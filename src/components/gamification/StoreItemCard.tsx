@@ -1,6 +1,8 @@
 'use client';
 
-import { Lock, Check, ShoppingBag, AlertCircle } from 'lucide-react';
+import { Lock, Check, ShoppingBag, AlertCircle, Sparkles, Image as ImageIcon, Palette, User as UserIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 export interface StoreItem {
     id: string;
@@ -37,40 +39,57 @@ export default function StoreItemCard({
 }: StoreItemCardProps) {
     const isLocked = !!lockedReason;
 
-    return (
-        <div className={`relative bg-white rounded-2xl border ${isEquipped ? 'border-purple-500 shadow-md ring-1 ring-purple-500' : 'border-gray-200'} overflow-hidden transition-all hover:shadow-lg flex flex-col h-full`}>
+    const Icon = item.type === 'theme' ? Palette : item.type === 'banner' ? ImageIcon : UserIcon;
 
-            {/* Visual Preview Placeholder */}
-            <div className={`h-32 bg-gradient-to-br ${getGradientForType(item.type)} flex items-center justify-center relative p-4`}>
-                <span className={`text-4xl filter drop-shadow ${item.type === 'avatar' ? 'opacity-100 scale-125' : 'opacity-50'}`}>
-                    {item.type === 'avatar' ? item.asset_value : getIconForType(item.type)}
-                </span>
+    return (
+        <motion.div
+            whileHover={{ y: -4 }}
+            className={cn(
+                "group relative bg-white dark:bg-white/5 rounded-3xl border transition-all duration-300 flex flex-col h-full overflow-hidden",
+                isEquipped ? "border-indigo-500/50 shadow-xl shadow-indigo-500/5" : "border-slate-100 dark:border-white/5 hover:border-slate-200 dark:hover:border-white/10 shadow-sm"
+            )}
+        >
+            {/* Visual Preview */}
+            <div className={cn(
+                "h-32 flex items-center justify-center relative bg-[url('/grid.svg')] bg-[length:16px_16px]",
+                isEquipped ? "bg-indigo-500/5" : "bg-slate-50/50 dark:bg-black/20"
+            )}>
+                <div className={cn(
+                    "w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110",
+                    isEquipped ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20" : "bg-white dark:bg-white/5 text-slate-400 border border-slate-100 dark:border-white/5"
+                )}>
+                    {item.type === 'avatar' ? (
+                        <span className="text-3xl">{item.asset_value}</span>
+                    ) : (
+                        <Icon className="w-8 h-8" />
+                    )}
+                </div>
 
                 {isEquipped && (
-                    <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center shadow-sm">
-                        <Check className="h-3 w-3 mr-1" /> Equipped
+                    <div className="absolute top-4 right-4 bg-indigo-600 text-white p-1 rounded-full shadow-lg">
+                        <Check className="h-3 w-3" />
                     </div>
                 )}
 
                 {isLocked && (
-                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-[2px] flex items-center justify-center p-4 text-center">
-                        <div className="bg-white/90 p-3 rounded-xl shadow-lg">
-                            <Lock className="h-6 w-6 text-gray-500 mx-auto mb-1" />
-                            <p className="text-xs font-bold text-gray-700">{lockedReason}</p>
+                    <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-slate-900 px-4 py-2 rounded-2xl shadow-2xl flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-slate-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{lockedReason}</span>
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className="p-5 flex flex-col flex-1">
+            <div className="p-6 flex flex-col flex-1">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-900 line-clamp-1">{item.name}</h3>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wide ${getTypeColor(item.type)}`}>
-                        {item.type.replace('_', ' ')}
+                    <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">{item.name}</h3>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-slate-100 dark:bg-white/5 text-slate-400">
+                        {item.type}
                     </span>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-4 flex-1 line-clamp-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-6 flex-1 line-clamp-2 leading-relaxed">
                     {item.description}
                 </p>
 
@@ -78,78 +97,40 @@ export default function StoreItemCard({
                     {isOwned ? (
                         <button
                             onClick={() => onEquip(item)}
-                            disabled={isEquipped || (item.code !== 'DEFAULT_THEME' && item.code !== 'DEFAULT_BANNER' && item.type !== 'avatar_frame' && item.type !== 'avatar')}
-                            className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center
-                                ${isEquipped
-                                    ? 'bg-gray-100 text-gray-400 cursor-default'
-                                    : (item.code !== 'DEFAULT_THEME' && item.code !== 'DEFAULT_BANNER' && item.type !== 'avatar_frame')
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                                        : 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm'
-                                }`}
+                            disabled={isEquipped}
+                            className={cn(
+                                "w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                isEquipped
+                                    ? "bg-slate-100 dark:bg-white/5 text-slate-400 cursor-default"
+                                    : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 active:scale-95"
+                            )}
                         >
-                            {isEquipped ? 'Active' : (item.code !== 'DEFAULT_THEME' && item.code !== 'DEFAULT_BANNER' && item.type !== 'avatar_frame' && item.type !== 'avatar') ? 'Upcoming' : 'Equip'}
+                            {isEquipped ? 'Active' : 'Equip Item'}
                         </button>
                     ) : (
-                        <div className="flex items-center space-x-2">
-                            <button
-                                onClick={() => onPurchase(item)}
-                                disabled={isLocked || !canAfford || purchasing}
-                                className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center
-                                    ${isLocked
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : !canAfford
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-sm hover:shadow-orange-200'
-                                    }`}
-                            >
-                                {purchasing ? (
-                                    <span className="animate-pulse">Processing...</span>
-                                ) : (
-                                    <>
-                                        {isLocked ? (
-                                            <Lock className="h-4 w-4 mr-1.5" />
-                                        ) : !canAfford ? (
-                                            <AlertCircle className="h-4 w-4 mr-1.5" />
-                                        ) : (
-                                            <ShoppingBag className="h-4 w-4 mr-1.5" />
-                                        )}
-                                        {item.cost.toLocaleString()}
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => onPurchase(item)}
+                            disabled={isLocked || !canAfford || purchasing}
+                            className={cn(
+                                "w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                                isLocked || !canAfford
+                                    ? "bg-slate-50 dark:bg-white/5 text-slate-400 cursor-not-allowed"
+                                    : "bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] shadow-xl group/btn"
+                            )}
+                        >
+                            {purchasing ? (
+                                <span className="animate-pulse">Processing...</span>
+                            ) : (
+                                <>
+                                    {!canAfford && <AlertCircle className="h-3.5 w-3.5 opacity-50" />}
+                                    <span>{item.cost.toLocaleString()} Points</span>
+                                    {!isLocked && canAfford && <ShoppingBag className="h-3.5 w-3.5 transition-transform group-hover/btn:rotate-12" />}
+                                </>
+                            )}
+                        </button>
                     )}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
-}
-
-function getGradientForType(type: string): string {
-    switch (type) {
-        case 'theme': return 'from-indigo-100 to-purple-100';
-        case 'banner': return 'from-pink-100 to-rose-100';
-        case 'avatar_frame': return 'from-amber-100 to-yellow-100';
-        case 'avatar': return 'from-blue-100 to-indigo-100';
-        default: return 'from-gray-100 to-gray-200';
-    }
-}
-
-function getIconForType(type: string): string {
-    switch (type) {
-        case 'theme': return '🎨';
-        case 'banner': return '🖼️';
-        case 'avatar_frame': return '🤳';
-        default: return '📦';
-    }
-}
-
-function getTypeColor(type: string): string {
-    switch (type) {
-        case 'theme': return 'bg-indigo-100 text-indigo-700';
-        case 'banner': return 'bg-pink-100 text-pink-700';
-        case 'avatar_frame': return 'bg-amber-100 text-amber-700';
-        case 'avatar': return 'bg-blue-100 text-blue-700';
-        default: return 'bg-gray-100 text-gray-700';
-    }
 }

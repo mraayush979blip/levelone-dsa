@@ -22,7 +22,6 @@
   --background: #0d0221;
   --foreground: #f0f0f0;
   --theme-primary: #ff00ff;
-  /* neon pink */
   --card-bg: #1a0b2e;
   --card-bg-rgb: 26, 11, 46;
   --card-border: #ff00ff44;
@@ -34,7 +33,6 @@
   --background: #000000;
   --foreground: #ffffff;
   --theme-primary: #fbbf24;
-  /* amber-400 */
   --card-bg: #111111;
   --card-bg-rgb: 17, 17, 17;
   --card-border: #333333;
@@ -104,4 +102,27 @@ input,
 textarea,
 select {
   background-color: #ffffff !important;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+:root {
+  --theme-primary-rgb: 37, 99, 235;
+}
+
+[data-theme='theme-neon'] {
+  --theme-primary-rgb: 255, 0, 255;
+}
+
+[data-theme='theme-midnight'] {
+  --theme-primary-rgb: 251, 191, 36;
 }

@@ -10,21 +10,33 @@ import {
     ChevronRight,
     Trophy,
     Zap,
-    Lock
+    Lock,
+    Star,
+    Gift,
+    Calendar,
+    Sparkles,
+    Check
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getPhaseStatus } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { getPhaseStatus, cn } from '@/lib/utils';
+import AnimatedBackground from '@/components/ui/animated-background';
+import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from '@/components/ui/motion-wrapper';
+import GlassCard from '@/components/ui/glass-card';
+import GiftUnboxing from '@/components/gamification/GiftUnboxing';
 
 export default function StudentDashboard() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ completedCount: 0, totalTimeSeconds: 0, points: 0 });
     const [submissions, setSubmissions] = useState<Set<string>>(new Set());
+    const [showGift, setShowGift] = useState(false);
 
-    const formatDuration = (seconds: number) => {
+    const formatDuration = (seconds?: number) => {
+        if (!seconds) return '0m';
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         if (hours > 0) return `${hours}h ${minutes}m`;
@@ -36,66 +48,25 @@ export default function StudentDashboard() {
             if (!user) return;
             if (phases.length === 0) setLoading(true);
             try {
-                // Check if student should be revoked (self-check)
                 const { data: isRevoked, error: revokeError } = await supabase.rpc('check_and_revoke_self');
-                if (revokeError) {
-                    console.error('Error in self-revocation check:', {
-                        message: revokeError.message,
-                        details: revokeError.details,
-                        hint: revokeError.hint,
-                        code: revokeError.code
-                    });
-                } else if (isRevoked) {
+                if (!revokeError && isRevoked) {
                     window.location.href = '/revoked';
                     return;
                 }
 
-                const [
-                    , // streakResult
-                    phasesResult,
-                    userResult,
-                    submissionsResult,
-                    activityResult
-                ] = await Promise.all([
-                    // Update streak
+                const [, phasesResult, userResult, submissionsResult, activityResult] = await Promise.all([
                     supabase.rpc('update_student_streak', { student_uuid: user.id }),
-
-                    // Fetch phases (ALL active ones, regardless of pause or date)
-                    supabase
-                        .from('phases')
-                        .select('*')
-                        .eq('is_active', true)
-                        .order('phase_number', { ascending: true }),
-
-                    // Fetch student stats
-                    supabase
-                        .from('users')
-                        .select('total_time_spent_seconds, points')
-                        .eq('id', user.id)
-                        .single(),
-
-                    // Fetch all submissions for status tracking
-                    supabase
-                        .from('submissions')
-                        .select('phase_id')
-                        .eq('student_id', user.id),
-
-                    // Fetch total phase-specific learning time
-                    supabase
-                        .from('student_phase_activity')
-                        .select('total_time_spent_seconds')
-                        .eq('student_id', user.id)
+                    supabase.from('phases').select('*').eq('is_active', true).order('phase_number', { ascending: true }),
+                    supabase.from('users').select('total_time_spent_seconds, points').eq('id', user.id).single(),
+                    supabase.from('submissions').select('phase_id').eq('student_id', user.id),
+                    supabase.from('student_phase_activity').select('total_time_spent_seconds').eq('student_id', user.id)
                 ]);
 
                 if (phasesResult.error) throw phasesResult.error;
 
                 setPhases(phasesResult.data || []);
-
-                // Track submission IDs for status badges
                 const submissionIds = new Set((submissionsResult.data || []).map((s: any) => s.phase_id));
                 setSubmissions(submissionIds);
-
-                // Calculate total learning time from all phases
                 const totalLearningTime = (activityResult.data || []).reduce((acc: number, curr: any) => acc + (curr.total_time_spent_seconds || 0), 0);
 
                 setStats({
@@ -111,9 +82,7 @@ export default function StudentDashboard() {
             }
         };
 
-        if (user?.id) {
-            fetchDashboardData();
-        }
+        if (user?.id) fetchDashboardData();
     }, [user, phases.length]);
 
     const getGreeting = () => {
@@ -123,198 +92,212 @@ export default function StudentDashboard() {
         return 'Good evening';
     };
 
+    const isEligibleForGift = stats.completedCount >= 2 && user?.equipped_theme !== 'theme-neon';
+    const isNeon = user?.equipped_theme === 'theme-neon';
+
     const DashboardSkeleton = () => (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-pulse">
-            <div className="h-32 md:h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
-                ))}
+        <div className="max-w-6xl mx-auto px-6 py-12 space-y-12 animate-pulse">
+            <div className="h-48 bg-gray-100 dark:bg-gray-800/50 rounded-3xl w-full" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-gray-50 dark:bg-gray-900/30 rounded-2xl" />)}
             </div>
-            <div className="space-y-4">
-                <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-48" />
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl w-full" />
-                ))}
+            <div className="space-y-6">
+                <div className="h-8 bg-gray-100 dark:bg-gray-800/50 rounded w-48" />
+                {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900/30 rounded-2xl w-full" />)}
             </div>
         </div>
     );
 
-    if (loading) {
-        return <DashboardSkeleton />;
-    }
+    if (loading || authLoading) return <DashboardSkeleton />;
 
     const livePhasesCount = phases.filter((p: Phase) => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'live').length;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-            {/* Profile Banner */}
-            {user?.equipped_banner && user.equipped_banner !== 'default' && (
-                <div
-                    className="h-32 md:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 relative group"
+        <div className={cn("relative min-h-screen transition-colors duration-500", isNeon ? "bg-gray-950 text-white" : "bg-white text-slate-900")}>
+            <AnimatedBackground theme={user?.equipped_theme} />
+
+            {/* Gift Icon Button - Minimalist */}
+            {isEligibleForGift && (
+                <button
+                    onClick={() => setShowGift(true)}
+                    className="fixed bottom-8 right-8 z-50 group flex items-center gap-3 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-2xl shadow-xl shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-10" />
-                    <Image
-                        src={`https://img.youtube.com/vi/${user.equipped_banner}/maxresdefault.jpg`}
-                        alt="Profile Banner"
-                        fill
-                        className="object-cover"
-                        priority
-                        unoptimized
-                    />
-                    <div className="absolute bottom-6 left-8 z-20">
-                        <h2 className="text-2xl font-black text-white drop-shadow-md">
-                            {getGreeting()}, {user.name}
-                        </h2>
-                    </div>
-                </div>
+                    <Gift className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                    <span className="text-sm font-bold tracking-tight">Open Gift</span>
+                    <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
+                </button>
             )}
 
-            <header className={(user?.equipped_banner && user.equipped_banner !== 'default') ? 'hidden' : 'mb-10 text-center md:text-left relative'}>
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
-                            {getGreeting()}, <span className="text-blue-600">{user?.name || 'Student'}</span>
-                        </h1>
-                        <p className="mt-2 text-lg font-medium opacity-80" style={{ color: 'var(--text-muted, #4b5563)' }}>Keep going, you're doing great!</p>
-                    </div>
-                    <div className="mt-4 md:mt-0 flex items-center justify-center md:justify-end space-x-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        <span>Live • Updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                </div>
-            </header>
+            {showGift && user && (
+                <GiftUnboxing
+                    userId={user.id}
+                    userName={user.name}
+                    onUnlock={() => window.location.reload()}
+                    onClose={() => setShowGift(false)}
+                />
+            )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div className="p-5 rounded-2xl shadow-sm border transition-all flex flex-col items-center justify-center text-center space-y-2 group hover:shadow-md hover:-translate-y-1" style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #f3f4f6)' }}>
-                    <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                        <BookOpen className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #6b7280)' }}>Active</p>
-                        <p className="text-xl font-black" style={{ color: 'var(--foreground)' }}>{livePhasesCount}</p>
-                    </div>
-                </div>
-                <div className="p-5 rounded-2xl shadow-sm border transition-all flex flex-col items-center justify-center text-center space-y-2 group hover:shadow-md hover:-translate-y-1" style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #f3f4f6)' }}>
-                    <div className="p-3 rounded-xl bg-green-500/10 text-green-600 group-hover:bg-green-500 group-hover:text-white transition-all">
-                        <Trophy className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #6b7280)' }}>Done</p>
-                        <p className="text-xl font-black" style={{ color: 'var(--foreground)' }}>{stats.completedCount}</p>
-                    </div>
-                </div>
-                <div className="p-5 rounded-2xl shadow-sm border transition-all flex flex-col items-center justify-center text-center space-y-2 group hover:shadow-md hover:-translate-y-1" style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #f3f4f6)' }}>
-                    <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-all">
-                        <Zap className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #6b7280)' }}>Points</p>
-                        <p className="text-xl font-black" style={{ color: 'var(--foreground)' }}>{(stats as any).points || 0}</p>
-                    </div>
-                </div>
-                <div className="p-5 rounded-2xl shadow-sm border transition-all flex flex-col items-center justify-center text-center space-y-2 group hover:shadow-md hover:-translate-y-1" style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #f3f4f6)' }}>
-                    <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 group-hover:bg-purple-500 group-hover:text-white transition-all">
-                        <Clock className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #6b7280)' }}>Time</p>
-                        <p className="text-xl font-black" style={{ color: 'var(--foreground)' }}>{formatDuration(stats.totalTimeSeconds)}</p>
-                    </div>
-                </div>
-            </div>
+            <div className="max-w-6xl mx-auto px-6 py-12 space-y-16 relative z-10">
 
-            <div className="space-y-6">
-                <h2 className="text-xl font-bold flex items-center" style={{ color: 'var(--foreground)' }}>
-                    <Video className="mr-2 h-5 w-5" style={{ color: 'var(--theme-primary, #2563eb)' }} />
-                    Available Learning Phases
-                </h2>
+                {/* Profile Header - Minimalist */}
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-gray-100 dark:border-white/5">
+                    <SlideUp>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-indigo-500 dark:text-indigo-400">
+                                <Sparkles className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{getGreeting()}</span>
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                                Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">{user?.name?.split(' ')[0] || 'Student'}</span>
+                            </h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium">Ready to continue your learning journey?</p>
+                        </div>
+                    </SlideUp>
 
-                {phases.length === 0 ? (
-                    <div className="bg-white p-12 rounded-xl border border-dashed border-gray-300 text-center">
-                        <p className="text-gray-500">No active phases available at the moment.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-6">
-                        {phases.map((phase: Phase) => {
-                            const status = getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused);
-                            const isLive = status === 'live';
-                            const isPaused = status === 'paused';
-                            const isUpcoming = status === 'upcoming';
-                            const isLocked = isPaused || isUpcoming;
-
-                            const content = (
-                                <div
-                                    className={`group p-5 rounded-2xl shadow-sm border transition-all flex flex-col md:flex-row md:items-center justify-between ${isLocked ? 'opacity-75 cursor-not-allowed bg-gray-50/50 grayscale-[0.5]' : 'hover:shadow-xl hover:border-blue-500/30 active:scale-[0.98]'
-                                        }`}
-                                    style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #f3f4f6)' }}
-                                >
-                                    <div className="flex items-center space-x-5">
-                                        <div
-                                            className={`h-14 w-14 rounded-2xl flex items-center justify-center font-black shrink-0 transition-all border shadow-sm ${!isLocked && 'group-hover:rotate-3'}`}
-                                            style={{
-                                                backgroundColor: isLocked ? 'var(--card-border, #f3f4f6)' : 'var(--theme-primary, #2563eb)11',
-                                                color: isLocked ? '#9ca3af' : 'var(--theme-primary, #2563eb)',
-                                                borderColor: isLocked ? '#e5e7eb' : 'var(--theme-primary, #2563eb)33'
-                                            }}
-                                        >
-                                            {isLocked ? <Lock className="h-6 w-6" /> : `P${phase.phase_number}`}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <h3 className={`text-xl font-bold transition-colors ${!isLocked && 'group-hover:text-blue-600'}`} style={{ color: isLocked ? '#6b7280' : 'var(--foreground)' }}>
-                                                    {phase.title}
-                                                </h3>
-                                                {!phase.is_mandatory && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-400 rounded-full uppercase tracking-widest border border-gray-200">
-                                                        Optional
-                                                    </span>
-                                                )}
-                                                {isPaused && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-yellow-100 text-yellow-600 rounded-full uppercase tracking-widest border border-yellow-200">
-                                                        Paused
-                                                    </span>
-                                                )}
-                                                {isUpcoming && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-600 rounded-full uppercase tracking-widest border border-blue-200">
-                                                        Starts • {new Date(phase.start_date).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                                {isLive && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-600 rounded-full uppercase tracking-widest border border-orange-200">
-                                                        Deadline • {new Date(phase.end_date).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-sm line-clamp-1 max-w-xl mt-0.5" style={{ color: 'var(--text-muted, #6b7280)' }}>
-                                                {isUpcoming ? `Phase starts on ${new Date(phase.start_date).toLocaleDateString()}` : phase.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-5 md:mt-0 flex items-center justify-between md:justify-end space-x-8 border-t md:border-t-0 pt-4 md:pt-0">
-                                        <div className="flex flex-col items-start md:items-end">
-                                            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #9ca3af)' }}>Status</span>
-                                            <span className={`text-sm font-black ${isLocked ? 'text-gray-400' : submissions.has(phase.id) ? 'text-green-500' : 'text-orange-400'}`}>
-                                                {isPaused ? 'Paused' : isUpcoming ? 'Locked' : submissions.has(phase.id) ? 'Completed' : 'Continue'}
-                                            </span>
-                                        </div>
-                                        <div className={`h-10 w-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center transition-all shadow-inner ${!isLocked && 'group-hover:bg-blue-600 group-hover:text-white'}`}>
-                                            {isLocked ? <Lock className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-5 w-5" />}
-                                        </div>
-                                    </div>
+                    <SlideUp delay={0.1}>
+                        <div className="flex items-center gap-6 text-slate-400 dark:text-slate-500">
+                            <div className="text-right">
+                                <p className="text-[10px] font-black uppercase tracking-widest mb-1">Current Points</p>
+                                <div className="flex items-center gap-2 justify-end">
+                                    <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                    <span className="text-xl font-black text-slate-900 dark:text-white">{(stats as any).points || 0}</span>
                                 </div>
-                            );
+                            </div>
+                            <div className="h-10 w-px bg-gray-100 dark:bg-white/5" />
+                            <div className="text-right">
+                                <p className="text-[10px] font-black uppercase tracking-widest mb-1">Time Spent</p>
+                                <div className="flex items-center gap-2 justify-end text-xl font-black text-slate-900 dark:text-white">
+                                    <Clock className="w-4 h-4 text-indigo-500" />
+                                    <span>{formatDuration(stats.totalTimeSeconds)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </SlideUp>
+                </header>
 
-                            return isLocked ? (
-                                <div key={phase.id}>{content}</div>
-                            ) : (
-                                <Link key={phase.id} href={`/student/phase/${phase.id}`}>
-                                    {content}
-                                </Link>
-                            );
-                        })}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    {/* Main Content - Phases */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <SlideUp delay={0.2} className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold flex items-center gap-3">
+                                <Video className="w-5 h-5 text-indigo-500" />
+                                Active Phases
+                            </h2>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{phases.length} Total</span>
+                        </SlideUp>
+
+                        <StaggerContainer className="grid grid-cols-1 gap-4">
+                            {phases.map((phase: Phase) => {
+                                const status = getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused);
+                                const isLive = status === 'live';
+                                const isPaused = status === 'paused';
+                                const isUpcoming = status === 'upcoming';
+                                const isLocked = isPaused || isUpcoming;
+                                const isCompleted = submissions.has(phase.id);
+
+                                return (
+                                    <StaggerItem key={phase.id}>
+                                        <Link
+                                            href={isLocked ? '#' : `/student/phase/${phase.id}`}
+                                            className={cn(
+                                                "group block relative overflow-hidden rounded-3xl border transition-all duration-300",
+                                                isLocked
+                                                    ? "bg-slate-50 dark:bg-white/5 border-gray-100 dark:border-white/5 grayscale opacity-60 cursor-not-allowed"
+                                                    : "bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1"
+                                            )}
+                                        >
+                                            <div className="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                                <div className="flex items-center gap-6">
+                                                    <div className={cn(
+                                                        "w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-transform group-hover:scale-110",
+                                                        isLocked ? "bg-slate-200 text-slate-400" :
+                                                            isCompleted ? "bg-emerald-500/10 text-emerald-500" : "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20"
+                                                    )}>
+                                                        {isLocked ? <Lock className="w-5 h-5" /> : isCompleted ? <Check className="w-6 h-6" /> : phase.phase_number}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold tracking-tight mb-1 group-hover:text-indigo-500 transition-colors">
+                                                            {phase.title}
+                                                        </h3>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={cn(
+                                                                "text-[10px] font-black uppercase tracking-widest",
+                                                                isLive ? "text-indigo-500" : isCompleted ? "text-emerald-500" : "text-slate-400"
+                                                            )}>
+                                                                {isPaused ? 'Paused' : isUpcoming ? 'Locked' : isCompleted ? 'Phase Completed' : 'In Progress'}
+                                                            </span>
+                                                            {!phase.is_mandatory && <span className="text-[10px] font-medium text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Optional</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4 text-slate-400 group-hover:text-indigo-500 transition-colors">
+                                                    {!isLocked && (
+                                                        <>
+                                                            <span className="text-xs font-medium hidden sm:block">View Phase</span>
+                                                            <ChevronRight className="w-5 h-5" />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </StaggerItem>
+                                );
+                            })}
+                        </StaggerContainer>
                     </div>
-                )}
+
+                    {/* Sidebar - Stats & Info */}
+                    <div className="space-y-8">
+                        <SlideUp delay={0.4} className="space-y-6">
+                            <h2 className="text-xl font-bold flex items-center gap-3">
+                                <Trophy className="w-5 h-5 text-indigo-500" />
+                                Your Stats
+                            </h2>
+
+                            <GlassCard className="!bg-indigo-600 text-white border-0 shadow-2xl shadow-indigo-500/20 p-8 rounded-3xl overflow-hidden group">
+                                <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                                    <Trophy className="w-32 h-32" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Completion</p>
+                                <h3 className="text-4xl font-black mb-4">{Math.round((stats.completedCount / (phases.length || 1)) * 100)}%</h3>
+                                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(stats.completedCount / (phases.length || 1)) * 100}%` }}
+                                        transition={{ duration: 1, delay: 0.5 }}
+                                        className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                    />
+                                </div>
+                                <div className="mt-6 flex justify-between text-xs font-bold">
+                                    <span>{stats.completedCount} Done</span>
+                                    <span>{phases.length} Total</span>
+                                </div>
+                            </GlassCard>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <GlassCard className="p-6 rounded-3xl border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center gap-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-indigo-500">
+                                        <BookOpen className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Active</p>
+                                        <p className="text-xl font-black">{livePhasesCount}</p>
+                                    </div>
+                                </GlassCard>
+
+                                <GlassCard className="p-6 rounded-3xl border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center gap-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-purple-500">
+                                        <Calendar className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Upcoming</p>
+                                        <p className="text-xl font-black">{phases.filter(p => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'upcoming').length}</p>
+                                    </div>
+                                </GlassCard>
+                            </div>
+                        </SlideUp>
+                    </div>
+                </div>
             </div>
         </div>
     );

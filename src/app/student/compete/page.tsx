@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Trophy, Flame, Users, CheckCircle2, Loader2, ArrowLeft, Medal, Zap } from 'lucide-react';
+import { Trophy, Flame, Users, CheckCircle2, Loader2, ArrowLeft, Medal, Zap, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import BadgeList from '@/components/gamification/BadgeList';
+import { SlideUp, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/motion-wrapper';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface LeaderboardEntry {
     id: string;
@@ -13,6 +16,7 @@ interface LeaderboardEntry {
     avatar: string;
     completed_phases: number;
     current_streak: number;
+    activity_points: number;
 }
 
 interface PhaseStats {
@@ -47,42 +51,19 @@ export default function CompetePage() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // 1. Update own streak on page load
                 if (user) {
-                    console.log('🔄 [Compete] Updating streak...');
-                    const { error: streakErr } = await supabase.rpc('update_student_streak', { student_uuid: user.id });
-                    if (streakErr) console.error('⚠️ [Compete] Streak update error:', streakErr);
-
-                    // Fetch User Badges
-                    console.log('🔄 [Compete] Fetching user badges...');
-                    const { data: ubData, error: ubErr } = await supabase
-                        .from('user_badges')
-                        .select('*')
-                        .eq('user_id', user.id);
-                    if (ubErr) console.error('⚠️ [Compete] Badges fetch error:', ubErr);
+                    await supabase.rpc('update_student_streak', { student_uuid: user.id });
+                    const { data: ubData } = await supabase.from('user_badges').select('*').eq('user_id', user.id);
                     setUserBadges(ubData || []);
-
-                    // Fetch Rank Context
-                    console.log('🔄 [Compete] Fetching rank context...');
-                    const { data: rankData, error: rankErr } = await supabase
-                        .rpc('get_student_rank_context', { current_student_id: user.id });
-                    if (rankErr) console.error('⚠️ [Compete] Rank context error:', rankErr);
+                    const { data: rankData } = await supabase.rpc('get_student_rank_context', { current_student_id: user.id });
                     setRankContext(rankData);
                 }
 
-                // Fetch All Badges
                 const { data: bData } = await supabase.from('badges').select('*');
                 setBadges(bData || []);
 
-                // 2. Fetch Leaderboard using new Optimized RPC
-                console.log('🔄 [Compete] Fetching leaderboard...');
-                const { data: lbData, error: lbError } = await supabase
-                    .rpc('get_leaderboard_v2');
-
-                if (lbError) {
-                    console.error('❌ [Compete] Leaderboard RPC failed:', lbError);
-                    throw lbError;
-                }
+                const { data: lbData, error: lbError } = await supabase.rpc('get_leaderboard_v2');
+                if (lbError) throw lbError;
 
                 const processedLB = (lbData || []).map((entry: any) => ({
                     id: entry.user_id,
@@ -92,261 +73,243 @@ export default function CompetePage() {
                     completed_phases: Number(entry.completed_phases) || 0,
                     activity_points: entry.activity_points || 0
                 }));
-
                 setLeaderboard(processedLB);
 
-                // 3. Fetch Total Students
-                const { count } = await supabase
-                    .from('users')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('role', 'student');
+                const { count } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'student');
                 setTotalStudents(count || 0);
 
-                // 4. Fetch Phase Completion Stats
-                const { data: phases } = await supabase
-                    .from('phases')
-                    .select('phase_number, title, id')
-                    .eq('is_active', true)
-                    .order('phase_number', { ascending: true });
+                const { data: phases } = await supabase.from('phases').select('phase_number, title, id').eq('is_active', true).order('phase_number', { ascending: true });
 
                 if (phases) {
                     const stats = await Promise.all(phases.map(async (p) => {
-                        const { count: completedCount } = await supabase
-                            .from('submissions')
-                            .select('*', { count: 'exact', head: true })
-                            .eq('phase_id', p.id)
-                            .eq('status', 'valid');
-
-                        return {
-                            phase_number: p.phase_number,
-                            title: p.title,
-                            completed_count: completedCount || 0
-                        };
+                        const { count: completedCount } = await supabase.from('submissions').select('*', { count: 'exact', head: true }).eq('phase_id', p.id).eq('status', 'valid');
+                        return { phase_number: p.phase_number, title: p.title, completed_count: completedCount || 0 };
                     }));
                     setPhaseStats(stats);
                 }
-
             } catch (error: any) {
                 console.error('❌ [Compete] Global Fetch Error:', error);
-                // If it's a Supabase error, it might not be an instance of Error
-                if (error && typeof error === 'object') {
-                    console.error('Error Details:', JSON.stringify(error, null, 2));
-                }
             } finally {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [user]);
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
+            <div className="flex flex-col justify-center items-center min-h-[60vh] space-y-4">
+                <Loader2 className="animate-spin h-8 w-8 text-indigo-600" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fetching Standings...</p>
             </div>
         );
     }
 
+    const isNeon = user?.equipped_theme === 'theme-neon';
+
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-16">
+        <div className={cn("max-w-6xl mx-auto px-6 py-12 space-y-16 pb-24 relative z-10", isNeon ? "text-white" : "text-slate-900")}>
             {/* Header */}
-            <div className="space-y-2">
-                <Link href="/student" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
-                </Link>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Level Up Your Journey</h1>
-                        <p className="text-gray-500 mt-1">Compete with fellow students and maintain your learning streak.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-slate-100 dark:border-white/5">
+                <SlideUp>
+                    <div className="space-y-4">
+                        <Link href="/student" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                            <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to Dashboard
+                        </Link>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-indigo-500">
+                                <Sparkles className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Community</span>
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                                Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Rankings</span>
+                            </h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">Challenge yourself and fellow students. Every submission counts towards your journey.</p>
+                        </div>
                     </div>
-                </div>
+                </SlideUp>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: My Stats & Community */}
-                <div className="lg:col-span-1 space-y-8">
-                    {/* My Streak Card */}
-                    <div className="bg-gradient-to-br from-orange-400 to-rose-500 rounded-3xl p-8 text-white shadow-xl shadow-orange-100 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                            <Flame className="h-32 w-32" />
-                        </div>
-                        <div className="relative z-10">
-                            <div className="flex items-center space-x-2 bg-white/20 w-fit px-3 py-1 rounded-full backdrop-blur-sm mb-6">
-                                <Flame className="h-4 w-4 fill-white" />
-                                <span className="text-xs font-bold uppercase tracking-wider">Daily Streak</span>
-                            </div>
-                            <div className="flex items-end space-x-2">
-                                <span className="text-6xl font-black">{user?.current_streak || 0}</span>
-                                <span className="text-xl font-bold mb-2">Days</span>
-                            </div>
-                            <p className="mt-4 text-orange-50/80 font-medium">Keep it up! Your max streak is {user?.max_streak || 0} days.</p>
-                        </div>
-                    </div>
-
-                    {/* Badge List (Mobile/Desktop stacked) */}
-                    <div className="lg:col-span-1">
-                        <BadgeList badges={badges} userBadges={userBadges} />
-                    </div>
-
-                    {/* Community Stats */}
-                    <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
-                        <div className="flex items-center space-x-3">
-                            <div className="bg-blue-50 p-2 rounded-xl">
-                                <Users className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900">Community Progress</h2>
-                        </div>
-
-                        <div className="space-y-4">
-                            {phaseStats.map((stat) => (
-                                <div key={stat.phase_number} className="relative group">
-                                    <div className="flex justify-between items-center mb-1 bg-white relative z-10">
-                                        <span className="text-sm font-semibold text-gray-700">Phase {stat.phase_number}</span>
-                                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                            {stat.completed_count} Completed
-                                        </span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                {/* Left: Stats & Badges */}
+                <div className="lg:col-span-4 space-y-12">
+                    <StaggerContainer>
+                        {/* Streak Card - Minimalist */}
+                        <StaggerItem>
+                            <div className="relative group bg-slate-900 rounded-3xl p-8 text-white overflow-hidden shadow-2xl">
+                                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                                    <Flame className="h-32 w-32" />
+                                </div>
+                                <div className="relative z-10 space-y-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 bg-orange-500 rounded-lg">
+                                            <Flame className="h-4 w-4 fill-white text-white" />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-orange-200">Current Streak</span>
                                     </div>
-                                    <div className="w-full bg-gray-50 rounded-full h-2 overflow-hidden border border-gray-100">
-                                        <div
-                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-1000 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                                            style={{ width: `${(stat.completed_count / (totalStudents || 1)) * 100}%` }}
-                                        ></div>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-7xl font-black tabular-nums tracking-tighter">{user?.current_streak || 0}</span>
+                                        <span className="text-sm font-black uppercase tracking-widest text-slate-400">Days Active</span>
+                                    </div>
+                                    <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                                        Consistent progress beats intensity. Your all-time best is <span className="text-white">{user?.max_streak || 0} days</span>.
+                                    </p>
+                                </div>
+                            </div>
+                        </StaggerItem>
+
+                        {/* Community Progress */}
+                        <StaggerItem>
+                            <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-slate-100 dark:border-white/5 shadow-sm space-y-8">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4 text-indigo-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Community Progress</span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+
+                                <div className="space-y-6">
+                                    {phaseStats.map((stat) => (
+                                        <div key={stat.phase_number} className="group">
+                                            <div className="flex justify-between items-end mb-2">
+                                                <span className="text-xs font-bold text-slate-900 dark:text-white">Phase {stat.phase_number}</span>
+                                                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+                                                    {stat.completed_count} SUCCESSFUL
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-slate-50 dark:bg-black/20 rounded-full h-1.5 overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${(stat.completed_count / (totalStudents || 1)) * 100}%` }}
+                                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                                    className="bg-indigo-600 h-full rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </StaggerItem>
+
+                        <StaggerItem>
+                            <BadgeList badges={badges} userBadges={userBadges} />
+                        </StaggerItem>
+                    </StaggerContainer>
                 </div>
 
-                {/* Right Column: Leaderboard */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden h-full flex flex-col">
-                        <div className="p-8 border-b border-gray-50 bg-gray-50/30">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-yellow-50 p-2 rounded-xl">
-                                        <Trophy className="h-6 w-6 text-yellow-600" />
-                                    </div>
-                                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Top Contributors</h2>
-                                </div>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Global Ranking</span>
+                {/* Right: Leaderboard */}
+                <div className="lg:col-span-8">
+                    <div className="bg-white dark:bg-white/5 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm flex flex-col overflow-hidden">
+                        <div className="p-10 border-b border-slate-50 dark:border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Trophy className="h-5 w-5 text-amber-500" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Global Leaderboard</span>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-auto">
-                            <div className="divide-y divide-gray-50">
-                                {leaderboard.map((entry, index) => (
-                                    <div
-                                        key={entry.id}
-                                        className={`p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors ${entry.id === user?.id ? 'bg-blue-50/50' : ''
-                                            }`}
-                                    >
-                                        <div className="flex items-center space-x-4">
-                                            <div className="flex-shrink-0 w-10 text-center">
-                                                {index < 3 ? (
-                                                    <div className="relative">
-                                                        <Medal className={`h-8 w-8 mx-auto ${index === 0 ? 'text-yellow-400' :
-                                                            index === 1 ? 'text-gray-400' :
-                                                                'text-amber-600'
-                                                            }`} />
-                                                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white mb-0.5">
-                                                            {index + 1}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-lg font-black text-gray-300">{index + 1}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex-shrink-0">
-                                                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-xl shadow-inner border border-gray-200">
-                                                    {entry.avatar}
+                        <div className="divide-y divide-slate-50 dark:divide-white/5">
+                            {leaderboard.map((entry, index) => (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    key={entry.id}
+                                    className={cn(
+                                        "p-8 flex items-center justify-between hover:bg-slate-50 transition-colors group",
+                                        entry.id === user?.id && "bg-indigo-50/50 dark:bg-indigo-500/5 ring-1 ring-inset ring-indigo-100 dark:ring-indigo-500/20"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-8">
+                                        <div className="w-8 text-center">
+                                            {index < 3 ? (
+                                                <div className="relative flex justify-center">
+                                                    <Medal className={cn(
+                                                        "h-8 w-8 transition-transform group-hover:scale-110",
+                                                        index === 0 ? "text-amber-400" : index === 1 ? "text-slate-400" : "text-orange-500"
+                                                    )} />
+                                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white pb-0.5">
+                                                        {index + 1}
+                                                    </span>
                                                 </div>
+                                            ) : (
+                                                <span className="text-sm font-black text-slate-300 dark:text-slate-700">{index + 1}</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-12 w-12 rounded-2xl bg-slate-50 dark:bg-black/40 flex items-center justify-center text-2xl shadow-inner border border-slate-100 dark:border-white/5">
+                                                {entry.avatar}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-900 flex items-center">
-                                                    {entry.name}
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-bold text-slate-900 dark:text-white capitalize leading-none">{entry.name}</p>
                                                     {entry.id === user?.id && (
-                                                        <span className="ml-2 text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">You</span>
+                                                        <span className="text-[8px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-widest">YOU</span>
                                                     )}
-                                                </p>
-                                                <div className="flex items-center mt-0.5 space-x-3 text-xs text-gray-500">
-                                                    <span className="flex items-center">
-                                                        <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                                                </div>
+                                                <div className="flex items-center mt-2 gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                    <span className="flex items-center gap-1.5">
+                                                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                                                         {entry.completed_phases} Phases
                                                     </span>
-                                                    <span className="flex items-center">
-                                                        <Zap className="h-3 w-3 mr-1 text-yellow-500" />
-                                                        {(entry as any).activity_points || 0} Points
-                                                    </span>
-                                                    <span className="flex items-center">
-                                                        <Flame className={`h-3 w-3 mr-1 ${entry.current_streak > 0 ? 'text-orange-500' : 'text-gray-300'}`} />
-                                                        {entry.current_streak} Streak
+                                                    <span className="flex items-center gap-1.5">
+                                                        <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                                                        {(entry as any).activity_points || 0}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-xs font-black text-gray-400 bg-gray-100 px-3 py-1 rounded-lg uppercase tracking-wider">
-                                                Level {Math.floor(entry.completed_phases / 1) + 1}
-                                            </span>
+                                    <div className="text-right">
+                                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 dark:bg-black/40 rounded-full border border-slate-100 dark:border-white/5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Level</span>
+                                            <span className="text-xs font-black text-slate-900 dark:text-white">{Math.floor(entry.completed_phases / 1) + 1}</span>
                                         </div>
                                     </div>
-                                ))}
+                                </motion.div>
+                            ))}
 
-                                {/* You Are Here Section */}
-                                {rankContext && rankContext.rank > 10 && rankContext.neighbors && (
-                                    <>
-                                        <div className="p-4 bg-gray-50 flex items-center justify-center">
-                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">...</span>
-                                        </div>
-                                        <div className="bg-blue-50/30 border-t-2 border-b-2 border-blue-100">
-                                            <div className="px-6 py-3 bg-blue-50 flex items-center justify-between">
-                                                <h3 className="text-sm font-bold text-blue-800 uppercase tracking-wider">You Are Here</h3>
-                                            </div>
-                                            {rankContext.neighbors.map((neighbor) => (
-                                                <div
-                                                    key={neighbor.id}
-                                                    className={`p-6 flex items-center justify-between ${neighbor.id === user?.id ? 'bg-blue-50' : 'bg-white opacity-70'}`}
-                                                >
-                                                    <div className="flex items-center space-x-4">
-                                                        <div className="flex-shrink-0 w-10 text-center">
-                                                            <span className="text-lg font-black text-gray-400">{neighbor.rank_position}</span>
-                                                        </div>
-                                                        <div className="flex-shrink-0">
-                                                            <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center text-lg border border-gray-100">
-                                                                {neighbor.avatar || '👤'}
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-gray-900 flex items-center">
-                                                                {neighbor.name}
-                                                                {neighbor.id === user?.id && (
-                                                                    <span className="ml-2 text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">You</span>
-                                                                )}
-                                                            </p>
-                                                            <div className="flex items-center mt-0.5 space-x-3 text-xs text-gray-500">
-                                                                <span className="flex items-center">
-                                                                    <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
-                                                                    {neighbor.completed_phases} Phases
-                                                                </span>
-                                                            </div>
-                                                        </div>
+                            {rankContext && rankContext.rank > 10 && rankContext.neighbors && (
+                                <div className="bg-slate-50 dark:bg-black/20">
+                                    <div className="px-10 py-4 bg-slate-100/50 dark:bg-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">
+                                        Your Current Standing
+                                    </div>
+                                    {rankContext.neighbors.map((neighbor) => (
+                                        <div
+                                            key={neighbor.id}
+                                            className={cn(
+                                                "p-8 flex items-center justify-between",
+                                                neighbor.id === user?.id ? "bg-indigo-50/50 dark:bg-indigo-500/10" : "opacity-60"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-8">
+                                                <div className="w-8 text-center">
+                                                    <span className="text-sm font-black text-slate-400">{neighbor.rank_position}</span>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-10 w-10 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-xl border border-slate-100 dark:border-white/5">
+                                                        {neighbor.avatar || '👤'}
                                                     </div>
+                                                    <p className="font-bold text-slate-900 dark:text-white">{neighbor.name}</p>
                                                 </div>
-                                            ))}
+                                            </div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                {neighbor.completed_phases} Phases
+                                            </div>
                                         </div>
-                                    </>
-                                )}
+                                    ))}
+                                </div>
+                            )}
 
-                                {leaderboard.length === 0 && (
-                                    <div className="py-20 text-center">
-                                        <Users className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-                                        <p className="text-gray-400 font-medium">No activity yet. Be the first!</p>
+                            {leaderboard.length === 0 && (
+                                <div className="py-32 text-center space-y-4">
+                                    <div className="bg-slate-50 dark:bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                                        <Users className="h-6 w-6 text-slate-300" />
                                     </div>
-                                )}
-                            </div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">The arena is empty. Start the movement.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
