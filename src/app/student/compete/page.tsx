@@ -108,11 +108,11 @@ export default function CompetePage() {
     const isNeon = user?.equipped_theme === 'theme-neon';
 
     return (
-        <div className={cn("max-w-6xl mx-auto px-6 py-12 space-y-16 pb-24 relative z-10", isNeon ? "text-white" : "text-slate-900")}>
+        <div className={cn("max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 sm:space-y-16 pb-24 relative z-10", isNeon ? "text-white" : "text-slate-900")}>
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-slate-100 dark:border-white/5">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 pb-6 sm:pb-8 border-b border-slate-100 dark:border-white/5">
                 <SlideUp>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         <Link href="/student" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
                             <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to Dashboard
                         </Link>
@@ -121,37 +121,37 @@ export default function CompetePage() {
                                 <Sparkles className="w-4 h-4" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Community</span>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
                                 Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Rankings</span>
                             </h1>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">Challenge yourself and fellow students. Every submission counts towards your journey.</p>
+                            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg">Challenge yourself and fellow students. Every submission counts towards your journey.</p>
                         </div>
                     </div>
                 </SlideUp>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12">
                 {/* Left: Stats & Badges */}
-                <div className="lg:col-span-4 space-y-12">
+                <div className="lg:col-span-4 space-y-8 sm:space-y-12">
                     <StaggerContainer>
                         {/* Streak Card - Minimalist */}
                         <StaggerItem>
-                            <div className="relative group bg-slate-900 rounded-3xl p-8 text-white overflow-hidden shadow-2xl">
+                            <div className="relative group bg-slate-900 rounded-3xl p-6 sm:p-8 text-white overflow-hidden shadow-2xl will-change-transform">
                                 <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                                    <Flame className="h-32 w-32" />
+                                    <Flame className="h-24 sm:h-32 w-24 sm:w-32" />
                                 </div>
-                                <div className="relative z-10 space-y-6">
+                                <div className="relative z-10 space-y-4 sm:space-y-6">
                                     <div className="flex items-center gap-2">
                                         <div className="p-1.5 bg-orange-500 rounded-lg">
-                                            <Flame className="h-4 w-4 fill-white text-white" />
+                                            <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white" />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-orange-200">Current Streak</span>
+                                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-orange-200">Current Streak</span>
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-7xl font-black tabular-nums tracking-tighter">{user?.current_streak || 0}</span>
-                                        <span className="text-sm font-black uppercase tracking-widest text-slate-400">Days Active</span>
+                                        <span className="text-5xl sm:text-7xl font-black tabular-nums tracking-tighter">{user?.current_streak || 0}</span>
+                                        <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-slate-400">Days Active</span>
                                     </div>
-                                    <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                                    <p className="text-[11px] sm:text-xs font-medium text-slate-400 leading-relaxed">
                                         Consistent progress beats intensity. Your all-time best is <span className="text-white">{user?.max_streak || 0} days</span>.
                                     </p>
                                 </div>
@@ -160,7 +160,7 @@ export default function CompetePage() {
 
                         {/* Community Progress */}
                         <StaggerItem>
-                            <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-slate-100 dark:border-white/5 shadow-sm space-y-8">
+                            <div className="bg-white dark:bg-white/5 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-white/5 shadow-sm space-y-6 sm:space-y-8">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4 text-indigo-500" />
@@ -168,12 +168,12 @@ export default function CompetePage() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
+                                <div className="space-y-5 sm:space-y-6">
                                     {phaseStats.map((stat) => (
                                         <div key={stat.phase_number} className="group">
                                             <div className="flex justify-between items-end mb-2">
                                                 <span className="text-xs font-bold text-slate-900 dark:text-white">Phase {stat.phase_number}</span>
-                                                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+                                                <span className="text-[9px] sm:text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400 px-2 py-0.5 rounded-full">
                                                     {stat.completed_count} SUCCESSFUL
                                                 </span>
                                             </div>
@@ -181,7 +181,7 @@ export default function CompetePage() {
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${(stat.completed_count / (totalStudents || 1)) * 100}%` }}
-                                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                                    transition={{ duration: 1, ease: "easeOut" }}
                                                     className="bg-indigo-600 h-full rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"
                                                 />
                                             </div>
@@ -199,72 +199,72 @@ export default function CompetePage() {
 
                 {/* Right: Leaderboard */}
                 <div className="lg:col-span-8">
-                    <div className="bg-white dark:bg-white/5 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm flex flex-col overflow-hidden">
-                        <div className="p-10 border-b border-slate-50 dark:border-white/5 flex items-center justify-between">
+                    <div className="bg-white dark:bg-white/5 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-sm flex flex-col overflow-hidden">
+                        <div className="p-6 sm:p-10 border-b border-slate-50 dark:border-white/5 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Trophy className="h-5 w-5 text-amber-500" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Global Leaderboard</span>
+                                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Global Leaderboard</span>
                             </div>
                         </div>
 
                         <div className="divide-y divide-slate-50 dark:divide-white/5">
                             {leaderboard.map((entry, index) => (
                                 <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.3 }}
                                     key={entry.id}
                                     className={cn(
-                                        "p-8 flex items-center justify-between hover:bg-slate-50 transition-colors group",
+                                        "p-4 sm:p-8 flex items-center justify-between hover:bg-slate-50/50 transition-colors group will-change-transform",
                                         entry.id === user?.id && "bg-indigo-50/50 dark:bg-indigo-500/5 ring-1 ring-inset ring-indigo-100 dark:ring-indigo-500/20"
                                     )}
                                 >
-                                    <div className="flex items-center gap-8">
-                                        <div className="w-8 text-center">
+                                    <div className="flex items-center gap-3 sm:gap-8 min-w-0">
+                                        <div className="w-6 sm:w-8 flex-shrink-0 text-center">
                                             {index < 3 ? (
                                                 <div className="relative flex justify-center">
                                                     <Medal className={cn(
-                                                        "h-8 w-8 transition-transform group-hover:scale-110",
+                                                        "h-6 w-6 sm:h-8 sm:w-8 transition-transform group-hover:scale-110",
                                                         index === 0 ? "text-amber-400" : index === 1 ? "text-slate-400" : "text-orange-500"
                                                     )} />
-                                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white pb-0.5">
+                                                    <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[10px] font-black text-white pb-0.5">
                                                         {index + 1}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-sm font-black text-slate-300 dark:text-slate-700">{index + 1}</span>
+                                                <span className="text-xs sm:text-sm font-black text-slate-300 dark:text-slate-700">{index + 1}</span>
                                             )}
                                         </div>
 
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-2xl bg-slate-50 dark:bg-black/40 flex items-center justify-center text-2xl shadow-inner border border-slate-100 dark:border-white/5">
+                                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-black/40 flex-shrink-0 flex items-center justify-center text-xl sm:text-2xl shadow-inner border border-slate-100 dark:border-white/5">
                                                 {entry.avatar}
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-bold text-slate-900 dark:text-white capitalize leading-none">{entry.name}</p>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+                                                    <p className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">{entry.name}</p>
                                                     {entry.id === user?.id && (
-                                                        <span className="text-[8px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-widest">YOU</span>
+                                                        <span className="text-[7px] sm:text-[8px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex-shrink-0">YOU</span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center mt-2 gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                                    <span className="flex items-center gap-1.5">
-                                                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                                                        {entry.completed_phases} Phases
+                                                <div className="flex items-center gap-3 sm:gap-4 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                    <span className="flex items-center gap-1 sm:gap-1.5">
+                                                        <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-500" />
+                                                        <span className="truncate">{entry.completed_phases}</span>
                                                     </span>
-                                                    <span className="flex items-center gap-1.5">
-                                                        <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
-                                                        {(entry as any).activity_points || 0}
+                                                    <span className="flex items-center gap-1 sm:gap-1.5">
+                                                        <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500 fill-amber-500" />
+                                                        <span>{(entry as any).activity_points || 0}</span>
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="text-right">
-                                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 dark:bg-black/40 rounded-full border border-slate-100 dark:border-white/5">
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Level</span>
-                                            <span className="text-xs font-black text-slate-900 dark:text-white">{Math.floor(entry.completed_phases / 1) + 1}</span>
+                                    <div className="flex-shrink-0 ml-4">
+                                        <div className="inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-slate-50 dark:bg-black/40 rounded-full border border-slate-100 dark:border-white/5">
+                                            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">LVL</span>
+                                            <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">{Math.floor(entry.completed_phases / 1) + 1}</span>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -272,30 +272,30 @@ export default function CompetePage() {
 
                             {rankContext && rankContext.rank > 10 && rankContext.neighbors && (
                                 <div className="bg-slate-50 dark:bg-black/20">
-                                    <div className="px-10 py-4 bg-slate-100/50 dark:bg-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">
+                                    <div className="px-6 sm:px-10 py-3 sm:py-4 bg-slate-100/50 dark:bg-white/5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">
                                         Your Current Standing
                                     </div>
                                     {rankContext.neighbors.map((neighbor) => (
                                         <div
                                             key={neighbor.id}
                                             className={cn(
-                                                "p-8 flex items-center justify-between",
+                                                "p-4 sm:p-8 flex items-center justify-between",
                                                 neighbor.id === user?.id ? "bg-indigo-50/50 dark:bg-indigo-500/10" : "opacity-60"
                                             )}
                                         >
-                                            <div className="flex items-center gap-8">
-                                                <div className="w-8 text-center">
-                                                    <span className="text-sm font-black text-slate-400">{neighbor.rank_position}</span>
+                                            <div className="flex items-center gap-3 sm:gap-8 min-w-0">
+                                                <div className="w-6 sm:w-8 flex-shrink-0 text-center">
+                                                    <span className="text-xs sm:text-sm font-black text-slate-400">{neighbor.rank_position}</span>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-10 w-10 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-xl border border-slate-100 dark:border-white/5">
+                                                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-white dark:bg-white/5 flex-shrink-0 flex items-center justify-center text-lg sm:text-xl border border-slate-100 dark:border-white/5">
                                                         {neighbor.avatar || '👤'}
                                                     </div>
-                                                    <p className="font-bold text-slate-900 dark:text-white">{neighbor.name}</p>
+                                                    <p className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">{neighbor.name}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                                {neighbor.completed_phases} Phases
+                                            <div className="flex-shrink-0 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">
+                                                {neighbor.completed_phases} PHS
                                             </div>
                                         </div>
                                     ))}
@@ -303,11 +303,11 @@ export default function CompetePage() {
                             )}
 
                             {leaderboard.length === 0 && (
-                                <div className="py-32 text-center space-y-4">
-                                    <div className="bg-slate-50 dark:bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                                        <Users className="h-6 w-6 text-slate-300" />
+                                <div className="py-20 sm:py-32 text-center space-y-4">
+                                    <div className="bg-slate-50 dark:bg-white/5 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto">
+                                        <Users className="h-5 w-5 sm:h-6 sm:w-6 text-slate-300" />
                                     </div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">The arena is empty. Start the movement.</p>
+                                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">The arena is empty. Start the movement.</p>
                                 </div>
                             )}
                         </div>
