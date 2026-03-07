@@ -23,27 +23,28 @@ if (typeof window !== 'undefined') {
 
     // ONLY attempt tunnel if we're in production on EdgeOne/Vercel
     if (isEdgeOne && !isDev) {
-        // We use a 1.2s ping to check if Supabase is blocked
-        // If it responds fast, we bypass the proxy for ⏫ SPEED.
-        // If it hangs, we tunnel via origin for ✅ RELIABILITY.
+        // DEFAULT: Use Proxy for reliability on first load
+        // EXCEPTION: Use Direct only if the previous probe proved it's reachable.
         const cachedPath = localStorage.getItem('supabase_proxy_active');
-        if (cachedPath === 'true') {
-            finalBaseUrl = origin;
-            console.log('⚡ [Supabase] Using Cached Bypass Path (Origin Proxy)');
+
+        if (cachedPath === 'false') {
+            finalBaseUrl = supabaseUrl; // ACCELERATED PATH
+            console.log('⚡ [Supabase] Using Proven Direct Path (Fast)');
+        } else {
+            finalBaseUrl = origin; // SECURE TUNNEL
+            console.log('🛡️ [Supabase] Using Reliable Proxy Path (Tunneling)');
         }
 
         // Background probe to update path for next session
         fetch(`https://${projectHost}/rest/v1/`, { method: 'HEAD', mode: 'no-cors' })
             .then(() => {
                 localStorage.setItem('supabase_proxy_active', 'false');
-                console.log('✅ [Supabase] Direct path is reachable. Using Direct for Speed!');
+                console.log('📡 [Probe] Direct path reachable. Speed will be boosted on next load.');
             })
             .catch(() => {
                 localStorage.setItem('supabase_proxy_active', 'true');
-                console.warn('🚧 [Supabase] Direct path blocked. Falling back to Proxy...');
+                console.warn('📡 [Probe] Direct path blocked. Staying on reliable proxy.');
             });
-
-        if (cachedPath === 'true') finalBaseUrl = origin;
     }
 }
 
@@ -59,9 +60,7 @@ export const supabase = createClient(
         },
         global: {
             headers: {
-                'x-client-info': 'levelone-bypass-v2.1',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'x-client-info': 'levelone-bypass-v2.1'
             }
         }
     }

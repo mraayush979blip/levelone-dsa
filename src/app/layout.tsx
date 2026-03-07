@@ -40,31 +40,36 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // AUTO-SYNC VERSION: 2.1.0 (Critical Cache Purge)
+              // AUTO-SYNC VERSION: 2.3.0 (CORS Fix + Purge)
               (function() {
-                const CURRENT_DEPLOY = "2.1.0-final";
-                const lastSync = localStorage.getItem("levelone_last_sync_v2");
+                const CURRENT_DEPLOY = "2.3.0-final";
+                const lastSync = localStorage.getItem("levelone_last_sync_v4");
                 
                 if (lastSync !== CURRENT_DEPLOY) {
-                  console.log("🚀 [Sync] Critical update detected, purging legacy caches...");
+                  console.log("🚀 [Sync] Nuclear update detected, performing full system reset...");
                   
-                  // 1. Force unregister all service workers (legacy cleanup)
+                  // 1. Unregister ALL service workers
                   if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(regs => {
-                      for(let reg of regs) {
-                        reg.unregister();
-                        console.log("🧹 [Sync] Unregistered stale worker:", reg.scope);
-                      }
+                      for(let reg of regs) reg.unregister();
                     }).catch(() => {});
                   }
                   
-                  // 2. Clear known stale storage keys
-                  localStorage.removeItem("supabase.auth.token"); // Force session refresh if stuck
-                  localStorage.setItem("levelone_last_sync_v2", CURRENT_DEPLOY);
+                  // 2. Purge all Browser Caches
+                  if ('caches' in window) {
+                    caches.keys().then(keys => {
+                      for(let key of keys) caches.delete(key);
+                    }).catch(() => {});
+                  }
                   
-                  // 3. One-time hard reload with cache bypass
-                  console.warn("🔄 [Sync] System restart in 1s...");
-                  setTimeout(() => window.location.reload(), 1000);
+                  // 3. Clear Storage & Set Marker
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  localStorage.setItem("levelone_last_sync_v3", CURRENT_DEPLOY);
+                  
+                  // 4. Force Hard Reload
+                  console.warn("🔄 [Sync] Emergency system reset in progress... Cleaning stale workers.");
+                  setTimeout(() => window.location.reload(true), 1500);
                 }
               })();
             `
