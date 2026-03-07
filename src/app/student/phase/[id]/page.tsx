@@ -237,6 +237,14 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         return () => clearInterval(heartbeatInterval);
     }, [phase, user, id]);
 
+    // --- Derived State ---
+    const isPastDeadline = phase ? (() => {
+        const now = new Date();
+        const endDate = new Date(phase.end_date);
+        endDate.setHours(23, 59, 59, 999);
+        return now > endDate;
+    })() : false;
+
     // --- Handlers ---
 
     const handleDownloadAssignment = async (e: React.MouseEvent, url: string) => {
@@ -328,7 +336,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
     const handleSubmit = async (e: React.FormEvent, index: number) => {
         e.preventDefault();
-        if (!user || !isUnlocked) return;
+        if (!user || !isUnlocked || isPastDeadline) return;
 
         const data = formData[index];
         setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: null, success: null } }));
@@ -563,7 +571,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                             <h2 className="text-xl font-bold text-foreground">Submission Portal</h2>
                         </div>
 
-                        {!isUnlocked && (
+                        {!isUnlocked && !isPastDeadline && (
                             <div className="mb-10 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
                                 <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-sm mb-4">
                                     <Lock className="h-6 w-6 text-slate-400" />
@@ -571,6 +579,18 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 <h3 className="text-sm font-bold mb-2">Submissions Locked</h3>
                                 <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider leading-relaxed">
                                     Please complete the required viewing time to enable assignment submission.
+                                </p>
+                            </div>
+                        )}
+
+                        {isPastDeadline && (
+                            <div className="mb-10 p-6 bg-red-50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-500/10 flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-sm mb-4 text-red-500">
+                                    <AlertCircle className="h-6 w-6" />
+                                </div>
+                                <h3 className="text-sm font-bold text-red-600 mb-2">Deadline Passed</h3>
+                                <p className="text-[11px] font-medium text-red-500 uppercase tracking-wider leading-relaxed">
+                                    The submission window for this phase has closed.
                                 </p>
                             </div>
                         )}
@@ -641,13 +661,13 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                             value={data.githubUrl}
                                                             onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], githubUrl: e.target.value } }))}
                                                             className="w-full !pl-10 text-sm font-medium"
-                                                            disabled={!isUnlocked}
+                                                            disabled={!isUnlocked || isPastDeadline}
                                                         />
                                                     </div>
                                                 ) : (
                                                     <div className={cn(
                                                         "group relative border-2 border-dashed rounded-2xl p-6 transition-all text-center",
-                                                        !isUnlocked ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
+                                                        (!isUnlocked || isPastDeadline) ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
                                                         data.selectedFile || data.existingFileUrl ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-slate-200 dark:border-slate-800'
                                                     )}>
                                                         {data.selectedFile ? (
@@ -659,8 +679,8 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                                 <button onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
                                                             </div>
                                                         ) : (
-                                                            <label className={cn("cursor-pointer block", !isUnlocked && 'pointer-events-none')}>
-                                                                <input type="file" className="hidden" onChange={(e) => handleFileSelect(e, idx)} />
+                                                            <label className={cn("cursor-pointer block", (!isUnlocked || isPastDeadline) && 'pointer-events-none')}>
+                                                                <input type="file" className="hidden" disabled={!isUnlocked || isPastDeadline} onChange={(e) => handleFileSelect(e, idx)} />
                                                                 <Upload className="mx-auto h-8 w-8 text-slate-300 mb-3 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
                                                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Project File</p>
                                                             </label>
@@ -673,7 +693,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                     value={data.notes}
                                                     onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], notes: e.target.value } }))}
                                                     className="w-full h-24 text-sm font-medium resize-none pb-safe"
-                                                    disabled={!isUnlocked}
+                                                    disabled={!isUnlocked || isPastDeadline}
                                                 />
                                             </div>
 
@@ -694,7 +714,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
                                             <button
                                                 type="submit"
-                                                disabled={submittingIndex === idx || !isUnlocked}
+                                                disabled={submittingIndex === idx || !isUnlocked || isPastDeadline}
                                                 className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
                                             >
                                                 <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
