@@ -1,32 +1,66 @@
+const CACHE_VERSION = 'levelone-v2.4';
+
 self.addEventListener('install', (e) => {
-    // Force the new service worker to activate immediately 
-    // without waiting for the old one to shut down.
+    // Activate immediately without waiting for old SW
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
     e.waitUntil(
-        // Take control of all pages immediately 
-        self.clients.claim().then(() => {
-            // Nuke ALL CACHES belonging to levelone-cache-* or anything else
-            return caches.keys().then(keys => {
-                return Promise.all(
-                    keys.map(key => {
-                        console.log('[SW-Nuke] Destroying old cache completely:', key);
+        // Clean up old caches from previous versions
+        caches.keys().then(keys => {
+            return Promise.all(
+                keys
+                    .filter(key => key !== CACHE_VERSION)
+                    .map(key => {
+                        console.log('[SW] Cleaning old cache:', key);
                         return caches.delete(key);
                     })
-                );
-            });
-        }).then(() => {
-            // After nuking caches, Unregister the service worker completely.
-            self.registration.unregister().then(function (boolean) {
-                console.log('[SW-Nuke] Service Worker force-unregistered: ', boolean);
-            });
-        })
+            );
+        }).then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', (event) => {
-    // 100% Pass-Through, no caching at all, to guarantee fresh files
-    event.respondWith(fetch(event.request));
+    const { request } = event;
+    const url = new URL(request.url);
+
+    // Only handle same-origin requests
+    if (url.origin !== location.origin) return;
+
+    // Network-first for HTML pages and API calls (always fresh)
+    if (request.mode === 'navigate' || url.pathname.startsWith('/api/')) {
+        event.respondWith(
+            fetch(request).catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // Cache-first for static assets (JS, CSS, images, fonts)
+    if (
+        url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|woff2?|ico)$/) ||
+        url.pathname.startsWith('/_next/static/')
+    ) {
+        event.respondWith(
+            caches.match(request).then(cached => {
+                if (cached) return cached;
+                return fetch(request).then(response => {
+                    // Only cache successful responses
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_VERSION).then(cache => {
+                            cache.put(request, clone);
+                        });
+                    }
+                    return response;
+                });
+            })
+        );
+        return;
+    }
+
+    // Default: network-first for everything else
+    event.respondWith(
+        fetch(request).catch(() => caches.match(request))
+    );
 });

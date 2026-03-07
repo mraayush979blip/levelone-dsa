@@ -40,36 +40,44 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // AUTO-SYNC VERSION: 2.3.0 (CORS Fix + Purge)
+              // AUTO-SYNC VERSION: 2.4.0 (PWA-aware)
               (function() {
-                const CURRENT_DEPLOY = "2.3.0-final";
+                const CURRENT_DEPLOY = "2.4.0-pwa";
                 const lastSync = localStorage.getItem("levelone_last_sync_v4");
                 
+                function registerSW() {
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(function(reg) { console.log('✅ [SW] Registered:', reg.scope); })
+                      .catch(function(err) { console.warn('⚠️ [SW] Registration failed:', err); });
+                  }
+                }
+                
                 if (lastSync !== CURRENT_DEPLOY) {
-                  console.log("🚀 [Sync] Nuclear update detected, performing full system reset...");
+                  console.log("🚀 [Sync] Update detected, refreshing caches...");
                   
-                  // 1. Unregister ALL service workers
+                  // 1. Unregister old service workers
                   if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(regs => {
                       for(let reg of regs) reg.unregister();
                     }).catch(() => {});
                   }
                   
-                  // 2. Purge all Browser Caches
+                  // 2. Purge old caches
                   if ('caches' in window) {
                     caches.keys().then(keys => {
                       for(let key of keys) caches.delete(key);
                     }).catch(() => {});
                   }
                   
-                  // 3. Clear Storage & Set Marker
-                  localStorage.clear();
-                  sessionStorage.clear();
+                  // 3. Set marker (don't clear all localStorage anymore — preserves user prefs)
                   localStorage.setItem("levelone_last_sync_v4", CURRENT_DEPLOY);
                   
-                  // 4. Force Hard Reload
-                  console.warn("🔄 [Sync] Emergency system reset in progress... Cleaning stale workers.");
-                  setTimeout(() => window.location.reload(true), 1500);
+                  // 4. Re-register fresh SW after cleanup
+                  setTimeout(registerSW, 2000);
+                } else {
+                  // Normal load — ensure SW is registered
+                  registerSW();
                 }
               })();
             `
