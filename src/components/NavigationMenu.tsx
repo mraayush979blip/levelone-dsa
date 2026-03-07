@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users } from 'lucide-react';
+import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users, Download, Smartphone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +16,14 @@ const themes = [
 export default function NavigationMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const { user, signOut, updateTheme } = useAuth();
+    const { isInstallable, handleInstallClick } = usePWAInstall();
     const [mounted, setMounted] = useState(false);
+    const [showIOSGuide, setShowIOSGuide] = useState(false);
+
+    // Detect iOS Safari (doesn't support beforeinstallprompt)
+    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+    const showInstall = (isInstallable || (isIOS && !isStandalone));
 
     useEffect(() => {
         setMounted(true);
@@ -159,6 +167,50 @@ export default function NavigationMenu() {
                                         </div>
                                         <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </Link>
+
+                                    {/* PWA Install Button */}
+                                    {showInstall && (
+                                        <button
+                                            onClick={() => {
+                                                if (isInstallable) {
+                                                    handleInstallClick();
+                                                    setIsOpen(false);
+                                                } else if (isIOS) {
+                                                    setShowIOSGuide(!showIOSGuide);
+                                                }
+                                            }}
+                                            className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 text-muted hover:text-primary transition-all group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20">
+                                                    {isIOS ? <Smartphone className="h-4 w-4 text-primary" /> : <Download className="h-4 w-4 text-primary" />}
+                                                </div>
+                                                <span className="text-xs font-bold tracking-tight">Install App</span>
+                                            </div>
+                                            <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </button>
+                                    )}
+
+                                    {/* iOS Manual Guide */}
+                                    <AnimatePresence>
+                                        {showIOSGuide && isIOS && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="mx-3 p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary">How to Install on iOS</p>
+                                                    <ol className="text-[11px] text-muted font-medium space-y-1.5 list-decimal list-inside">
+                                                        <li>Tap the <strong className="text-foreground">Share</strong> button (□↑) in Safari</li>
+                                                        <li>Scroll down and tap <strong className="text-foreground">Add to Home Screen</strong></li>
+                                                        <li>Tap <strong className="text-foreground">Add</strong> to confirm</li>
+                                                    </ol>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
 
                                     <button
                                         onClick={() => {
