@@ -37,6 +37,34 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // AUTO-SYNC VERSION: 2.0.0 (Bypass ISP Block Fix)
+              (function() {
+                const CURRENT_DEPLOY = "2.0.0-final";
+                const lastSync = localStorage.getItem("levelone_last_sync");
+                
+                if (lastSync !== CURRENT_DEPLOY) {
+                  console.log("🚀 [Sync] New version detected, updating system...");
+                  
+                  // 1. Silent SW Cleanup
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(regs => {
+                      for(let reg of regs) reg.unregister();
+                    }).catch(() => {});
+                  }
+                  
+                  // 2. Clear stale cache identifiers
+                  localStorage.setItem("levelone_last_sync", CURRENT_DEPLOY);
+                  
+                  // 3. One-time silent reload to fetch fresh scripts
+                  setTimeout(() => window.location.reload(true), 500);
+                }
+              })();
+            `
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

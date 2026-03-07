@@ -103,7 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             }
                         } catch (err) {
                             console.error('❌ [Auth] Profile fetch error/timeout:', err);
+                            // FALLBACK: Allow session even if profile is blocked
                             setSupabaseUser(session.user);
+                            setUser({ id: session.user.id, role: 'student', name: 'Student' } as any);
                         } finally {
                             if (mounted) setLoading(false);
                         }
@@ -155,21 +157,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleSignIn = async (email: string, password: string) => {
         try {
             setLoading(true);
-            await signIn(email, password);
+            // Increased timeout for sign-in process
+            const signPromise = signIn(email, password);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Sign-in timeout'), 7000));
 
-            // Wait a bit for onAuthStateChange to trigger and fetch user
-            // or manually fetch it here for a faster/more reliable response to the caller
-            const { data: { user: authUser } } = await supabase.auth.getUser();
-            if (authUser) {
-                const { data: userData } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', authUser.id)
-                    .single();
+            await Promise.race([signPromise, timeoutPromise]);
 
-                if (userData) {
-                    setUser(userData as User);
+            // Attempt manual profile fetch with short timeout
+            try {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (authUser) {
+                    const profilePromise = supabase.from('users').select('*').eq('id', authUser.id).single();
+                    const profileTimeout = new Promise((_, reject) => setTimeout(() => reject('Profile fetch timeout'), 3000));
+                    const { data: userData } = await Promise.race([profilePromise, profileTimeout]) as any;
+
+                    if (userData) {
+                        setUser(userData as User);
+                        userRef.current = userData as User;
+                    } else {
+                        // Fallback user state
+                        setUser({ id: authUser.id, role: 'student', name: 'Student' } as any);
+                    }
                 }
+            } catch (err) {
+                console.warn('⚠️ [Auth] Manual profile fetch failed/timed out, using session only');
             }
         } catch (error) {
             setLoading(false);

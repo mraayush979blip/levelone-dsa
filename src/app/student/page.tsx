@@ -1,13 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Phase } from '@/types/database';
 import {
-    BookOpen,
-    Video,
     Clock,
-    ChevronRight,
     Trophy,
     Zap,
     Lock,
@@ -19,10 +15,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { getPhaseStatus, cn } from '@/lib/utils';
 import AnimatedBackground from '@/components/ui/animated-background';
-import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from '@/components/ui/motion-wrapper';
+import { StaggerContainer, StaggerItem, SlideUp } from '@/components/ui/motion-wrapper';
 import GlassCard from '@/components/ui/glass-card';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -81,7 +77,6 @@ export default function StudentDashboard() {
         return 'Good Evening';
     };
 
-    const isNeon = user?.equipped_theme === 'theme-neon';
     const loading = authLoading || dashboardLoading;
     const phases = dashboardData?.phases || [];
     const submissions = dashboardData?.submissions || new Set<string>();
