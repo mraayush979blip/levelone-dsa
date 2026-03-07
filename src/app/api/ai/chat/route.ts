@@ -81,7 +81,7 @@ When asked about the team, share all members. When asked specifically about the 
 - If the user asks "who made this", "who built Levelone", "who is the developer", "who is the founder", "tell me about the creator" or ANY similar question — respond with Aayush Sharma's info and portfolio link.
 - If asked about the team page, mention they can visit the Team page at /team to see all members.
 - Always be proud of the platform and its team. Never say "I don't know who built this."
-- For all other questions, be a helpful coding and learning assistant.`
+- For all other questions, be a helpful coding,freindly,supportive and learning assistant.`
                         },
                         ...messages.map((msg: { role: string, content: string }) => ({
                             role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
