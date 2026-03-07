@@ -37,11 +37,7 @@ export const supabase = createClient(
             flowType: 'pkce'
         },
         global: {
-            headers: { 'x-client-info': 'levelone-bypass-v3' }
-        },
-        // CRITICAL: Disable realtime to prevent WSS socket hangs behind the proxy
-        realtime: {
-            enabled: false
+            headers: { 'x-client-info': 'levelone-bypass-v4' }
         }
     }
 );
