@@ -22,14 +22,25 @@ async function getPhaseContext(): Promise<string> {
             return 'No phase data available at this time.';
         }
 
+        const now = new Date();
+
         const phaseText = phases.map(p => {
-            // Build a clear status label combining lifecycle + active/paused state
-            let statusLabel = (p.status || 'unknown').toUpperCase();
-            if (p.is_paused) statusLabel = '⏸️ PAUSED';
-            else if (statusLabel === 'UPCOMING') statusLabel = '🔜 UPCOMING';
-            else if (statusLabel === 'LIVE' || statusLabel === 'ACTIVE') statusLabel = '🟢 LIVE NOW';
-            else if (statusLabel === 'COMPLETED' || statusLabel === 'ENDED') statusLabel = '✅ COMPLETED';
-            else if (!p.is_active) statusLabel = '❌ INACTIVE';
+            // Determine real status from dates (more reliable than the status field)
+            const startDate = p.start_date ? new Date(p.start_date) : null;
+            const endDate = p.end_date ? new Date(p.end_date) : null;
+
+            let statusLabel: string;
+            if (p.is_paused) {
+                statusLabel = '⏸️ PAUSED';
+            } else if (!p.is_active) {
+                statusLabel = '❌ INACTIVE';
+            } else if (endDate && now > endDate) {
+                statusLabel = '✅ COMPLETED';
+            } else if (startDate && now >= startDate) {
+                statusLabel = '🟢 LIVE NOW';
+            } else {
+                statusLabel = '🔜 UPCOMING';
+            }
 
             const lines = [
                 `Phase ${p.phase_number}: "${p.title}" [${statusLabel}]`,
@@ -37,18 +48,30 @@ async function getPhaseContext(): Promise<string> {
             if (p.description) lines.push(`  Topic: ${p.description}`);
             if (p.youtube_url) lines.push(`  YouTube Video: ${p.youtube_url}`);
             if (p.assignment_resource_url) lines.push(`  Assignment/Resource: ${p.assignment_resource_url}`);
-            if (p.start_date) lines.push(`  Start Date: ${new Date(p.start_date).toLocaleDateString('en-IN')}`);
-            if (p.end_date) lines.push(`  Deadline: ${new Date(p.end_date).toLocaleDateString('en-IN')}`);
+            if (startDate) lines.push(`  Start Date: ${startDate.toLocaleDateString('en-IN')}`);
+            if (endDate) lines.push(`  Deadline: ${endDate.toLocaleDateString('en-IN')}`);
             if (p.is_paused && p.pause_reason) lines.push(`  Pause Reason: ${p.pause_reason}`);
             return lines.join('\n');
         }).join('\n\n');
 
-        const liveCount = phases.filter(p => (p.status === 'live' || p.status === 'active') && p.is_active && !p.is_paused).length;
-        const upcomingCount = phases.filter(p => p.status === 'upcoming').length;
-        const completedCount = phases.filter(p => p.status === 'completed' || p.status === 'ended').length;
+        // Count using same date-based logic
+        const livePhases = phases.filter(p => {
+            if (!p.is_active || p.is_paused) return false;
+            const s = p.start_date ? new Date(p.start_date) : null;
+            const e = p.end_date ? new Date(p.end_date) : null;
+            return s && now >= s && (!e || now <= e);
+        });
+        const upcomingPhases = phases.filter(p => {
+            const s = p.start_date ? new Date(p.start_date) : null;
+            return p.is_active && !p.is_paused && s && now < s;
+        });
+        const completedPhases = phases.filter(p => {
+            const e = p.end_date ? new Date(p.end_date) : null;
+            return e && now > e;
+        });
 
-        const result = `There are ${phases.length} total phases: ${liveCount} live, ${upcomingCount} upcoming, ${completedCount} completed.\n\n${phaseText}`;
-        phaseCache = { data: result, ts: now };
+        const result = `There are ${phases.length} total phases: ${livePhases.length} live, ${upcomingPhases.length} upcoming, ${completedPhases.length} completed.\n\n${phaseText}`;
+        phaseCache = { data: result, ts: Date.now() };
         return result;
     } catch (err) {
         console.error('[AI] Failed to fetch phases:', err);
