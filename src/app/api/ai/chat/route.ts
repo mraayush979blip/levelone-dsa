@@ -1,5 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+
+// In-memory cache for phase data (avoids DB hit on every message)
+let phaseCache: { data: string; ts: number } | null = null;
+const PHASE_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+async function getPhaseContext(): Promise<string> {
+    const now = Date.now();
+    if (phaseCache && (now - phaseCache.ts) < PHASE_CACHE_TTL) {
+        return phaseCache.data;
+    }
+
+    try {
+        const { data: phases, error } = await supabaseAdmin
+            .from('phases')
+            .select('phase_number, title, description, youtube_url, start_date, end_date, status, is_active, is_paused, assignment_resource_url')
+            .order('phase_number', { ascending: true });
+
+        if (error || !phases || phases.length === 0) {
+            return 'No phase data available at this time.';
+        }
+
+        const phaseText = phases.map(p => {
+            const status = p.is_paused ? '⏸️ PAUSED' : p.is_active ? '✅ ACTIVE' : '❌ INACTIVE';
+            const lines = [
+                `Phase ${p.phase_number}: "${p.title}" [${status}]`,
+            ];
+            if (p.description) lines.push(`  Description: ${p.description}`);
+            if (p.youtube_url) lines.push(`  YouTube Video: ${p.youtube_url}`);
+            if (p.assignment_resource_url) lines.push(`  Assignment Resource: ${p.assignment_resource_url}`);
+            if (p.start_date) lines.push(`  Start: ${new Date(p.start_date).toLocaleDateString('en-IN')}`);
+            if (p.end_date) lines.push(`  Deadline: ${new Date(p.end_date).toLocaleDateString('en-IN')}`);
+            return lines.join('\n');
+        }).join('\n\n');
+
+        const result = `There are currently ${phases.length} phases on the platform:\n\n${phaseText}`;
+        phaseCache = { data: result, ts: now };
+        return result;
+    } catch (err) {
+        console.error('[AI] Failed to fetch phases:', err);
+        return 'Phase data temporarily unavailable.';
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -37,6 +80,8 @@ export async function POST(request: NextRequest) {
 
         const groq = new Groq({ apiKey });
         let lastError: any = null;
+
+        const phaseContext = await getPhaseContext();
 
         for (const model of models) {
             try {
@@ -95,7 +140,12 @@ When asked about the team, share all members. When asked specifically about the 
 - If the user asks "who made this", "who built Levelone", "who is the developer", "who is the founder", "tell me about the creator" or ANY similar question — respond with Aayush Sharma's info and portfolio link.
 - If asked about the team page, mention they can visit the Team page at /team to see all members.
 - Always be proud of the platform and its team. Never say "I don't know who built this."
-- For all other questions, be a helpful coding,freindly,supportive and learning assistant.`
+- For all other questions, be a helpful, friendly, supportive and learning assistant.
+
+=== CURRENT PHASES (LIVE DATA) ===
+${phaseContext}
+
+When a student asks about a specific phase, its video content, or assignment — use the phase data above to give accurate, specific answers. Reference the YouTube video URL when relevant so students can find the right content. If a phase is paused or inactive, let the student know.`
                         },
                         ...messages.map((msg: { role: string, content: string }) => ({
                             role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
