@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -179,8 +180,12 @@ export default function AIHelpPage() {
                                             ? 'bg-primary text-white rounded-tr-none'
                                             : 'bg-card border border-card-border text-foreground rounded-tl-none'
                                     )}>
-                                        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                                            {msg.content}
+                                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                                            {msg.role === 'assistant' ? (
+                                                <MarkdownRenderer content={msg.content} />
+                                            ) : (
+                                                <span className="whitespace-pre-wrap">{msg.content}</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
