@@ -48,13 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     console.log('🔄 [Auth] Session restored silently');
                     setSupabaseUser(initialSession.user);
 
-                    // CRITICAL: Set Immediate identity so ProtectedRoute allows entry
-                    const initialUser = { id: initialSession.user.id, role: 'student', name: 'Student' } as any;
-                    setUser(initialUser);
-                    userRef.current = initialUser;
-
-                    // Fetch full profile in background
-                    fetchUserProfile(initialSession.user.id).catch(() => { });
+                    // Fetch full profile in background before dropping the loading shield
+                    await fetchUserProfile(initialSession.user.id).catch(() => { });
                 }
             } catch (err) {
                 console.warn('❌ [Auth] Init error or timeout:', err);
@@ -76,11 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                         // Set basic identity immediately to prevent redirect-back-to-login
                         if (!userRef.current || userRef.current.id !== session.user.id) {
-                            const tempUser = { id: session.user.id, role: 'student', name: 'Student' } as any;
-                            setUser(tempUser);
-                            userRef.current = tempUser;
-                            // Fetch real profile in background
-                            fetchUserProfile(session.user.id).catch(() => { });
+                            // Do not set mock user. Block the UI drop until we have the real data.
+                            await fetchUserProfile(session.user.id).catch(() => { });
                         }
                     } else {
                         setUser(null);
@@ -119,15 +111,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 throw error;
             }
 
-            if (userData && userRef.current?.id === userId) {
-                console.log('✅ [Auth] Profile loaded successfully for:', userData.email);
-                const newUser = userData as User;
-                setUser(newUser);
-                userRef.current = newUser;
-                if (newUser.equipped_theme) {
-                    localStorage.setItem('levelone-theme', newUser.equipped_theme);
+            if (userData) {
+                // If userRef is null, it means this is initial load. If it matches, it's a refresh.
+                if (!userRef.current || userRef.current.id === userId) {
+                    console.log('✅ [Auth] Profile loaded successfully for:', userData.email);
+                    const newUser = userData as User;
+                    setUser(newUser);
+                    userRef.current = newUser;
+                    if (newUser.equipped_theme) {
+                        localStorage.setItem('levelone-theme', newUser.equipped_theme);
+                    }
                 }
-            } else if (!userData) {
+            } else {
                 console.warn('⚠️ [Auth] No profile data returned for:', userId);
             }
         } catch (err) {
