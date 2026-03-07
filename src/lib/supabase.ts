@@ -1,27 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Get base URL from env
-let supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
-const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
-
-// 1. If project ID was provided instead of full URL, expand it.
+let supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || 'tclvquwsxbntvwvozeto.supabase.co').trim();
 if (supabaseUrl && !supabaseUrl.startsWith('http')) {
-    supabaseUrl = `https://${supabaseUrl}.supabase.co`;
+    supabaseUrl = `https://${supabaseUrl}`;
+}
+if (!supabaseUrl.includes('.supabase.co')) {
+    supabaseUrl += '.supabase.co';
 }
 
-// 2. Determine the "Final" URL for the client.
-// If we are in the browser, and on EdgeOne, we proxy through the current domain.
-let finalBaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
+const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+
+// Determine the "Final" URL for the client.
+let finalBaseUrl = supabaseUrl;
 
 if (typeof window !== 'undefined') {
-    const isEdgeOne = window.location.origin.includes('edgeone.app');
-    const isDev = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1');
+    const origin = window.location.origin;
+    const isEdgeOne = origin.includes('edgeone.app') || origin.includes('vercel.app');
+    const isDev = origin.includes('localhost') || origin.includes('127.0.0.1');
 
-    // Skip proxy on Localhost to use direct connection (faster if DNS is set)
-    // Use proxy on EdgeOne to bypass regional blocks (India ISP issue)
+    // In Production (EdgeOne), we MUST use the current origin as the proxy to bypass India ISP blocks
     if (isEdgeOne && !isDev) {
-        finalBaseUrl = window.location.origin;
-        console.log('🚀 [Supabase] India Bypass Active: Proxying via current origin');
+        finalBaseUrl = origin;
+        console.log('🚀 [Supabase] India Bypass Active: Tunneling via', origin);
     }
 }
 
@@ -36,20 +37,21 @@ export const supabase = createClient(
             flowType: 'pkce'
         },
         global: {
-            // Identifier for logs
-            headers: { 'x-client-info': 'levelone-bypass-v2' }
+            headers: { 'x-client-info': 'levelone-bypass-v3' }
+        },
+        // CRITICAL: Disable realtime to prevent WSS socket hangs behind the proxy
+        realtime: {
+            enabled: false
         }
     }
 );
 
-// Helper function to get current user
 export async function getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
     return user;
 }
 
-// Helper function to sign in
 export async function signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -59,7 +61,6 @@ export async function signIn(email: string, password: string) {
     return data;
 }
 
-// Helper function to sign out
 export async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;

@@ -29,18 +29,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const initializeAuth = async () => {
             console.log('🔄 [Auth] Initializing (Bypass Active)...');
 
-            // EMERGENCY WATCHDOG: Force app open in 3 seconds NO MATTER WHAT
+            // EMERGENCY WATCHDOG: Force app open in 4 seconds NO MATTER WHAT
             const watchdog = setTimeout(() => {
                 if (mounted && loading) {
                     console.warn('⚠️ [Auth] Watchdog forced end of loading state.');
                     setLoading(false);
                 }
-            }, 3000);
+            }, 4000);
 
             try {
-                // Determine session with 5s timeout
+                // Determine session with 2s timeout
                 const sessionPromise = supabase.auth.getSession();
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Session timeout'), 5000));
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Session timeout'), 2000));
 
                 const { data: { session: initialSession } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
 
@@ -48,11 +48,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     console.log('🔄 [Auth] Session restored silently');
                     setSupabaseUser(initialSession.user);
 
-                    // Fetch profile silently, don't block the UI if it's too slow
+                    // CRITICAL: Set Immediate identity so ProtectedRoute allows entry
+                    const initialUser = { id: initialSession.user.id, role: 'student', name: 'Student' } as any;
+                    setUser(initialUser);
+                    userRef.current = initialUser;
+
+                    // Fetch full profile in background
                     fetchUserProfile(initialSession.user.id).catch(() => { });
                 }
             } catch (err) {
-                console.error('❌ [Auth] Init error or timeout:', err);
+                console.warn('❌ [Auth] Init error or timeout:', err);
             } finally {
                 if (mounted) {
                     setLoading(false);
@@ -68,7 +73,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                     if (session?.user) {
                         setSupabaseUser(session.user);
+
+                        // Set basic identity immediately to prevent redirect-back-to-login
                         if (!userRef.current || userRef.current.id !== session.user.id) {
+                            const tempUser = { id: session.user.id, role: 'student', name: 'Student' } as any;
+                            setUser(tempUser);
+                            userRef.current = tempUser;
+                            // Fetch real profile in background
                             fetchUserProfile(session.user.id).catch(() => { });
                         }
                     } else {
@@ -100,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (error) throw error;
 
-            if (userData) {
+            if (userData && userRef.current?.id === userId) {
                 console.log('✅ [Auth] Profile loaded');
                 const newUser = userData as User;
                 setUser(newUser);
@@ -110,14 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             }
         } catch (err) {
-            console.warn('⚠️ [Auth] Profile fetch failed (ISP Block?), using fallback student state:', err);
-            // DO NOT set user to null, just keep what we have or set a basic template 
-            // to allow navigation to continue
-            if (!userRef.current) {
-                const fallback = { id: userId, role: 'student', name: 'Student' } as any;
-                setUser(fallback);
-                userRef.current = fallback;
-            }
+            console.warn('⚠️ [Auth] Profile fetch failed (Background Sync), using fallback:', err);
         }
     };
 
@@ -130,7 +134,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             setLoading(true);
             await signIn(email, password);
-            // Refresh explicitly after sign-in for speed
             const { data: { user: authUser } } = await supabase.auth.getUser();
             if (authUser) await fetchUserProfile(authUser.id);
         } catch (error) {
