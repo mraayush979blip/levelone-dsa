@@ -75,6 +75,54 @@ export default function RootLayout({
             `
           }}
         />
+        {/* ChunkLoadError Recovery — auto-recovers from stale chunk failures after deploys */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function handleChunkError(e) {
+                  var msg = (e.message || e.reason && e.reason.message || '').toLowerCase();
+                  if (
+                    msg.includes('chunkloaderror') ||
+                    msg.includes('loading chunk') ||
+                    msg.includes('failed to fetch dynamically imported module') ||
+                    msg.includes('importing a module script failed')
+                  ) {
+                    var key = 'levelone_chunk_reload';
+                    var last = localStorage.getItem(key);
+                    var now = Date.now();
+                    
+                    if (last && (now - parseInt(last, 10)) < 10000) {
+                      // Persistent failure — nuclear cleanup
+                      console.error('[Levelone] Persistent chunk error. Clearing all caches...');
+                      sessionStorage.clear();
+                      localStorage.removeItem(key);
+                      if ('caches' in window) {
+                        caches.keys().then(function(keys) {
+                          keys.forEach(function(k) { caches.delete(k); });
+                        });
+                      }
+                      if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(function(regs) {
+                          regs.forEach(function(r) { r.unregister(); });
+                        });
+                      }
+                    } else {
+                      // First failure — quick reload
+                      console.warn('[Levelone] Chunk load error detected. Reloading...');
+                      localStorage.setItem(key, now.toString());
+                      window.location.reload();
+                    }
+                  }
+                }
+                window.addEventListener('error', handleChunkError);
+                window.addEventListener('unhandledrejection', function(e) {
+                  handleChunkError({ message: (e.reason && e.reason.message) || '' });
+                });
+              })();
+            `
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
