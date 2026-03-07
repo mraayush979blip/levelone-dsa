@@ -151,7 +151,7 @@ export default function StudentDashboard() {
         <div className="relative min-h-[calc(100vh-80px)] font-sans text-foreground">
             <AnimatedBackground theme={user?.equipped_theme} />
 
-            <div className="max-w-7xl mx-auto px-6 py-8 md:py-12 space-y-12 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-12 space-y-8 md:space-y-12 relative z-10">
                 {/* Clean Header */}
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-card-border">
                     <SlideUp>
@@ -160,10 +160,10 @@ export default function StudentDashboard() {
                                 <Sparkles className="w-4 h-4" />
                                 <span className="text-[10px] font-bold uppercase tracking-[0.25em]">{getGreeting()}</span>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-black tracking-[-0.03em] leading-tight text-foreground">
+                            <h1 className="text-3xl md:text-5xl font-black tracking-[-0.03em] leading-tight text-foreground">
                                 Welcome Back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{user?.name?.split(' ')[0] || 'Student'}</span>
                             </h1>
-                            <p className="text-lg text-muted font-medium">Ready to continue your specialization today?</p>
+                            <p className="text-base md:text-lg text-muted font-medium">Ready to continue your specialization today?</p>
                         </div>
                     </SlideUp>
 
@@ -190,9 +190,9 @@ export default function StudentDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 text-foreground">
                     {/* Main Timeline */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-6 md:space-y-8">
                         <SlideUp delay={0.2} className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
+                            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2 md:gap-3 text-foreground">
                                 <LayoutDashboard className="w-5 h-5 text-primary" />
                                 Your Specialization Path
                             </h2>
@@ -224,22 +224,22 @@ export default function StudentDashboard() {
                                                 }
                                             }}
                                             className={cn(
-                                                "group block relative overflow-hidden rounded-[2rem] border transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 gpu-accelerated bg-card",
+                                                "group block relative overflow-hidden rounded-3xl md:rounded-[2rem] border transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 md:gap-6 md:p-8 gpu-accelerated bg-card",
                                                 isLocked
                                                     ? "border-card-border opacity-60 grayscale cursor-not-allowed"
                                                     : "border-card-border hover:border-primary/30 hover:shadow-glow hover:-translate-y-1.5"
                                             )}
                                         >
-                                            <div className="flex items-center gap-8 min-w-0">
+                                            <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                                 <div className={cn(
-                                                    "w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500",
+                                                    "w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl flex items-center justify-center font-black text-lg md:text-xl transition-all duration-500",
                                                     isLocked ? "bg-card border border-card-border text-muted" :
                                                         isCompleted ? "bg-emerald-500/10 text-emerald-500" : "bg-primary text-white shadow-xl shadow-primary/20 group-hover:scale-110"
                                                 )}>
                                                     {isLocked ? <Lock className="w-6 h-6" /> : isCompleted ? <CheckCircle2 className="w-7 h-7" /> : phase.phase_number}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <h3 className="text-xl font-bold tracking-tight mb-1.5 group-hover:text-primary transition-colors truncate text-foreground">
+                                                    <h3 className="text-lg md:text-xl font-bold tracking-tight mb-1.5 group-hover:text-primary transition-colors truncate text-foreground">
                                                         {phase.title}
                                                     </h3>
                                                     <div className="flex items-center gap-4">
@@ -272,18 +272,18 @@ export default function StudentDashboard() {
                     {/* Pro Sidebar */}
                     <div className="space-y-10">
                         <SlideUp delay={0.4} className="space-y-8">
-                            <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
-                                <Trophy className="w-5 h-5 text-primary" />
+                            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2 md:gap-3 text-foreground">
+                                <Trophy className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                                 Performance Metrics
                             </h2>
 
-                            <GlassCard className="!bg-primary border-0 shadow-2xl shadow-primary/20 p-8 rounded-[2rem] overflow-hidden relative group gpu-accelerated">
+                            <GlassCard className="!bg-primary border-0 shadow-2xl shadow-primary/20 p-6 md:p-8 rounded-3xl md:rounded-[2rem] overflow-hidden relative group gpu-accelerated">
                                 <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-all duration-700">
-                                    <Trophy className="w-40 h-40 text-black/20 dark:text-white/20" />
+                                    <Trophy className="w-32 h-32 md:w-40 md:h-40 text-black/20 dark:text-white/20" />
                                 </div>
                                 <div className="relative z-10 text-white">
                                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-90 mb-2">Overall Completion</p>
-                                    <h3 className="text-4xl font-black mb-6">{Math.round((stats.completedCount / (phases.length || 1)) * 100)}%</h3>
+                                    <h3 className="text-3xl md:text-4xl font-black mb-6">{Math.round((stats.completedCount / (phases.length || 1)) * 100)}%</h3>
 
                                     <div className="h-2.5 bg-white/30 rounded-full overflow-hidden shadow-inner">
                                         <motion.div
@@ -305,23 +305,23 @@ export default function StudentDashboard() {
                             </GlassCard>
 
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="p-6 rounded-[2rem] border border-card-border bg-card flex items-center gap-6 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                                        <Target className="w-7 h-7" />
+                                <div className="p-5 md:p-6 rounded-[2rem] border border-card-border bg-card flex items-center gap-4 md:gap-6 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                                        <Target className="w-6 h-6 md:w-7 md:h-7" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Active Phases</p>
-                                        <p className="text-2xl font-black text-foreground">{livePhasesCount}</p>
+                                        <p className="text-xl md:text-2xl font-black text-foreground">{livePhasesCount}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 rounded-[2rem] border border-card-border bg-card flex items-center gap-6 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 text-indigo-600 flex items-center justify-center">
-                                        <Zap className="w-7 h-7" />
+                                <div className="p-5 md:p-6 rounded-[2rem] border border-card-border bg-card flex items-center gap-4 md:gap-6 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-2xl bg-indigo-600/10 text-indigo-600 flex items-center justify-center">
+                                        <Zap className="w-6 h-6 md:w-7 md:h-7" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Upcoming Content</p>
-                                        <p className="text-2xl font-black text-foreground">{phases.filter(p => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'upcoming').length}</p>
+                                        <p className="text-xl md:text-2xl font-black text-foreground">{phases.filter(p => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'upcoming').length}</p>
                                     </div>
                                 </div>
                             </div>
