@@ -65,7 +65,7 @@ export default function RootLayout({
                   // 3. Clear Storage & Set Marker
                   localStorage.clear();
                   sessionStorage.clear();
-                  localStorage.setItem("levelone_last_sync_v3", CURRENT_DEPLOY);
+                  localStorage.setItem("levelone_last_sync_v4", CURRENT_DEPLOY);
                   
                   // 4. Force Hard Reload
                   console.warn("🔄 [Sync] Emergency system reset in progress... Cleaning stale workers.");
