@@ -15,7 +15,7 @@ async function getPhaseContext(): Promise<string> {
     try {
         const { data: phases, error } = await supabaseAdmin
             .from('phases')
-            .select('phase_number, title, description, youtube_url, start_date, end_date, status, is_active, is_paused, assignment_resource_url')
+            .select('phase_number, title, description, youtube_url, start_date, end_date, status, is_active, is_paused, pause_reason, assignment_resource_url')
             .order('phase_number', { ascending: true });
 
         if (error || !phases || phases.length === 0) {
@@ -23,19 +23,31 @@ async function getPhaseContext(): Promise<string> {
         }
 
         const phaseText = phases.map(p => {
-            const status = p.is_paused ? '⏸️ PAUSED' : p.is_active ? '✅ ACTIVE' : '❌ INACTIVE';
+            // Build a clear status label combining lifecycle + active/paused state
+            let statusLabel = (p.status || 'unknown').toUpperCase();
+            if (p.is_paused) statusLabel = '⏸️ PAUSED';
+            else if (statusLabel === 'UPCOMING') statusLabel = '🔜 UPCOMING';
+            else if (statusLabel === 'LIVE' || statusLabel === 'ACTIVE') statusLabel = '🟢 LIVE NOW';
+            else if (statusLabel === 'COMPLETED' || statusLabel === 'ENDED') statusLabel = '✅ COMPLETED';
+            else if (!p.is_active) statusLabel = '❌ INACTIVE';
+
             const lines = [
-                `Phase ${p.phase_number}: "${p.title}" [${status}]`,
+                `Phase ${p.phase_number}: "${p.title}" [${statusLabel}]`,
             ];
-            if (p.description) lines.push(`  Description: ${p.description}`);
+            if (p.description) lines.push(`  Topic: ${p.description}`);
             if (p.youtube_url) lines.push(`  YouTube Video: ${p.youtube_url}`);
-            if (p.assignment_resource_url) lines.push(`  Assignment Resource: ${p.assignment_resource_url}`);
-            if (p.start_date) lines.push(`  Start: ${new Date(p.start_date).toLocaleDateString('en-IN')}`);
+            if (p.assignment_resource_url) lines.push(`  Assignment/Resource: ${p.assignment_resource_url}`);
+            if (p.start_date) lines.push(`  Start Date: ${new Date(p.start_date).toLocaleDateString('en-IN')}`);
             if (p.end_date) lines.push(`  Deadline: ${new Date(p.end_date).toLocaleDateString('en-IN')}`);
+            if (p.is_paused && p.pause_reason) lines.push(`  Pause Reason: ${p.pause_reason}`);
             return lines.join('\n');
         }).join('\n\n');
 
-        const result = `There are currently ${phases.length} phases on the platform:\n\n${phaseText}`;
+        const liveCount = phases.filter(p => (p.status === 'live' || p.status === 'active') && p.is_active && !p.is_paused).length;
+        const upcomingCount = phases.filter(p => p.status === 'upcoming').length;
+        const completedCount = phases.filter(p => p.status === 'completed' || p.status === 'ended').length;
+
+        const result = `There are ${phases.length} total phases: ${liveCount} live, ${upcomingCount} upcoming, ${completedCount} completed.\n\n${phaseText}`;
         phaseCache = { data: result, ts: now };
         return result;
     } catch (err) {
