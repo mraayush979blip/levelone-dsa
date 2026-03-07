@@ -101,7 +101,7 @@ export default function StudentDashboard() {
     const livePhasesCount = phases.filter((p: Phase) => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'live').length;
 
     return (
-        <div className="relative min-h-[calc(100vh-80px)] font-sans">
+        <div className="relative min-h-[calc(100vh-80px)] font-sans text-foreground">
             <AnimatedBackground theme={user?.equipped_theme} />
 
             <div className="max-w-7xl mx-auto px-6 py-8 md:py-12 space-y-12 relative z-10">
@@ -141,7 +141,7 @@ export default function StudentDashboard() {
                     </SlideUp>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 text-foreground">
                     {/* Main Timeline */}
                     <div className="lg:col-span-2 space-y-8">
                         <SlideUp delay={0.2} className="flex items-center justify-between">

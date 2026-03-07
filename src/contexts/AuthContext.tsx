@@ -27,30 +27,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         let mounted = true;
 
         const initializeAuth = async () => {
-            console.log('🔄 [Auth] Initializing...');
+            console.log('🔄 [Auth] Initializing (Bypass Active)...');
 
-            // SAFETY TIMEOUT: Force stop loading if initialization takes > 15 seconds
+            // EMERGENCY WATCHDOG: Force app open in 3 seconds NO MATTER WHAT
             const watchdog = setTimeout(() => {
                 if (mounted && loading) {
-                    console.warn('⚠️ [Auth] Initialization watchdog triggered - forcing end of loading state.');
+                    console.warn('⚠️ [Auth] Watchdog forced end of loading state.');
                     setLoading(false);
                 }
-            }, 15000);
+            }, 3000);
 
             try {
-                // race between getSession and a shorter timeout
+                // Determine session with 5s timeout
                 const sessionPromise = supabase.auth.getSession();
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Session check timeout'), 10000));
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Session timeout'), 5000));
 
                 const { data: { session: initialSession } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
 
-                console.log('🔄 [Auth] Initial session check:', initialSession ? 'Found' : 'Null');
-                if (!initialSession && mounted) {
-                    setLoading(false);
-                    clearTimeout(watchdog);
+                if (initialSession && mounted) {
+                    console.log('🔄 [Auth] Session restored silently');
+                    setSupabaseUser(initialSession.user);
+
+                    // Fetch profile silently, don't block the UI if it's too slow
+                    fetchUserProfile(initialSession.user.id).catch(() => { });
                 }
             } catch (err) {
-                console.error('❌ [Auth] Error or timeout checking initial session:', err);
+                console.error('❌ [Auth] Init error or timeout:', err);
+            } finally {
                 if (mounted) {
                     setLoading(false);
                     clearTimeout(watchdog);
@@ -61,61 +64,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { data: { subscription } } = supabase.auth.onAuthStateChange(
                 async (event, session) => {
                     if (!mounted) return;
-                    console.log(`🔔 [Auth] State change: ${event}`);
-
-                    // Only set loading true if we are changing state or initializing
-                    // Avoid setting it true if we already have a user and it's just a token refresh, 
-                    // unless we need to re-fetch the profile.
+                    console.log(`🔔 [Auth] Event: ${event}`);
 
                     if (session?.user) {
-                        if (userRef.current && userRef.current.id === session.user.id) {
-                            setSupabaseUser(session.user);
-                            if (mounted) setLoading(false);
-                            return;
-                        }
-
-                        try {
-                            // Fetch profile with a small timeout
-                            const profilePromise = supabase
-                                .from('users')
-                                .select('*')
-                                .eq('id', session.user.id)
-                                .single();
-
-                            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Profile fetch timeout'), 7000));
-
-                            const { data: userData } = await Promise.race([profilePromise, timeoutPromise]) as any;
-
-                            if (!mounted) return;
-
-                            if (userData) {
-                                console.log('✅ [Auth] Profile loaded');
-                                const newUser = userData as User;
-                                if (newUser.equipped_theme) {
-                                    localStorage.setItem('levelone-theme', newUser.equipped_theme);
-                                }
-                                setUser(newUser);
-                                userRef.current = newUser;
-                                setSupabaseUser(session.user);
-                            } else {
-                                console.warn('⚠️ [Auth] Profile missing - using auth user only');
-                                setSupabaseUser(session.user);
-                            }
-                        } catch (err) {
-                            console.error('❌ [Auth] Profile fetch error/timeout:', err);
-                            // FALLBACK: Allow session even if profile is blocked
-                            setSupabaseUser(session.user);
-                            setUser({ id: session.user.id, role: 'student', name: 'Student' } as any);
-                        } finally {
-                            if (mounted) setLoading(false);
+                        setSupabaseUser(session.user);
+                        if (!userRef.current || userRef.current.id !== session.user.id) {
+                            fetchUserProfile(session.user.id).catch(() => { });
                         }
                     } else {
-                        if (mounted) {
-                            setUser(null);
-                            setSupabaseUser(null);
-                            setLoading(false);
-                        }
+                        setUser(null);
+                        setSupabaseUser(null);
+                        userRef.current = null;
                     }
+                    if (mounted) setLoading(false);
                 }
             );
 
@@ -130,58 +91,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const fetchUserProfile = async (userId: string) => {
         try {
-            const { data: userData } = await supabase
+            console.log('🔄 [Auth] Fetching profile for:', userId);
+            const { data: userData, error } = await supabase
                 .from('users')
                 .select('*')
                 .eq('id', userId)
                 .single();
 
+            if (error) throw error;
+
             if (userData) {
-                console.log('✅ [Auth] Profile refreshed');
+                console.log('✅ [Auth] Profile loaded');
                 const newUser = userData as User;
                 setUser(newUser);
                 userRef.current = newUser;
+                if (newUser.equipped_theme) {
+                    localStorage.setItem('levelone-theme', newUser.equipped_theme);
+                }
             }
         } catch (err) {
-            console.error('❌ [Auth] Error refreshing profile:', err);
+            console.warn('⚠️ [Auth] Profile fetch failed (ISP Block?), using fallback student state:', err);
+            // DO NOT set user to null, just keep what we have or set a basic template 
+            // to allow navigation to continue
+            if (!userRef.current) {
+                const fallback = { id: userId, role: 'student', name: 'Student' } as any;
+                setUser(fallback);
+                userRef.current = fallback;
+            }
         }
     };
 
     const handleRefreshUser = async () => {
         const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser) {
-            await fetchUserProfile(authUser.id);
-        }
+        if (authUser) await fetchUserProfile(authUser.id);
     };
 
     const handleSignIn = async (email: string, password: string) => {
         try {
             setLoading(true);
-            // Increased timeout for sign-in process
-            const signPromise = signIn(email, password);
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Sign-in timeout'), 7000));
-
-            await Promise.race([signPromise, timeoutPromise]);
-
-            // Attempt manual profile fetch with short timeout
-            try {
-                const { data: { user: authUser } } = await supabase.auth.getUser();
-                if (authUser) {
-                    const profilePromise = supabase.from('users').select('*').eq('id', authUser.id).single();
-                    const profileTimeout = new Promise((_, reject) => setTimeout(() => reject('Profile fetch timeout'), 3000));
-                    const { data: userData } = await Promise.race([profilePromise, profileTimeout]) as any;
-
-                    if (userData) {
-                        setUser(userData as User);
-                        userRef.current = userData as User;
-                    } else {
-                        // Fallback user state
-                        setUser({ id: authUser.id, role: 'student', name: 'Student' } as any);
-                    }
-                }
-            } catch (err) {
-                console.warn('⚠️ [Auth] Manual profile fetch failed/timed out, using session only');
-            }
+            await signIn(email, password);
+            // Refresh explicitly after sign-in for speed
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (authUser) await fetchUserProfile(authUser.id);
         } catch (error) {
             setLoading(false);
             throw error;
@@ -200,17 +151,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleUpdateTheme = async (theme: string) => {
         if (!user) return;
         try {
-            // Save to LocalStorage for immediate, flicker-free persistence
             localStorage.setItem('levelone-theme', theme);
-
-            const { error } = await supabase
-                .from('users')
-                .update({ equipped_theme: theme })
-                .eq('id', user.id);
-
+            const { error } = await supabase.from('users').update({ equipped_theme: theme }).eq('id', user.id);
             if (error) throw error;
-
-            // Optimistic update
             const updatedUser = { ...user, equipped_theme: theme };
             setUser(updatedUser);
             userRef.current = updatedUser;
@@ -239,8 +182,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
+    if (context === undefined) throw new Error('useAuth must be used within an AuthProvider');
     return context;
 }

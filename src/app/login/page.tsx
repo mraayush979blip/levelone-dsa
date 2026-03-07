@@ -48,10 +48,7 @@ export default function LoginPage() {
         try {
             console.log('Attempting login for:', email);
 
-            // Check if environment variables are missing
-            if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-                throw new Error('Supabase URL is not configured in Vercel. Please add NEXT_PUBLIC_SUPABASE_URL to your Project Settings.');
-            }
+            console.log('Attempting login for:', email);
 
             await signIn(email, password);
 
