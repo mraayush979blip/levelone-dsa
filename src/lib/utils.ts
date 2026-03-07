@@ -13,7 +13,10 @@ export function getTimeUntilDeadline(endDate: string): {
     isExpired: boolean;
 } {
     const now = new Date();
+    // Inclusive: Deadline is the LAST SECOND of that day
     const deadline = new Date(endDate);
+    deadline.setHours(23, 59, 59, 999);
+    
     const diff = deadline.getTime() - now.getTime();
 
     if (diff <= 0) {
@@ -37,7 +40,10 @@ export function getPhaseStatus(
 ): 'upcoming' | 'live' | 'ended' | 'paused' {
     const now = new Date();
     const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Start of day
+
     const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // End of day (inclusive)
 
     if (isPaused) return 'paused';
     if (now < start) return 'upcoming';

@@ -15,12 +15,21 @@ import {
     ArrowLeft,
     Loader2,
     Upload,
-    X
+    X,
+    Trophy,
+    Target,
+    Zap,
+    Shield,
+    MessageSquare,
+    ChevronDown,
+    Lock
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { getPhaseStatus } from '@/lib/utils';
+import { getPhaseStatus, cn } from '@/lib/utils';
 import { isValidGitHubUrl, isValidFileSize, formatFileSize, isValidAssignmentFileType } from '@/utils/validation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import PremiumPlayer from '@/components/PremiumPlayer';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface PhasePageProps {
     params: Promise<{ id: string }>;
@@ -30,13 +39,14 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
     const { id } = use(params);
     const router = useRouter();
     const { user } = useAuth();
+    const queryClient = useQueryClient();
 
-    const [phase, setPhase] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    // --- State Variables ---
+    const [timeSpent, setTimeSpent] = useState(0);
+    const timeSpentRef = useRef(0);
     const [videoCompleted, setVideoCompleted] = useState(false);
+    const [isUnlocked, setIsUnlocked] = useState(false);
     const [submittingIndex, setSubmittingIndex] = useState<number | null>(null);
-
-    // Multiple submissions state
     const [submissions, setSubmissions] = useState<Record<number, any>>({});
     const [formData, setFormData] = useState<Record<number, {
         submissionType: 'github' | 'file';
@@ -47,140 +57,119 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         success?: string | null;
         error?: string | null;
     }>>({});
-
     const [success, setSuccess] = useState<string | null>(null);
     const [isVideoStarted, setIsVideoStarted] = useState(false);
 
-    const [timeSpent, setTimeSpent] = useState(0);
-    const timeSpentRef = useRef(0);
-    const [isUnlocked, setIsUnlocked] = useState(false);
+    // --- Data Fetching (React Query) ---
+
+    // 1. Fetch Phase Data
+    const { data: phase, isLoading: phaseLoading } = useQuery({
+        queryKey: ['phase', id],
+        queryFn: async () => {
+            const { data: isRevoked } = await supabase.rpc('check_and_revoke_self');
+            if (isRevoked) {
+                window.location.href = '/revoked';
+                return null;
+            }
+
+            const { data, error } = await supabase
+                .from('phases')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+
+            const status = getPhaseStatus(data.start_date, data.end_date, data.is_paused);
+            if (status === 'upcoming' || status === 'paused') {
+                router.push('/student');
+                return null;
+            }
+            return data;
+        },
+        enabled: !!id && !!user,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // 2. Fetch Submissions
+    const { data: submissionsData } = useQuery({
+        queryKey: ['submissions', id, user?.id],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('submissions')
+                .select('*')
+                .eq('phase_id', id)
+                .eq('student_id', user?.id);
+            return data || [];
+        },
+        enabled: !!id && !!user,
+    });
+
+    // 3. Fetch Activity Stats
+    const { data: activityData } = useQuery({
+        queryKey: ['activity', id, user?.id],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('student_phase_activity')
+                .select('total_time_spent_seconds, video_completed')
+                .eq('phase_id', id)
+                .eq('student_id', user?.id)
+                .single();
+            return data;
+        },
+        enabled: !!id && !!user,
+    });
+
+    // --- Sync Query Data to State ---
+    useEffect(() => {
+        if (activityData) {
+            setTimeSpent(activityData.total_time_spent_seconds || 0);
+            timeSpentRef.current = activityData.total_time_spent_seconds || 0;
+            setVideoCompleted(activityData.video_completed || false);
+        }
+    }, [activityData]);
 
     useEffect(() => {
-        const fetchPhaseData = async () => {
-            if (!phase) setLoading(true); // Only show spinner on initial load
-            try {
-                // Check if student should be revoked (self-check)
-                const { data: isRevoked, error: revokeError } = await supabase.rpc('check_and_revoke_self');
-                if (revokeError) {
-                    console.error('Error in self-revocation check:', {
-                        message: revokeError.message,
-                        details: revokeError.details,
-                        hint: revokeError.hint,
-                        code: revokeError.code
-                    });
-                } else if (isRevoked) {
-                    window.location.href = '/revoked';
-                    return;
-                }
+        if (phase && submissionsData) {
+            const submissionsMap: Record<number, any> = {};
+            const initialFormData: any = {};
 
-                const { data: phaseData, error: phaseError } = await supabase
-                    .from('phases')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
+            const totalAssignments = phase.total_assignments || 1;
 
-                if (phaseError) throw phaseError;
+            submissionsData.forEach((sub: any) => {
+                const idx = sub.assignment_index || 1;
+                submissionsMap[idx] = sub;
+                initialFormData[idx] = {
+                    submissionType: sub.submission_type,
+                    githubUrl: sub.github_url || '',
+                    notes: sub.notes || '',
+                    selectedFile: null,
+                    existingFileUrl: sub.file_url || null
+                };
+            });
 
-                // Security check: Don't allow access to upcoming or paused phases
-                const status = getPhaseStatus(phaseData.start_date, phaseData.end_date, phaseData.is_paused);
-                if (status === 'upcoming' || status === 'paused') {
-                    router.push('/student');
-                    return;
-                }
-
-                setPhase(phaseData);
-
-                // Fetch all submissions for this phase
-                const { data: subData } = await supabase
-                    .from('submissions')
-                    .select('*')
-                    .eq('phase_id', id)
-                    .eq('student_id', user?.id);
-
-                const submissionsMap: Record<number, any> = {};
-                const initialFormData: any = {};
-
-                // Initialize form data for all required assignments
-                const totalAssignments = phaseData.total_assignments || 1;
-                for (let i = 1; i <= totalAssignments; i++) {
+            for (let i = 1; i <= totalAssignments; i++) {
+                if (!initialFormData[i]) {
                     initialFormData[i] = {
-                        submissionType: phaseData.allowed_submission_type === 'file' ? 'file' : 'github',
+                        submissionType: phase.allowed_submission_type === 'file' ? 'file' : 'github',
                         githubUrl: '',
                         notes: '',
                         selectedFile: null,
                         existingFileUrl: null
                     };
                 }
-
-                if (subData) {
-                    subData.forEach(sub => {
-                        const idx = sub.assignment_index || 1;
-                        submissionsMap[idx] = sub;
-                        initialFormData[idx] = {
-                            submissionType: sub.submission_type,
-                            githubUrl: sub.github_url || '',
-                            notes: sub.notes || '',
-                            selectedFile: null,
-                            existingFileUrl: sub.file_url || null
-                        };
-                    });
-                }
-
-                setSubmissions(submissionsMap);
-                setFormData(initialFormData);
-
-                // Fetch activity stats
-                const { data: activityData } = await supabase
-                    .from('student_phase_activity')
-                    .select('total_time_spent_seconds, video_completed')
-                    .eq('phase_id', id)
-                    .eq('student_id', user?.id)
-                    .single();
-
-                const spent = activityData?.total_time_spent_seconds || 0;
-                setTimeSpent(spent);
-                setVideoCompleted(activityData?.video_completed || false);
-
-                // Fix: Stricter unlock check (Respects admin time, fallbacks to video if no time set)
-                const req = phaseData.min_seconds_required || 0;
-                let shouldBeUnlocked = false;
-
-                console.log('Phase Unlock Debug:', {
-                    bypass: phaseData.bypass_time_requirement,
-                    timeSpent: spent,
-                    req: req,
-                    video: activityData?.video_completed
-                });
-
-                if (phaseData.bypass_time_requirement) {
-                    shouldBeUnlocked = true;
-                } else if (req > 0) {
-                    shouldBeUnlocked = spent >= req;
-                } else {
-                    // If no time requirement set by admin, fallback to requiring video completion
-                    shouldBeUnlocked = activityData?.video_completed || false;
-                }
-
-                setIsUnlocked(shouldBeUnlocked);
-                if (shouldBeUnlocked) {
-                    console.log('🔓 [Phase] Unlocked (spent:', spent, 'req:', req, 'video:', videoCompleted, ')');
-                }
-            } catch (err: any) {
-                console.error('Error fetching phase:', err);
-            } finally {
-                setLoading(false);
             }
-        };
 
-        if (id && user?.id) {
-            fetchPhaseData();
+            setSubmissions(submissionsMap);
+            setFormData(initialFormData);
         }
-    }, [id, user, router, videoCompleted, phase]);
+    }, [phase, submissionsData]);
 
-    // 1. Live Ticking Timer (Every second)
+    // --- Core Logic Hooks ---
+
+    // Timer logic
     useEffect(() => {
         if (!phase || !user) return;
-
         const timer = setInterval(() => {
             setTimeSpent(prev => {
                 const next = prev + 1;
@@ -188,53 +177,36 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 return next;
             });
         }, 1000);
-
         return () => clearInterval(timer);
     }, [phase, user]);
 
-    // Update internal ref whenever state changes (e.g. from fetch)
-    useEffect(() => {
-        timeSpentRef.current = timeSpent;
-    }, [timeSpent]);
-
-    // 3. Dynamic Unlock Check (Runs every second as timer ticks)
+    // Unlock logic
     useEffect(() => {
         if (!phase) return;
-
         const req = phase.min_seconds_required || 0;
         let shouldUnlock = false;
 
         if (phase.bypass_time_requirement) {
             shouldUnlock = true;
         } else if (req > 0) {
-            // Admin set a time limit -> Unlock if time spent >= limit
             shouldUnlock = timeSpent >= req;
         } else {
-            // No time limit -> Unlock if video completed
             shouldUnlock = videoCompleted;
         }
 
-        setIsUnlocked(prev => {
-            if (prev !== shouldUnlock) {
-                console.log(shouldUnlock ? '🔓 Phase Unlocked!' : '🔒 Phase Locked');
-                return shouldUnlock;
-            }
-            return prev;
-        });
+        setIsUnlocked(shouldUnlock);
     }, [timeSpent, phase, videoCompleted]);
 
-    // 2. Heartbeat logic (Sync with DB every 30 seconds)
+    // Heartbeat sync
     useEffect(() => {
         if (!phase || !user) return;
 
         const heartbeatInterval = setInterval(async () => {
             try {
                 const currentSeconds = timeSpentRef.current;
-
-                // Update activity record in DB
                 const { data: existing } = await supabase
                     .from('student_phase_activity')
-                    .select('id, total_time_spent_seconds')
+                    .select('id')
                     .eq('phase_id', id)
                     .eq('student_id', user.id)
                     .single();
@@ -257,70 +229,33 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                             last_activity_at: new Date().toISOString()
                         });
                 }
-
-                // Periodic check for auto-unlock
-                const reqSeconds = phase.min_seconds_required || 0;
-                let meetsCondition = false;
-
-                if (reqSeconds > 0) {
-                    meetsCondition = currentSeconds >= reqSeconds;
-                } else {
-                    // Fallback to video completion if no time requirement
-                    meetsCondition = videoCompleted;
-                }
-
-                if (meetsCondition) {
-                    setIsUnlocked(prev => {
-                        if (!prev) {
-                            setSuccess('Congratulations! You have spent enough time to unlock the assignment submission.');
-                            return true;
-                        }
-                        return true;
-                    });
-                }
-
             } catch (err) {
                 console.error('Heartbeat error:', err);
             }
-        }, 30000); // 30 second sync
+        }, 30000);
 
         return () => clearInterval(heartbeatInterval);
-    }, [phase, user, id, isVideoStarted, videoCompleted]); // Added isVideoStarted and videoCompleted to catch state changes!
+    }, [phase, user, id]);
 
-    // Video end handler removed (unused)
+    // --- Handlers ---
 
     const handleDownloadAssignment = async (e: React.MouseEvent, url: string) => {
         e.preventDefault();
         try {
             const response = await fetch(url);
-
-            if (!response.ok) {
-                throw new Error(`Download failed with status: ${response.status}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('text/html')) {
-                throw new Error('Download failed: The server returned an HTML page instead of a file.');
-            }
-
+            if (!response.ok) throw new Error(`Download failed with status: ${response.status}`);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = blobUrl;
-
-            // Extract filename from URL or use a default
             const filename = url.split('/').pop() || 'assignment.pdf';
             link.download = filename;
-
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(blobUrl);
-
-            console.log('✅ Direct download triggered for:', filename);
         } catch (err) {
             console.error('Download error:', err);
-            // Fallback to opening in new tab
             window.open(url, '_blank');
         }
     };
@@ -340,7 +275,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         if (!isValidFileSize(file, 2)) {
             setFormData(prev => ({
                 ...prev,
-                [index]: { ...prev[index], error: `File size must be less than 2MB. Current size: ${formatFileSize(file.size)}` }
+                [index]: { ...prev[index], error: `File size must be less than 2MB.` }
             }));
             return;
         }
@@ -362,11 +297,8 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         const data = formData[index];
         if (!data?.selectedFile || !user) return null;
 
-        setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: null } }));
-
         try {
             const fileExt = data.selectedFile.name.split('.').pop();
-            // Use index in filename to avoid clashes
             const fileName = `${user.id}/${id}/submission_${index}.${fileExt}`;
             const filePath = `${fileName}`;
 
@@ -396,36 +328,24 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
     const handleSubmit = async (e: React.FormEvent, index: number) => {
         e.preventDefault();
-        if (!user) return;
-
-        if (!isUnlocked) {
-            setFormData(prev => ({
-                ...prev,
-                [index]: { ...prev[index], error: 'Please complete the video lecture before submitting your assignment.' }
-            }));
-            return;
-        }
+        if (!user || !isUnlocked) return;
 
         const data = formData[index];
         setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: null, success: null } }));
 
-        // Validation
         let finalFileUrl = data.existingFileUrl;
 
         if (data.submissionType === 'github') {
             if (!data.githubUrl || !isValidGitHubUrl(data.githubUrl)) {
                 setFormData(prev => ({
                     ...prev,
-                    [index]: { ...prev[index], error: 'Please enter a valid GitHub repository URL (e.g., https://github.com/username/repo)' }
+                    [index]: { ...prev[index], error: 'Please enter a valid GitHub repository URL' }
                 }));
                 return;
             }
         } else if (data.submissionType === 'file') {
             if (!data.selectedFile && !data.existingFileUrl) {
-                setFormData(prev => ({
-                    ...prev,
-                    [index]: { ...prev[index], error: 'Please select a file to upload.' }
-                }));
+                setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: 'Please select a file' } }));
                 return;
             }
         }
@@ -433,7 +353,6 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         setSubmittingIndex(index);
 
         try {
-            // Upload file if needed
             if (data.submissionType === 'file' && data.selectedFile) {
                 const uploadedUrl = await handleFileUpload(index);
                 if (!uploadedUrl) {
@@ -465,35 +384,23 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 ...prev,
                 [index]: {
                     ...prev[index],
-                    success: 'Assignment submitted successfully!',
+                    success: 'Submission successful!',
                     existingFileUrl: finalFileUrl || prev[index].existingFileUrl,
                     selectedFile: null
                 }
             }));
 
-            // Register completion in local submissions state
             setSubmissions(prev => ({
                 ...prev,
-                [index]: {
-                    ...prev[index],
-                    submitted_at: new Date().toISOString() // Mock for UI
-                }
+                [index]: { submitted_at: new Date().toISOString() }
             }));
 
-            // Log activity
-            await supabase.from('activity_logs').insert({
-                student_id: user.id,
-                phase_id: id,
-                activity_type: 'SUBMISSION_CREATED',
-                payload: { type: data.submissionType, index }
-            });
+            // Refresh submissions query
+            queryClient.invalidateQueries({ queryKey: ['submissions', id] });
 
         } catch (err: any) {
             console.error('Submission error:', err);
-            setFormData(prev => ({
-                ...prev,
-                [index]: { ...prev[index], error: err.message }
-            }));
+            setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: err.message } }));
         } finally {
             setSubmittingIndex(null);
         }
@@ -506,63 +413,29 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         return (match && match[2].length === 11) ? match[2] : null;
     };
 
-    if (loading) {
+    // --- Render Helpers ---
+
+    if (phaseLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
+            <div className="flex flex-col justify-center items-center min-h-[80vh]">
+                <div className="relative">
+                    <div className="h-16 w-16 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin" />
+                </div>
+                <p className="mt-6 text-xs font-black text-slate-400 uppercase tracking-widest animate-pulse">Initializing Specialized Content...</p>
             </div>
         );
     }
 
     if (!phase) {
         return (
-            <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-gray-900">Phase Not Found</h1>
-                <p className="mt-2 text-gray-600">The phase you are looking for does not exist or has been removed.</p>
-                <Link href="/student" className="mt-6 inline-flex items-center text-blue-600 hover:underline">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
-                </Link>
-            </div>
-        );
-    }
-
-    if (phase.is_paused) {
-        return (
-            <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-                <Clock className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-gray-900">Phase Paused</h1>
-                <p className="mt-2 text-gray-600">This phase has been temporarily paused by the instructor. Please check back later.</p>
-                <Link href="/student" className="mt-6 inline-flex items-center text-blue-600 hover:underline">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
-                </Link>
-            </div>
-        );
-    }
-
-    const status = getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused);
-
-    if (status === 'upcoming') {
-        return (
-            <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-                <Clock className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-gray-900">Phase Not Started</h1>
-                <p className="mt-2 text-gray-600">This phase is scheduled to start on {new Date(phase.start_date).toLocaleDateString()}. Please check back then!</p>
-                <Link href="/student" className="mt-6 inline-flex items-center text-blue-600 hover:underline">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
-                </Link>
-            </div>
-        );
-    }
-
-    if (status === 'ended') {
-        return (
-            <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-gray-900">Phase Ended</h1>
-                <p className="mt-2 text-gray-600">The deadline for this phase has passed. You can no longer access this assignment.</p>
-                <Link href="/student" className="mt-6 inline-flex items-center text-blue-600 hover:underline">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+            <div className="max-w-4xl mx-auto px-6 py-24 text-center">
+                <div className="bg-red-50 dark:bg-red-950/20 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <AlertCircle className="h-8 w-8 text-red-600" />
+                </div>
+                <h1 className="text-3xl font-black tracking-tight mb-4">Module Unavailable</h1>
+                <p className="text-slate-500 mb-8">The requested learning phase could not be found or access has been restricted.</p>
+                <Link href="/student" className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-600/20">
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Return to Command Center
                 </Link>
             </div>
         );
@@ -571,138 +444,116 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
     const videoId = extractVideoId(phase.youtube_url);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-            <div className="flex items-center justify-between">
-                <Link href="/student" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900">
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+        <div className="max-w-7xl mx-auto px-6 py-8 space-y-10 font-sans text-foreground">
+            {/* Action Bar */}
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-card-border">
+                <Link href="/student" className="inline-flex items-center gap-2 group text-muted hover:text-primary transition-colors">
+                    <div className="p-2 bg-card rounded-xl border border-card-border shadow-sm group-hover:border-primary/20 transition-all">
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                    </div>
+                    <span className="text-sm font-bold tracking-tight">Return to Dashboard</span>
                 </Link>
-                <div className="flex items-center space-x-4">
-                    {isUnlocked && (
-                        <div className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Assignment Unlocked
-                        </div>
-                    )}
-                    <div className="flex items-center text-sm text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-100 shadow-sm font-mono">
-                        <Clock className="h-4 w-4 mr-2 text-orange-500" />
-                        <span>
-                            Time Spent: {Math.floor(timeSpent / 3600)}h {Math.floor((timeSpent % 3600) / 60)}m {timeSpent % 60}s
+                <div className="flex items-center gap-4">
+                    <AnimatePresence>
+                        {isUnlocked && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20"
+                            >
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Submissions Unlocked
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                    <div className="flex items-center gap-3 bg-card px-4 py-2 rounded-xl border border-card-border shadow-sm font-bold text-xs text-foreground">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <span className="tabular-nums">
+                            {Math.floor(timeSpent / 3600)}h {Math.floor((timeSpent % 3600) / 60)}m {timeSpent % 60}s
                         </span>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-black">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="p-6 border-b border-gray-50">
-                            <div className="flex items-baseline space-x-3 mb-2">
-                                <span className="bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-md text-sm font-bold">Phase {phase.phase_number}</span>
-                                <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                                    {phase.title}
-                                    {!phase.is_mandatory && (
-                                        <span className="ml-3 px-2 py-1 text-xs font-bold bg-gray-100 text-gray-500 rounded-lg uppercase tracking-wider">
-                                            Optional
-                                        </span>
-                                    )}
-                                    <span className="ml-3 px-2.5 py-1 text-xs font-bold bg-orange-100 text-orange-700 rounded-lg uppercase tracking-wider border border-orange-200">
-                                        Deadline: {new Date(phase.end_date).toLocaleDateString()}
-                                    </span>
-                                </h1>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Content Stream */}
+                <div className="lg:col-span-8 space-y-10">
+                    <div className="bg-card rounded-[2.5rem] shadow-sm border border-card-border overflow-hidden">
+                        <div className="p-8 md:p-10">
+                            <div className="flex items-center gap-3 mb-6">
+                                <span className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest border border-primary/20">Phase {phase.phase_number}</span>
+                                <div className="h-1 w-1 rounded-full bg-card-border" />
+                                <span className="text-xs font-bold text-muted">Deadline: {new Date(phase.end_date).toLocaleDateString()}</span>
                             </div>
-                            <p className="text-gray-600 leading-relaxed">{phase.description}</p>
+                            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-4 text-foreground">{phase.title}</h1>
+                            <p className="text-muted leading-relaxed text-lg">{phase.description}</p>
                         </div>
 
                         {videoId ? (
-                            <div className="aspect-video bg-black relative">
-                                {!isVideoStarted ? (
-                                    <div
-                                        className="absolute inset-0 z-10 cursor-pointer group"
-                                        onClick={() => setIsVideoStarted(true)}
-                                    >
-                                        <Image
-                                            src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-                                            alt="Video Thumbnail"
-                                            fill
-                                            className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                            unoptimized
-                                        />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="w-20 h-14 bg-red-600 rounded-xl flex items-center justify-center group-hover:bg-red-700 transition-colors shadow-xl">
-                                                <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[18px] border-l-white ml-1"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <iframe
-                                        width="100%"
-                                        height="100%"
-                                        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        className="w-full h-full"
-                                    ></iframe>
-                                )}
+                            <div className="p-2 md:p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+                                <PremiumPlayer videoId={videoId} />
                             </div>
                         ) : (
-                            <div className="aspect-video bg-gray-100 flex items-center justify-center text-gray-400">
-                                <div className="text-center">
-                                    <Video className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                                    <p>No video available for this phase</p>
-                                </div>
+                            <div className="aspect-video bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center text-slate-400 border-t border-slate-200 dark:border-slate-800">
+                                <Video className="h-12 w-12 mb-4 opacity-20" />
+                                <p className="font-bold text-sm uppercase tracking-widest">No Stream Available</p>
                             </div>
                         )}
                     </div>
 
                     {/* Resources */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <FileText className="mr-2 h-5 w-5 text-blue-600" />
-                            Learning Resources
-                        </h2>
-                        {phase.assignment_file_url ? (
-                            <button
-                                onClick={(e) => handleDownloadAssignment(e, phase.assignment_file_url)}
-                                className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
-                            >
-                                <FileText className="mr-2 h-4 w-4" /> Download Assignment Document
-                            </button>
-                        ) : phase.assignment_resource_url ? (
-                            <button
-                                onClick={(e) => handleDownloadAssignment(e, phase.assignment_resource_url)}
-                                className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
-                            >
-                                <FileText className="mr-2 h-4 w-4" /> Download Assignment PDF
-                            </button>
+                    <div className="bg-card p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-card-border">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
+                                <FileText className="w-5 h-5 text-primary" />
+                                Engineering Resources
+                            </h2>
+                        </div>
+                        {phase.assignment_file_url || phase.assignment_resource_url ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button
+                                    onClick={(e) => handleDownloadAssignment(e, phase.assignment_file_url || phase.assignment_resource_url)}
+                                    className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all group"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                                            <FileText className="h-5 w-5 text-indigo-600" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-bold">Assignment Specification</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PDF Document</p>
+                                        </div>
+                                    </div>
+                                    <ChevronDown className="h-4 w-4 text-slate-400 group-hover:translate-y-0.5 transition-transform" />
+                                </button>
+                            </div>
                         ) : (
-                            <p className="text-gray-500 italic">No additional resources provided.</p>
+                            <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No additional resources found</p>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {/* Sidebar: Submission */}
-                <div className="space-y-8">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24 max-h-[85vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                            <Send className="mr-2 h-5 w-5 text-blue-600" />
-                            Submit Assignments
-                        </h2>
-
-                        {!isUnlocked && phase?.min_seconds_required > 0 && (
-                            <div className="mb-6 p-4 bg-orange-50 border border-orange-100 rounded-xl flex items-start">
-                                <AlertCircle className="h-5 w-5 text-orange-600 mr-3 shrink-0 mt-0.5" />
-                                <p className="text-sm text-orange-800">
-                                    <strong>Video Required:</strong> Please complete the video lecture before submitting your assignments.
-                                </p>
+                {/* Submission Sidebar */}
+                <div className="lg:col-span-4 space-y-8">
+                    <aside className="bg-card p-8 rounded-[2.5rem] shadow-sm border border-card-border sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20">
+                                <Send className="h-4 w-4 text-white" />
                             </div>
-                        )}
+                            <h2 className="text-xl font-bold text-foreground">Submission Portal</h2>
+                        </div>
 
-                        {success && (
-                            <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-start">
-                                <CheckCircle2 className="h-5 w-5 text-green-600 mr-3 shrink-0 mt-0.5" />
-                                <p className="text-sm text-green-800">{success}</p>
+                        {!isUnlocked && (
+                            <div className="mb-10 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-sm mb-4">
+                                    <Lock className="h-6 w-6 text-slate-400" />
+                                </div>
+                                <h3 className="text-sm font-bold mb-2">Submissions Locked</h3>
+                                <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider leading-relaxed">
+                                    Please complete the required viewing time to enable assignment submission.
+                                </p>
                             </div>
                         )}
 
@@ -718,177 +569,121 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 const isSubmitted = !!submissions[idx];
 
                                 return (
-                                    <div key={idx} className={`space-y-6 pb-8 ${idx < (phase.total_assignments || 1) ? 'border-b border-gray-100' : ''}`}>
+                                    <div key={idx} className={cn(
+                                        "space-y-6 pb-10",
+                                        idx < (phase.total_assignments || 1) ? 'border-b border-slate-100 dark:border-slate-800' : ''
+                                    )}>
                                         <div className="flex items-center justify-between">
-                                            <h3 className="text-md font-bold text-gray-800 flex items-center">
-                                                Assignment #{idx}
+                                            <h3 className="text-sm font-black uppercase tracking-tighter flex items-center gap-2">
+                                                Assignment Unit {idx.toString().padStart(2, '0')}
                                                 {isSubmitted && (
-                                                    <span className="ml-2 flex items-center text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
-                                                        <CheckCircle2 className="h-2 w-2 mr-1" />
-                                                        Completed
-                                                    </span>
+                                                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                                 )}
                                             </h3>
+                                            {isSubmitted && (
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10">Verified</span>
+                                            )}
                                         </div>
 
                                         <form onSubmit={(e) => handleSubmit(e, idx)} className="space-y-6">
                                             {phase.allowed_submission_type === 'both' && (
-                                                <div className="space-y-3">
-                                                    <label className="text-sm font-semibold text-gray-700 block">Submission Type</label>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <button
-                                                            type="button"
-                                                            disabled={!isUnlocked}
-                                                            onClick={() => setFormData(prev => ({
-                                                                ...prev,
-                                                                [idx]: { ...prev[idx], submissionType: 'github' }
-                                                            }))}
-                                                            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all flex items-center justify-center ${data.submissionType === 'github'
-                                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                                                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
-                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                                        >
-                                                            <Github className="mr-2 h-4 w-4" /> GitHub
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            disabled={!isUnlocked}
-                                                            onClick={() => setFormData(prev => ({
-                                                                ...prev,
-                                                                [idx]: { ...prev[idx], submissionType: 'file' }
-                                                            }))}
-                                                            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all flex items-center justify-center ${data.submissionType === 'file'
-                                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                                                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
-                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                                        >
-                                                            <FileText className="mr-2 h-4 w-4" /> File
-                                                        </button>
-                                                    </div>
+                                                <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'github' } }))}
+                                                        className={cn(
+                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                            data.submissionType === 'github' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                        )}
+                                                    >
+                                                        Source Link
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'file' } }))}
+                                                        className={cn(
+                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                            data.submissionType === 'file' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                        )}
+                                                    >
+                                                        Local File
+                                                    </button>
                                                 </div>
                                             )}
 
-                                            {data.submissionType === 'github' ? (
-                                                <div className="space-y-2">
-                                                    <label htmlFor={`githubUrl-${idx}`} className="text-sm font-semibold text-gray-700 block text-black">GitHub Repository URL</label>
-                                                    <div className="relative">
-                                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-black">
-                                                            <Github className="h-4 w-4 text-gray-400" />
+                                            <div className="space-y-4">
+                                                {data.submissionType === 'github' ? (
+                                                    <div className="relative group">
+                                                        <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                                                            <Github className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
                                                         </div>
                                                         <input
-                                                            id={`githubUrl-${idx}`}
                                                             type="url"
-                                                            disabled={!isUnlocked}
-                                                            required={data.submissionType === 'github'}
-                                                            placeholder="https://github.com/user/repo"
+                                                            placeholder="GitHub Repository URL"
                                                             value={data.githubUrl}
-                                                            onChange={(e) => setFormData(prev => ({
-                                                                ...prev,
-                                                                [idx]: { ...prev[idx], githubUrl: e.target.value }
-                                                            }))}
-                                                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400"
+                                                            onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], githubUrl: e.target.value } }))}
+                                                            className="w-full !pl-10 text-sm font-medium"
+                                                            disabled={!isUnlocked}
                                                         />
                                                     </div>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-semibold text-gray-700 block">Upload File</label>
-                                                    {data.selectedFile || data.existingFileUrl ? (
-                                                        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center overflow-hidden">
-                                                                    <FileText className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
-                                                                    <div className="truncate">
-                                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                                            {data.selectedFile ? data.selectedFile.name : 'Submitted File'}
-                                                                        </p>
-                                                                        {data.selectedFile && (
-                                                                            <p className="text-xs text-gray-500">{formatFileSize(data.selectedFile.size)}</p>
-                                                                        )}
-                                                                        {!data.selectedFile && data.existingFileUrl && (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={(e) => handleDownloadAssignment(e, data.existingFileUrl!)}
-                                                                                className="text-xs text-blue-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
-                                                                            >
-                                                                                View Submitted
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
+                                                ) : (
+                                                    <div className={cn(
+                                                        "group relative border-2 border-dashed rounded-2xl p-6 transition-all text-center",
+                                                        !isUnlocked ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
+                                                        data.selectedFile || data.existingFileUrl ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-slate-200 dark:border-slate-800'
+                                                    )}>
+                                                        {data.selectedFile ? (
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                                    <FileText className="h-5 w-5 text-emerald-500 shrink-0" />
+                                                                    <span className="text-sm font-bold truncate">{data.selectedFile.name}</span>
                                                                 </div>
-                                                                {isUnlocked && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveFile(idx)}
-                                                                        className="ml-2 p-1 text-gray-400 hover:text-red-500"
-                                                                    >
-                                                                        <X className="h-4 w-4" />
-                                                                    </button>
-                                                                )}
+                                                                <button onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
                                                             </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50">
-                                                            <input
-                                                                type="file"
-                                                                id={`file-upload-${idx}`}
-                                                                className="hidden"
-                                                                accept=".pdf,image/png,image/jpeg,image/jpg"
-                                                                onChange={(e) => handleFileSelect(e, idx)}
-                                                                disabled={!isUnlocked}
-                                                            />
-                                                            <label htmlFor={`file-upload-${idx}`} className={`cursor-pointer flex flex-col items-center ${!isUnlocked ? 'pointer-events-none opacity-50' : ''}`}>
-                                                                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                                                                <span className="text-sm font-medium text-gray-700">Click to upload</span>
-                                                                <span className="text-xs text-gray-500 mt-1">PDF, PNG, JPG (max 2MB)</span>
+                                                        ) : (
+                                                            <label className={cn("cursor-pointer block", !isUnlocked && 'pointer-events-none')}>
+                                                                <input type="file" className="hidden" onChange={(e) => handleFileSelect(e, idx)} />
+                                                                <Upload className="mx-auto h-8 w-8 text-slate-300 mb-3 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Project File</p>
                                                             </label>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                                        )}
+                                                    </div>
+                                                )}
 
-                                            <div className="space-y-2">
-                                                <label htmlFor={`notes-${idx}`} className="text-sm font-semibold text-gray-700 block text-black">Notes (Optional)</label>
                                                 <textarea
-                                                    id={`notes-${idx}`}
-                                                    rows={3}
-                                                    disabled={!isUnlocked}
-                                                    placeholder="Any additional information..."
+                                                    placeholder="Implementation notes (optional)..."
                                                     value={data.notes}
-                                                    onChange={(e) => setFormData(prev => ({
-                                                        ...prev,
-                                                        [idx]: { ...prev[idx], notes: e.target.value }
-                                                    }))}
-                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none text-black disabled:bg-gray-50 disabled:text-gray-400"
+                                                    onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], notes: e.target.value } }))}
+                                                    className="w-full h-24 text-sm font-medium resize-none pb-safe"
+                                                    disabled={!isUnlocked}
                                                 />
                                             </div>
 
-                                            {data.error && (
-                                                <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-start animate-pulse">
-                                                    <AlertCircle className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
-                                                    {data.error}
-                                                </div>
-                                            )}
-
-                                            {data.success && (
-                                                <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg flex items-start">
-                                                    <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
-                                                    {data.success}
-                                                </div>
-                                            )}
+                                            <AnimatePresence>
+                                                {data.error && (
+                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/20 text-red-600 rounded-xl border border-red-100 dark:border-red-500/10">
+                                                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                        <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.error}</p>
+                                                    </motion.div>
+                                                )}
+                                                {data.success && (
+                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-100 dark:border-emerald-500/10">
+                                                        <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                                                        <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.success}</p>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
 
                                             <button
                                                 type="submit"
                                                 disabled={submittingIndex === idx || !isUnlocked}
-                                                className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+                                                className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
                                             >
+                                                <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                                                 {submittingIndex === idx ? (
-                                                    <>
-                                                        <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                                                        Submitting...
-                                                    </>
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
                                                 ) : (
-                                                    isSubmitted ? 'Update Assignment' : 'Submit Assignment'
+                                                    <span>{isSubmitted ? 'Update Engineering Submission' : 'Commit Final Assignment'}</span>
                                                 )}
                                             </button>
                                         </form>
@@ -896,11 +691,9 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 );
                             })}
                         </div>
-                    </div>
+                    </aside>
                 </div>
             </div>
         </div>
     );
 }
-
-

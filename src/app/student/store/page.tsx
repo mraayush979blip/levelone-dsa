@@ -183,23 +183,23 @@ export default function StorePage() {
     const isNeon = user?.equipped_theme === 'theme-neon';
 
     return (
-        <div className={cn("max-w-6xl mx-auto px-6 py-12 space-y-16 pb-24 relative z-10", isNeon ? "text-white" : "text-slate-900")}>
+        <div className={cn("max-w-6xl mx-auto px-6 py-12 space-y-16 pb-24 relative z-10 text-foreground")}>
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-slate-100 dark:border-white/5">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-card-border">
                 <SlideUp>
                     <div className="space-y-4">
-                        <Link href="/student" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                        <Link href="/student" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-muted hover:text-primary transition-colors">
                             <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to Dashboard
                         </Link>
                         <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-indigo-500">
+                            <div className="flex items-center gap-2 text-primary">
                                 <Sparkles className="w-4 h-4" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Exclusives</span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
                                 Points <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Store</span>
                             </h1>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">Unlock premium cosmetics and character upgrades with your hard-earned points.</p>
+                            <p className="text-muted font-medium max-w-lg">Unlock premium cosmetics and character upgrades with your hard-earned points.</p>
                         </div>
                     </div>
                 </SlideUp>

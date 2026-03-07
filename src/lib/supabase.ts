@@ -31,23 +31,46 @@ if (typeof window !== 'undefined') {
     const maskedUrl = supabaseUrl ? (supabaseUrl.length > 15 ? `${supabaseUrl.substring(0, 15)}...` : supabaseUrl) : 'MISSING';
     const maskedKey = supabaseAnonKey ? `${supabaseAnonKey.substring(0, 8)}...` : 'MISSING';
     console.log(`📡 [Supabase] Connecting to: ${maskedUrl}`);
-    console.log(`🔑 [Supabase] Key starting with: ${maskedKey}`);
+
+    // ISP Block Diagnostic
+    fetch(supabaseUrl + '/rest/v1/', { method: 'HEAD', mode: 'no-cors' }).catch(err => {
+        console.warn('⚠️ [Supabase] Connectivity Warning: If you are in India, your ISP might be blocking Supabase. Try changing DNS to 1.1.1.1 or 8.8.8.8.');
+    });
 }
 
 
+// Dynamic Proxy Logic: Auto-detect if we are running on EdgeOne (India Bypass)
+let finalBaseUrl = isValidUrl ? supabaseUrl : 'https://placeholder.supabase.co';
+
+if (typeof window !== 'undefined') {
+    const currentOrigin = window.location.origin;
+    const isEdgeOne = currentOrigin.includes('edgeone.app');
+    const manualProxy = process.env.NEXT_PUBLIC_SUPABASE_PROXY_URL?.trim();
+
+    // If we are on EdgeOne, we can proxy through the current domain's API routes or worker
+    if (isEdgeOne) {
+        // This is the "Magic" part: Use the current Batch URL as the proxy automatically
+        finalBaseUrl = currentOrigin;
+        console.log('🚀 [Supabase] EdgeOne detected: Using dynamic landing proxy:', finalBaseUrl);
+    } else if (manualProxy) {
+        finalBaseUrl = manualProxy;
+    }
+}
+
 export const supabase = createClient(
-    (isValidUrl ? supabaseUrl : 'https://placeholder.supabase.co') as string,
+    finalBaseUrl as string,
     ((isValidUrl && supabaseAnonKey) ? supabaseAnonKey : 'placeholder-key') as string,
     {
         auth: {
             persistSession: true,
             autoRefreshToken: true,
-            detectSessionInUrl: true
+            detectSessionInUrl: true,
+            // Optimization for Proxy: ensure flow is preserved
+            flowType: 'pkce'
         },
         global: {
-            headers: { 'x-client-info': 'phase-learning-portal' }
+            headers: { 'x-client-info': 'phase-learning-portal-proxied' }
         },
-        // Disable Realtime to prevent potential connection hangs
         realtime: {
             timeout: 20000
         }

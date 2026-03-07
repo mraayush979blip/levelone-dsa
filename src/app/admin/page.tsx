@@ -12,46 +12,20 @@ import {
     Plus,
     Upload,
     BarChart3,
-    TrendingUp
+    TrendingUp,
+    Loader2,
+    RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 
 export default function AdminDashboard() {
-    const [stats, setStats] = useState({
-        totalStudents: 0,
-        activeStudents: 0,
-        revokedStudents: 0,
-        livePhases: 0,
-    });
-    const [retentionData, setRetentionData] = useState<RetentionStats | null>(null);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        fetchDashboardStats();
-    }, []);
-
-    const handleSyncRevocation = async () => {
-        if (!confirm('Are you sure you want to sync revocations? This will revoke access for all students who have missed deadlines for ended phases.')) return;
-
-        setLoading(true);
-        try {
-            const { data, error } = await supabase.rpc('check_and_revoke_students');
-            if (error) throw error;
-
-            const { revoked_count, restored_count } = data as { revoked_count: number; restored_count: number };
-            alert(`Sync complete!\n- ${revoked_count} students were revoked.\n- ${restored_count} students were restored.`);
-            fetchDashboardStats();
-        } catch (error) {
-            console.error('Error syncing revocations:', error);
-            alert('Error syncing revocations: The SQL function check_and_revoke_students() might not be installed in Supabase Yet. Please run the provided SQL script first.');
-        } finally {
-            setLoading(true); // Refetching stats will set it to false
-            fetchDashboardStats();
-        }
-    };
-
-    const fetchDashboardStats = async () => {
-        try {
+    const { data: dashboardData, isLoading, refetch } = useQuery({
+        queryKey: ['admin-stats'],
+        queryFn: async () => {
             // Fetch total students
             const { count: totalStudents } = await supabase
                 .from('users')
@@ -72,52 +46,78 @@ export default function AdminDashboard() {
                 .eq('role', 'student')
                 .eq('status', 'revoked');
 
-            // Fetch live phases
-            const now = new Date().toISOString();
-            const { count: livePhases } = await supabase
+            // Fetch live phases with inclusive end-of-day logic
+            const now = new Date();
+            const { data: phases } = await supabase
                 .from('phases')
-                .select('*', { count: 'exact', head: true })
+                .select('id, start_date, end_date, is_active, is_paused')
                 .eq('is_active', true)
-                .eq('is_paused', false)
-                .lte('start_date', now)
-                .gte('end_date', now);
+                .eq('is_paused', false);
 
-            setStats({
-                totalStudents: totalStudents || 0,
-                activeStudents: activeStudents || 0,
-                revokedStudents: revokedStudents || 0,
-                livePhases: livePhases || 0,
-            });
+            const livePhasesCount = phases?.filter(p => {
+                const start = new Date(p.start_date);
+                const end = new Date(p.end_date);
+                end.setHours(23, 59, 59, 999);
+                return now >= start && now <= end;
+            }).length || 0;
 
-            // Calculate retention
-            const retentionPercent = totalStudents
-                ? ((activeStudents || 0) / totalStudents * 100).toFixed(2)
-                : '0';
+            const total = totalStudents || 0;
+            const active = activeStudents || 0;
+            const revoked = revokedStudents || 0;
+            const retentionPercent = total ? ((active / total) * 100).toFixed(1) : '0';
 
-            setRetentionData({
-                total_students: totalStudents || 0,
-                retained_count: activeStudents || 0,
-                revoked_count: revokedStudents || 0,
-                retention_percent: parseFloat(retentionPercent),
-                pie_chart_data: [
-                    { name: 'Active', value: activeStudents || 0, color: '#10b981' },
-                    { name: 'Revoked', value: revokedStudents || 0, color: '#ef4444' },
-                ],
-            });
+            return {
+                stats: {
+                    totalStudents: total,
+                    activeStudents: active,
+                    revokedStudents: revoked,
+                    livePhases: livePhasesCount,
+                },
+                retentionData: {
+                    total_students: total,
+                    retained_count: active,
+                    revoked_count: revoked,
+                    retention_percent: parseFloat(retentionPercent),
+                    pie_chart_data: [
+                        { name: 'Active', value: active, color: '#10b981' },
+                        { name: 'Revoked', value: revoked, color: '#ef4444' },
+                    ],
+                }
+            };
+        }
+    });
+
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSyncRevocation = async () => {
+        if (!confirm('Are you sure you want to sync revocations? This will use the new optimized set-based logic.')) return;
+
+        setIsSyncing(true);
+        try {
+            const { data, error } = await supabase.rpc('check_and_revoke_students');
+            if (error) throw error;
+
+            const { revoked_count, restored_count } = data as { revoked_count: number; restored_count: number };
+            alert(`Sync complete!\n- ${revoked_count} students were revoked.\n- ${restored_count} students were restored.`);
+            refetch();
         } catch (error) {
-            console.error('Error fetching dashboard stats:', error);
+            console.error('Error syncing revocations:', error);
+            alert('Error syncing revocations: Ensure the updated RPC is installed.');
         } finally {
-            setLoading(false);
+            setIsSyncing(false);
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex flex-col items-center justify-center h-96 space-y-4">
+                <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+                <p className="text-gray-400 font-mono text-xs uppercase tracking-widest animate-pulse">Loading Analytics...</p>
             </div>
         );
     }
+
+    const { stats, retentionData } = dashboardData!;
 
     return (
         <div className="space-y-6">
@@ -271,13 +271,20 @@ export default function AdminDashboard() {
 
                         <button
                             onClick={handleSyncRevocation}
-                            className="w-full flex items-center justify-between p-4 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors group mt-4 border border-rose-100"
+                            disabled={isSyncing}
+                            className="w-full flex items-center justify-between p-4 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all group mt-4 border border-rose-100 disabled:opacity-50"
                         >
                             <div className="flex items-center">
-                                <ShieldAlert className="h-5 w-5 text-rose-600 mr-3" />
-                                <span className="text-sm font-bold text-rose-700">Sync Revocations</span>
+                                {isSyncing ? (
+                                    <RefreshCw className="h-5 w-5 text-rose-600 mr-3 animate-spin" />
+                                ) : (
+                                    <ShieldAlert className="h-5 w-5 text-rose-600 mr-3" />
+                                )}
+                                <span className="text-sm font-bold text-rose-700">
+                                    {isSyncing ? 'Syncing...' : 'Sync Revocations'}
+                                </span>
                             </div>
-                            <span className="text-rose-300 group-hover:text-rose-600 transition-colors">↻</span>
+                            {!isSyncing && <span className="text-rose-300 group-hover:text-rose-600 transition-colors">↻</span>}
                         </button>
                     </div>
                 </div>

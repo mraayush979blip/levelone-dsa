@@ -1,128 +1,113 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
-  --theme-primary: #2563eb;
-  /* blue-600 */
-}
-
-/* Force Light Mode strictly for the default experience */
-[data-theme='default'] {
+  /* Theme 1: Arctic Ivory (Cleanest Light - DEFAULT) */
   --background: #fdfdfd;
-  --foreground: #111827;
+  --foreground: #020617;
+  --theme-primary: #0891b2;
+  --theme-primary-rgb: 8, 145, 178;
   --card-bg: #ffffff;
   --card-bg-rgb: 255, 255, 255;
-  --card-border: #eef0f2;
-  --text-muted: #6b7280;
+  --card-border: #e2e8f0;
+  --text-muted: #64748b;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --nav-bg: rgba(253, 253, 253, 0.9);
 }
 
-/* Neon Cyberpunk Theme */
-[data-theme='theme-neon'] {
-  --background: #0d0221;
-  --foreground: #f0f0f0;
-  --theme-primary: #ff00ff;
-  --card-bg: #1a0b2e;
-  --card-bg-rgb: 26, 11, 46;
-  --card-border: #ff00ff44;
-  --text-muted: #a5b4fc;
-}
-
-/* Midnight Pro Theme */
-[data-theme='theme-midnight'] {
+[data-theme='theme-dark'] {
+  /* Theme 2: Midnight Pro (Refined OLED Dark) */
   --background: #000000;
   --foreground: #ffffff;
-  --theme-primary: #fbbf24;
-  --card-bg: #111111;
-  --card-bg-rgb: 17, 17, 17;
-  --card-border: #333333;
-  --text-muted: #9ca3af;
+  --theme-primary: #f59e0b;
+  --theme-primary-rgb: 245, 158, 11;
+  --card-bg: #0a0a0a;
+  --card-bg-rgb: 10, 10, 10;
+  --card-border: #1a1a1a;
+  --text-muted: #a1a1aa;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --nav-bg: rgba(0, 0, 0, 0.9);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--theme-primary);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --shadow-glow: 0 0 20px rgba(var(--theme-primary-rgb), 0.15);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* App-like feel utilities */
+/* Optimized Performance Utilities */
 .glass {
-  background: rgba(var(--card-bg-rgb, 255, 255, 255), 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(var(--card-bg-rgb), 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
 }
 
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
+/* Premium Shimmer Effect */
+.shimmer {
+  position: relative;
+  overflow: hidden;
 }
 
-/* Animations */
-@keyframes nav-item-active {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent);
+  animation: shimmer 2s infinite;
 }
 
-.animate-nav-active {
-  animation: nav-item-active 0.3s ease-in-out;
-}
-
-/* Robust fix for input visibility across all browsers */
-input,
-textarea,
-select,
-input::placeholder,
-textarea::placeholder {
-  color: #111827 !important;
-  /* text-gray-900 */
-  opacity: 1 !important;
-}
-
-/* Ensure background is white if text is dark */
-input,
-textarea,
-select {
-  background-color: #ffffff !important;
-}
-
-/* Animations */
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-
   100% {
     transform: translateX(100%);
   }
 }
 
-:root {
-  --theme-primary-rgb: 37, 99, 235;
+/* Standardized Inputs */
+input,
+textarea,
+select {
+  background-color: var(--card-bg) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none !important;
 }
 
-[data-theme='theme-neon'] {
-  --theme-primary-rgb: 255, 0, 255;
+input:focus,
+textarea:focus {
+  border-color: var(--theme-primary) !important;
+  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.1) !important;
 }
 
-[data-theme='theme-midnight'] {
-  --theme-primary-rgb: 251, 191, 36;
-}
+
+/* Theme Clean Up Complete */

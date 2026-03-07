@@ -83,13 +83,13 @@ export default function StoreItemCard({
 
             <div className="p-6 flex flex-col flex-1">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">{item.name}</h3>
-                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-slate-100 dark:bg-white/5 text-slate-400">
+                    <h3 className="text-sm font-bold tracking-tight text-foreground">{item.name}</h3>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-card border border-card-border text-muted">
                         {item.type}
                     </span>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-6 flex-1 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-muted font-medium mb-6 flex-1 line-clamp-2 leading-relaxed">
                     {item.description}
                 </p>
 

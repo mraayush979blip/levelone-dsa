@@ -12,6 +12,7 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
     refreshUser: () => Promise<void>;
+    updateTheme: (theme: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,16 +29,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const initializeAuth = async () => {
             console.log('🔄 [Auth] Initializing...');
 
-            // Explicitly check session in case onAuthStateChange is delayed
+            // SAFETY TIMEOUT: Force stop loading if initialization takes > 15 seconds
+            const watchdog = setTimeout(() => {
+                if (mounted && loading) {
+                    console.warn('⚠️ [Auth] Initialization watchdog triggered - forcing end of loading state.');
+                    setLoading(false);
+                }
+            }, 15000);
+
             try {
-                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                // race between getSession and a shorter timeout
+                const sessionPromise = supabase.auth.getSession();
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Session check timeout'), 10000));
+
+                const { data: { session: initialSession } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+
                 console.log('🔄 [Auth] Initial session check:', initialSession ? 'Found' : 'Null');
                 if (!initialSession && mounted) {
                     setLoading(false);
+                    clearTimeout(watchdog);
                 }
             } catch (err) {
-                console.error('❌ [Auth] Error checking initial session:', err);
-                if (mounted) setLoading(false);
+                console.error('❌ [Auth] Error or timeout checking initial session:', err);
+                if (mounted) {
+                    setLoading(false);
+                    clearTimeout(watchdog);
+                }
             }
 
             // Listen for auth changes
@@ -51,8 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     // unless we need to re-fetch the profile.
 
                     if (session?.user) {
-                        // Optimization: Skip fetching profile if we already have the user loaded
-                        // This prevents blocking UI on every token refresh
                         if (userRef.current && userRef.current.id === session.user.id) {
                             setSupabaseUser(session.user);
                             if (mounted) setLoading(false);
@@ -60,34 +75,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         }
 
                         try {
-                            const { data: userData } = await supabase
+                            // Fetch profile with a small timeout
+                            const profilePromise = supabase
                                 .from('users')
                                 .select('*')
                                 .eq('id', session.user.id)
                                 .single();
+
+                            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Profile fetch timeout'), 7000));
+
+                            const { data: userData } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
                             if (!mounted) return;
 
                             if (userData) {
                                 console.log('✅ [Auth] Profile loaded');
                                 const newUser = userData as User;
+                                if (newUser.equipped_theme) {
+                                    localStorage.setItem('levelone-theme', newUser.equipped_theme);
+                                }
                                 setUser(newUser);
-                                // Update ref immediately to prevent race conditions in subsequent events
                                 userRef.current = newUser;
                                 setSupabaseUser(session.user);
                             } else {
-                                console.warn('⚠️ [Auth] User authenticated but profile missing');
+                                console.warn('⚠️ [Auth] Profile missing - using auth user only');
                                 setSupabaseUser(session.user);
-                                setUser(null);
-                                userRef.current = null;
                             }
                         } catch (err) {
-                            console.error('❌ [Auth] Error fetching profile:', err);
+                            console.error('❌ [Auth] Profile fetch error/timeout:', err);
+                            setSupabaseUser(session.user);
                         } finally {
                             if (mounted) setLoading(false);
                         }
                     } else {
-                        // Signed out
                         if (mounted) {
                             setUser(null);
                             setSupabaseUser(null);
@@ -166,6 +186,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSupabaseUser(null);
     };
 
+    const handleUpdateTheme = async (theme: string) => {
+        if (!user) return;
+        try {
+            // Save to LocalStorage for immediate, flicker-free persistence
+            localStorage.setItem('levelone-theme', theme);
+
+            const { error } = await supabase
+                .from('users')
+                .update({ equipped_theme: theme })
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            // Optimistic update
+            const updatedUser = { ...user, equipped_theme: theme };
+            setUser(updatedUser);
+            userRef.current = updatedUser;
+        } catch (err) {
+            console.error('❌ [Auth] Error updating theme:', err);
+            throw err;
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -175,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 signIn: handleSignIn,
                 signOut: handleSignOut,
                 refreshUser: handleRefreshUser,
+                updateTheme: handleUpdateTheme,
             }}
         >
             {children}

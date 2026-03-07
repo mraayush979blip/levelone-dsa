@@ -1,13 +1,16 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
+
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, BookOpen, Trophy, ShoppingBag, Terminal, User as UserIcon, Sparkles } from 'lucide-react';
+import { Trophy, ShoppingBag, Sparkles, LayoutDashboard, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import InstallPWA from '@/components/InstallPWA';
+import NavigationMenu from '@/components/NavigationMenu';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function StudentLayout({
     children,
@@ -16,151 +19,169 @@ export default function StudentLayout({
 }) {
     const { user, signOut } = useAuth();
     const pathname = usePathname();
+    const [localTheme, setLocalTheme] = useState<string | null>(null);
 
-    const MobileNavLink = ({ href, icon: Icon, label, isActive, isNeon }: { href: string; icon: any; label: string; isActive: boolean; isNeon: boolean }) => (
+    useEffect(() => {
+        // Hydrate theme from localStorage for instant, zero-flicker restoration
+        const saved = localStorage.getItem('levelone-theme');
+        if (saved) setLocalTheme(saved);
+    }, []);
+
+    const MobileNavLink = ({ href, icon: Icon, label, isActive }: { href: string; icon: any; label: string; isActive: boolean }) => (
         <Link
             href={href}
             className={cn(
                 "flex flex-col items-center justify-center w-full h-full space-y-1 relative transition-all duration-300",
                 isActive
-                    ? (isNeon ? "text-indigo-400" : "text-indigo-600")
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "text-primary"
+                    : "text-muted hover:text-foreground"
             )}
         >
-            {isActive && (
-                <motion.span
-                    layoutId="activeTab"
-                    className={cn("absolute top-0 w-8 h-1 rounded-full", isNeon ? "bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]" : "bg-indigo-600")}
-                />
-            )}
-            <Icon className={cn("h-5 w-5", isActive && "scale-110 transition-transform")} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+            <AnimatePresence>
+                {isActive && (
+                    <motion.span
+                        layoutId="activeTab"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className="absolute -top-1 w-8 h-1 rounded-full bg-primary shadow-glow"
+                    />
+                )}
+            </AnimatePresence>
+            <Icon className={cn("h-5 w-5 transition-transform duration-300", isActive && "scale-110 translate-y-[-2px]")} />
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em]">{label}</span>
         </Link>
     );
 
     const isHelpPage = pathname === '/student/help';
     const isPhasePage = pathname?.startsWith('/student/phase/');
-    const isNeon = user?.equipped_theme === 'theme-neon';
+    const currentTheme = user?.equipped_theme || localTheme || 'theme-light';
+
+    const menuItems = [
+        { href: '/student', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/student/compete', label: 'Compete', icon: Trophy },
+        { href: '/student/store', label: 'Rewards', icon: ShoppingBag },
+        { href: '/student/help', label: 'AI Help', icon: Sparkles },
+    ];
 
     return (
         <ProtectedRoute requireRole="student">
             <div
+                data-theme={currentTheme}
                 className={cn(
-                    "min-h-screen flex flex-col transition-colors duration-500",
-                    !isHelpPage && !isPhasePage ? 'pb-24 md:pb-0' : '',
-                    isNeon ? "bg-gray-950 text-white" : "bg-white text-slate-900"
+                    "min-h-screen flex flex-col transition-colors duration-500 font-sans bg-background text-foreground",
+                    !isHelpPage && !isPhasePage ? 'pb-24 md:pb-0' : ''
                 )}
             >
                 {!isHelpPage && (
-                    <nav className={cn(
-                        "sticky top-0 border-b transition-all relative z-50 backdrop-blur-xl",
-                        isNeon ? "bg-gray-950/80 border-white/5" : "bg-white/80 border-slate-100"
-                    )}>
-                        <div className="max-w-6xl mx-auto px-6">
+                    <nav className="sticky top-0 border-b border-card-border transition-all duration-300 z-50 backdrop-blur-xl bg-card/80">
+                        <div className="max-w-7xl mx-auto px-6">
                             <div className="flex justify-between h-20">
-                                <div className="flex items-center space-x-12">
-                                    <Link href="/student" className="flex items-center space-x-3 group">
-                                        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                                            <BookOpen className="h-5 w-5 text-white" />
+                                <div className="flex items-center space-x-10">
+                                    <Link href="/student" className="flex items-center space-x-3 group text-foreground">
+                                        <div className="w-10 h-10 bg-primary rounded-xl rotate-45 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-[135deg] transition-all duration-700">
+                                            <div className="-rotate-45 group-hover:-rotate-[135deg] transition-all duration-700">
+                                                <Zap className="h-5 w-5 text-white fill-white" />
+                                            </div>
                                         </div>
-                                        <span className="text-xl font-black tracking-tight tracking-[-0.04em]">
-                                            Levelone
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="text-xl font-black tracking-[-0.05em] leading-none text-foreground">
+                                                LEVELONE
+                                            </span>
+                                        </div>
                                     </Link>
 
                                     <div className="hidden md:flex items-center space-x-1">
-                                        {[
-                                            { href: '/student', label: 'Dashboard', icon: null },
-                                            { href: '/student/compete', label: 'Compete', icon: Trophy },
-                                            { href: '/student/store', label: 'Rewards', icon: ShoppingBag },
-                                            { href: '/student/help', label: 'Help AI', icon: Terminal },
-                                        ].map((item) => (
-                                            <Link
-                                                key={item.href}
-                                                href={item.href}
-                                                className={cn(
-                                                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-                                                    pathname === item.href
-                                                        ? (isNeon ? "bg-white/5 text-indigo-400" : "bg-indigo-50 text-indigo-600")
-                                                        : (isNeon ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50")
-                                                )}
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    {item.icon && <item.icon className="h-3.5 w-3.5" />}
-                                                    {item.label}
-                                                </div>
-                                            </Link>
-                                        ))}
+                                        {menuItems.map((item) => {
+                                            const isActive = pathname === item.href;
+                                            return (
+                                                <Link
+                                                    key={item.href}
+                                                    href={item.href}
+                                                    className={cn(
+                                                        "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all relative group",
+                                                        isActive
+                                                            ? "text-primary"
+                                                            : "text-muted hover:text-foreground"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center gap-2.5 relative z-10">
+                                                        {item.icon && <item.icon className={cn("h-4 w-4 transition-transform", isActive ? "scale-110" : "group-hover:scale-110")} />}
+                                                        <span>{item.label}</span>
+                                                    </div>
+                                                    {isActive && (
+                                                        <motion.div
+                                                            layoutId="navGlow"
+                                                            className="absolute inset-0 rounded-xl bg-primary/10 animate-pulse"
+                                                        />
+                                                    )}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
                                 <div className="flex items-center space-x-6">
                                     <InstallPWA />
 
-                                    <div className="hidden lg:flex items-center gap-3 pl-6 border-l border-slate-100 dark:border-white/5">
+                                    <div className="hidden lg:flex items-center gap-4 pl-8 border-l border-card-border">
                                         <div className="text-right">
-                                            <p className="text-sm font-bold truncate max-w-[120px]">
-                                                {user?.name?.split(' ')[0] || 'Student'}
-                                            </p>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500 opacity-80">
-                                                {user?.role}
+                                            <p className="text-sm font-black tracking-tight truncate max-w-[150px] text-foreground">
+                                                {user?.name || 'Student'}
                                             </p>
                                         </div>
-                                        <div className={cn(
-                                            "h-10 w-10 rounded-2xl flex items-center justify-center text-xl shadow-sm border",
-                                            isNeon ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-100"
-                                        )}>
+                                        <div className="h-10 w-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-card-border bg-card transition-all hover:scale-105 active:scale-95">
                                             {user?.equipped_avatar || '👤'}
                                         </div>
                                     </div>
 
-                                    <button
-                                        onClick={() => signOut()}
-                                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                                        title="Sign Out"
-                                    >
-                                        <LogOut className="h-5 w-5" />
-                                    </button>
+                                    <NavigationMenu />
                                 </div>
                             </div>
                         </div>
                     </nav>
                 )}
 
-                <main className={cn("flex-1", !isHelpPage && !isPhasePage ? 'py-8' : '')}>
+                <main className={cn("flex-1", !isHelpPage && !isPhasePage ? 'py-10' : '')}>
                     {children}
                 </main>
 
                 {!isHelpPage && !isPhasePage && (
                     <>
-                        <footer className={cn(
-                            "hidden md:block py-12 border-t transition-colors",
-                            isNeon ? "bg-gray-950 border-white/5" : "bg-white border-slate-100"
-                        )}>
-                            <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                                <div className="flex items-center gap-2 text-slate-400 font-medium text-sm">
-                                    <span>&copy; {new Date().getFullYear()} Levelone</span>
-                                    <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-white/10" />
-                                    <span>Built for Excellence</span>
+                        <footer className="hidden md:block py-16 border-t border-card-border transition-colors mt-auto bg-card text-foreground">
+                            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-primary rounded-lg rotate-45 flex items-center justify-center border border-primary/20">
+                                            <div className="-rotate-45">
+                                                <Zap className="h-4 w-4 text-white fill-white" />
+                                            </div>
+                                        </div>
+                                        <span className="text-lg font-black tracking-tighter">LEVELONE</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-muted font-medium text-xs">
+                                        <span>&copy; {new Date().getFullYear()} Levelone</span>
+                                        <span className="h-1 w-1 rounded-full bg-card-border" />
+                                        <span>Excellence in Digital Education</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                                    <Link href="#" className="hover:text-indigo-500 transition-colors">Privacy</Link>
-                                    <Link href="#" className="hover:text-indigo-500 transition-colors">Terms</Link>
-                                    <Link href="#" className="hover:text-indigo-500 transition-colors">Support</Link>
+                                <div className="flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-muted">
+                                    <Link href="/student/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
                                 </div>
                             </div>
                         </footer>
 
-                        {/* Mobile Navigation - Floated Minimalist */}
-                        <div className="md:hidden fixed bottom-6 left-6 right-6 h-16 z-50">
-                            <div className={cn(
-                                "h-full w-full backdrop-blur-2xl rounded-3xl border shadow-2xl flex items-center justify-around px-2",
-                                isNeon ? "bg-gray-950/80 border-white/10" : "bg-white/90 border-slate-100 shadow-slate-200/50"
-                            )}>
-                                <MobileNavLink href="/student" icon={BookOpen} label="Learn" isActive={pathname === '/student'} isNeon={isNeon} />
-                                <MobileNavLink href="/student/compete" icon={Trophy} label="Compete" isActive={pathname === '/student/compete'} isNeon={isNeon} />
-                                <MobileNavLink href="/student/store" icon={ShoppingBag} label="Store" isActive={pathname === '/student/store'} isNeon={isNeon} />
-                                <MobileNavLink href="/student/help" icon={Terminal} label="AI Help" isActive={pathname === '/student/help'} isNeon={isNeon} />
+                        <div className="md:hidden fixed bottom-8 left-6 right-6 h-20 z-50">
+                            <div className="h-full w-full backdrop-blur-3xl rounded-3xl border border-card-border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center justify-around px-4 bg-card/95">
+                                {menuItems.map((item) => (
+                                    <MobileNavLink
+                                        key={item.href}
+                                        href={item.href}
+                                        icon={item.icon}
+                                        label={item.label.split(' ')[0]}
+                                        isActive={pathname === item.href}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </>
