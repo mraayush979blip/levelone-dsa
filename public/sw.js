@@ -61,11 +61,17 @@ self.addEventListener('fetch', (event) => {
     // 2. For GET requests (Assets, CSS, Images): Cache First, then Network
     // EXCLUDE: API calls, Supabase requests, and non-http schemes (e.g. chrome-extension)
     const url = new URL(event.request.url);
+    const isSupabaseProxy = url.pathname.startsWith('/rest/') ||
+        url.pathname.startsWith('/auth/') ||
+        url.pathname.startsWith('/storage/') ||
+        url.pathname.startsWith('/realtime/') ||
+        url.hostname.includes('supabase');
+
     if (
         event.request.method === 'GET' &&
         url.protocol.startsWith('http') && // Only cache http/https
         !url.pathname.startsWith('/api/') &&
-        !url.hostname.includes('supabase')
+        !isSupabaseProxy
     ) {
         event.respondWith(
             caches.match(event.request).then((cached) => {

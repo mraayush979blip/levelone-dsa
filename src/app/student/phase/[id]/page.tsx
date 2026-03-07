@@ -74,7 +74,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
             const { data, error } = await supabase
                 .from('phases')
-                .select('*')
+                .select('id, phase_number, title, description, youtube_url, assignment_file_url, assignment_resource_url, allowed_submission_type, start_date, end_date, is_paused, bypass_time_requirement, min_seconds_required, total_assignments')
                 .eq('id', id)
                 .single();
 
@@ -362,6 +362,29 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 finalFileUrl = uploadedUrl;
             }
 
+            // OPTIMISTIC UPDATE: Update UI immediately
+            const previousSubmissions = { ...submissions };
+            const previousFormData = { ...formData };
+            const optimisticTimestamp = new Date().toISOString();
+
+            setSubmissions(prev => ({
+                ...prev,
+                [index]: {
+                    submitted_at: optimisticTimestamp,
+                    status: 'valid' // Assume valid for now
+                }
+            }));
+
+            setFormData(prev => ({
+                ...prev,
+                [index]: {
+                    ...prev[index],
+                    success: 'Syncing...', // Better than 'Success' immediately
+                    existingFileUrl: finalFileUrl || prev[index].existingFileUrl,
+                    selectedFile: null
+                }
+            }));
+
             const { error: subError } = await supabase
                 .from('submissions')
                 .upsert({
@@ -372,30 +395,25 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                     github_url: data.submissionType === 'github' ? data.githubUrl : null,
                     file_url: data.submissionType === 'file' ? finalFileUrl : null,
                     notes: data.notes,
-                    submitted_at: new Date().toISOString(),
+                    submitted_at: optimisticTimestamp,
                     status: 'valid'
                 }, {
                     onConflict: 'student_id,phase_id,assignment_index'
                 });
 
-            if (subError) throw subError;
+            if (subError) {
+                // REVERT on error
+                setSubmissions(previousSubmissions);
+                setFormData(previousFormData);
+                throw subError;
+            }
 
             setFormData(prev => ({
                 ...prev,
-                [index]: {
-                    ...prev[index],
-                    success: 'Submission successful!',
-                    existingFileUrl: finalFileUrl || prev[index].existingFileUrl,
-                    selectedFile: null
-                }
+                [index]: { ...prev[index], success: 'Verified & Committed!' }
             }));
 
-            setSubmissions(prev => ({
-                ...prev,
-                [index]: { submitted_at: new Date().toISOString() }
-            }));
-
-            // Refresh submissions query
+            // Silent refresh in background
             queryClient.invalidateQueries({ queryKey: ['submissions', id] });
 
         } catch (err: any) {

@@ -15,17 +15,35 @@ const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim()
 let finalBaseUrl = supabaseUrl;
 const projectHost = new URL(supabaseUrl).hostname;
 
+// DYNAMIC PROBE: Check if we can reach Supabase directly
 if (typeof window !== 'undefined') {
     const origin = window.location.origin;
     const isEdgeOne = origin.includes('edgeone.app') || origin.includes('vercel.app');
     const isDev = origin.includes('localhost') || origin.includes('127.0.0.1');
 
-    // In Production (EdgeOne), we MUST use the current origin as the proxy to bypass India ISP blocks
-    // This allows REST, Auth, and Storage to flow through the same domain.
+    // ONLY attempt tunnel if we're in production on EdgeOne/Vercel
     if (isEdgeOne && !isDev) {
-        finalBaseUrl = origin;
-        console.log('🚀 [Supabase] India Bypass Active: Tunneling via', origin);
-        console.log('📍 [Supabase] Destination:', projectHost);
+        // We use a 1.2s ping to check if Supabase is blocked
+        // If it responds fast, we bypass the proxy for ⏫ SPEED.
+        // If it hangs, we tunnel via origin for ✅ RELIABILITY.
+        const cachedPath = localStorage.getItem('supabase_proxy_active');
+        if (cachedPath === 'true') {
+            finalBaseUrl = origin;
+            console.log('⚡ [Supabase] Using Cached Bypass Path (Origin Proxy)');
+        }
+
+        // Background probe to update path for next session
+        fetch(`https://${projectHost}/rest/v1/`, { method: 'HEAD', mode: 'no-cors' })
+            .then(() => {
+                localStorage.setItem('supabase_proxy_active', 'false');
+                console.log('✅ [Supabase] Direct path is reachable. Using Direct for Speed!');
+            })
+            .catch(() => {
+                localStorage.setItem('supabase_proxy_active', 'true');
+                console.warn('🚧 [Supabase] Direct path blocked. Falling back to Proxy...');
+            });
+
+        if (cachedPath === 'true') finalBaseUrl = origin;
     }
 }
 

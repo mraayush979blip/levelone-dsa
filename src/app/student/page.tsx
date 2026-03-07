@@ -54,12 +54,22 @@ export default function StudentDashboard() {
             try {
                 // Wrap each call to ensure they are treated as standard Promises
                 const streakPromise = Promise.resolve(supabase.rpc('update_student_streak', { student_uuid: user?.id }));
-                const phasesPromise = Promise.resolve(supabase.from('phases').select('*').eq('is_active', true).order('phase_number', { ascending: true }));
-                const userPromise = Promise.resolve(supabase.from('users').select('total_time_spent_seconds, points, equipped_theme').eq('id', user?.id).single());
-                const submissionsPromise = Promise.resolve(supabase.from('submissions').select('phase_id').eq('student_id', user?.id));
-                const activityPromise = Promise.resolve(supabase.from('student_phase_activity').select('total_time_spent_seconds').eq('student_id', user?.id));
+                const phasesPromise = Promise.resolve(supabase.from('phases')
+                    .select('id, phase_number, title, description, start_date, end_date, total_assignments, min_seconds_required, bypass_time_requirement, is_paused, status, is_active, is_mandatory, created_at, updated_at')
+                    .eq('is_active', true)
+                    .order('phase_number', { ascending: true }));
+                const userPromise = Promise.resolve(supabase.from('users')
+                    .select('total_time_spent_seconds, points, equipped_theme, name')
+                    .eq('id', user?.id)
+                    .single());
+                const submissionsPromise = Promise.resolve(supabase.from('submissions')
+                    .select('phase_id, assignment_index')
+                    .eq('student_id', user?.id));
+                const activityPromise = Promise.resolve(supabase.from('student_phase_activity')
+                    .select('total_time_spent_seconds, phase_id')
+                    .eq('student_id', user?.id));
 
-                console.log('⏳ [Dashboard] Awaiting parallel data fetch...');
+                console.log('⏳ [Dashboard] Awaiting optimized parallel data fetch...');
                 const [streakResult, phasesResult, userResult, submissionsResult, activityResult] = await withTimeout(Promise.all([
                     streakPromise,
                     phasesPromise,

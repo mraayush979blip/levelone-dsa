@@ -123,9 +123,32 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-sm text-gray-600">
-                    Levelone - sab ka sath sab vikas
-                </p>
+                <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center gap-4">
+                    <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                        System Diagnostics
+                    </p>
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            if (confirm('This will reset your local app cache and log you out. Continue?')) {
+                                localStorage.clear();
+                                if ('serviceWorker' in navigator) {
+                                    const regs = await navigator.serviceWorker.getRegistrations();
+                                    for (const reg of regs) await reg.unregister();
+                                }
+                                const cacheNames = await caches.keys();
+                                for (const name of cacheNames) await caches.delete(name);
+                                window.location.reload();
+                            }
+                        }}
+                        className="text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5"
+                    >
+                        Trouble logging in? Reset App Cache
+                    </button>
+                    <p className="text-gray-300 text-[9px] font-medium tracking-tight">
+                        Levelone v2.1.0 Stable
+                    </p>
+                </div>
             </div>
         </div>
     );
