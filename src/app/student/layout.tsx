@@ -55,6 +55,8 @@ export default function StudentLayout({
 
     const isHelpPage = pathname === '/student/help';
     const isPhasePage = pathname?.startsWith('/student/phase/');
+    const isTeamPage = pathname === '/student/team';
+    const isFullscreen = isHelpPage || isPhasePage || isTeamPage;
     const currentTheme = user?.equipped_theme || localTheme || 'theme-light';
 
     const menuItems = [
@@ -70,10 +72,10 @@ export default function StudentLayout({
                 data-theme={currentTheme}
                 className={cn(
                     "min-h-screen flex flex-col transition-colors duration-500 font-sans bg-background text-foreground",
-                    !isHelpPage && !isPhasePage ? 'pb-24 md:pb-0' : ''
+                    !isFullscreen ? 'pb-24 md:pb-0' : ''
                 )}
             >
-                {!isHelpPage && (
+                {!isFullscreen && (
                     <nav className="sticky top-0 border-b border-card-border transition-all duration-300 z-50 backdrop-blur-xl bg-card/80">
                         <div className="max-w-7xl mx-auto px-6">
                             <div className="flex justify-between h-20">
@@ -142,11 +144,11 @@ export default function StudentLayout({
                     </nav>
                 )}
 
-                <main className={cn("flex-1", !isHelpPage && !isPhasePage ? 'py-10' : '')}>
+                <main className={cn("flex-1", !isFullscreen ? 'py-10' : '')}>
                     {children}
                 </main>
 
-                {!isHelpPage && !isPhasePage && (
+                {!isFullscreen && (
                     <>
                         <footer className="hidden md:block py-16 border-t border-card-border transition-colors mt-auto bg-card text-foreground">
                             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">

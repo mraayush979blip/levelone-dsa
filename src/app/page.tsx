@@ -35,39 +35,40 @@ export default function HomePage() {
   // If user is null and not loading, we show the landing page
   if (!user && showContent) {
     return (
-      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        <AnimatedBackground theme="theme-neon" />
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-black selection:bg-white selection:text-black">
+        {/* Subtle radial gradient to prevent absolute pitch black solid color */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(30,30,35,0.8),transparent_80%)]"></div>
 
         <div className="container px-4 md:px-6 z-10 relative">
           <StaggerContainer className="flex flex-col items-center text-center space-y-8">
             <StaggerItem>
-              <div className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-400 backdrop-blur-md">
-                <span className="flex h-2 w-2 rounded-full bg-blue-500 mr-2 animate-pulse"></span>
+              <div className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-1.5 text-xs tracking-widest uppercase font-semibold text-zinc-300 backdrop-blur-md shadow-sm">
+                <span className="flex h-2 w-2 rounded-full bg-white mr-3 animate-pulse"></span>
                 Next-Gen Learning Platform
               </div>
             </StaggerItem>
 
             <StaggerItem>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-blue-400 drop-shadow-sm">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white drop-shadow-sm font-sans leading-tight">
                 Master Web Development <br className="hidden md:inline" />
-                <span className="text-blue-500">The Modern Way</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-zinc-300 to-zinc-600">The Modern Way</span>
               </h1>
             </StaggerItem>
 
             <StaggerItem>
-              <p className="max-w-[700px] text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-[700px] text-zinc-400 font-medium md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed tracking-wide">
                 Experience a gamified, interactive learning environment designed to take you from zero to hero.
               </p>
             </StaggerItem>
 
             <StaggerItem>
-              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                <Link href="/login" className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-blue-600 px-8 font-medium text-white transition-all duration-300 hover:bg-blue-700 hover:scale-105 hover:shadow-[0_0_20px_rgba(37,99,235,0.5)]">
+              <div className="flex flex-col sm:flex-row gap-5 w-full justify-center pt-6">
+                <Link href="/login" className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-white px-10 font-bold text-black transition-all duration-300 hover:bg-zinc-200 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.1)]">
                   <span className="mr-2">Get Started</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <Link href="/about" className="group inline-flex h-12 items-center justify-center rounded-full border border-gray-700 bg-gray-900/50 px-8 font-medium text-gray-300 backdrop-blur transition-all hover:bg-gray-800 hover:text-white">
-                  Learn More
+                <Link href="/team" className="group inline-flex h-12 items-center justify-center rounded-full border border-zinc-700 bg-transparent px-10 font-bold text-zinc-300 backdrop-blur transition-all hover:border-white hover:text-white hover:bg-zinc-900/50">
+                  Our Team
                 </Link>
               </div>
             </StaggerItem>
@@ -75,33 +76,33 @@ export default function HomePage() {
 
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20" staggerDelay={0.2}>
             <StaggerItem>
-              <GlassCard className="h-full">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
-                  <Terminal className="h-6 w-6" />
+              <div className="h-full rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 backdrop-blur-xl transition duration-500 hover:bg-zinc-900/80 hover:border-zinc-700">
+                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-white shadow-inner">
+                  <Terminal className="h-5 w-5" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Interactive Coding</h3>
-                <p className="text-gray-400">Run code directly in your browser with our advanced playground.</p>
-              </GlassCard>
+                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Interactive Coding</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Run code directly in your browser with our advanced playground.</p>
+              </div>
             </StaggerItem>
 
             <StaggerItem>
-              <GlassCard className="h-full">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400">
-                  <Zap className="h-6 w-6" />
+              <div className="h-full rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 backdrop-blur-xl transition duration-500 hover:bg-zinc-900/80 hover:border-zinc-700">
+                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-white shadow-inner">
+                  <Zap className="h-5 w-5" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Gamified Progress</h3>
-                <p className="text-gray-400">Earn XP, badges, and level up as you complete challenges.</p>
-              </GlassCard>
+                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Gamified Progress</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Earn XP, badges, and level up as you complete challenges.</p>
+              </div>
             </StaggerItem>
 
             <StaggerItem>
-              <GlassCard className="h-full">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400">
-                  <BookOpen className="h-6 w-6" />
+              <div className="h-full rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 backdrop-blur-xl transition duration-500 hover:bg-zinc-900/80 hover:border-zinc-700">
+                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-white shadow-inner">
+                  <BookOpen className="h-5 w-5" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Curated Curriculum</h3>
-                <p className="text-gray-400">Structured learning path from basics to advanced concepts.</p>
-              </GlassCard>
+                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Curated Curriculum</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Structured learning path from basics to advanced concepts.</p>
+              </div>
             </StaggerItem>
           </StaggerContainer>
         </div>

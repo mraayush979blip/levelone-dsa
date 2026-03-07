@@ -163,8 +163,8 @@ export default function StudentListPage() {
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <div className="relative flex-1 w-full">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                <div className="relative w-full lg:max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </div>
@@ -176,25 +176,27 @@ export default function StudentListPage() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <button
-                        onClick={handleBulkRestore}
-                        disabled={actionLoading || loading}
-                        className="flex-1 md:flex-none inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-colors"
-                    >
-                        <Shield className="h-4 w-4 mr-2" /> Restore All
-                    </button>
-                    <button
-                        onClick={handleBulkRevoke}
-                        disabled={actionLoading || loading}
-                        className="flex-1 md:flex-none inline-flex items-center px-4 py-2 border border-rose-100 rounded-md shadow-sm text-sm font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 transition-colors"
-                    >
-                        <ShieldOff className="h-4 w-4 mr-2" /> Revoke All
-                    </button>
-                    <div className="flex items-center space-x-2 border-l pl-2 ml-2">
-                        <Filter className="h-5 w-5 text-gray-400" />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <button
+                            onClick={handleBulkRestore}
+                            disabled={actionLoading || loading}
+                            className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-colors"
+                        >
+                            <Shield className="h-4 w-4 mr-2" /> Restore All
+                        </button>
+                        <button
+                            onClick={handleBulkRevoke}
+                            disabled={actionLoading || loading}
+                            className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2 border border-rose-100 rounded-md shadow-sm text-sm font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 transition-colors"
+                        >
+                            <ShieldOff className="h-4 w-4 mr-2" /> Revoke All
+                        </button>
+                    </div>
+                    <div className="flex items-center space-x-2 sm:border-l sm:pl-3 sm:border-t-0 border-t pt-3 sm:pt-0 w-full sm:w-auto">
+                        <Filter className="h-5 w-5 text-gray-400 shrink-0" />
                         <select
-                            className="block w-full md:w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                            className="block w-full sm:w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value as any)}
                         >
@@ -217,7 +219,7 @@ export default function StudentListPage() {
                     <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
                 </div>
             ) : (
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200 text-black">
+                <div className="bg-white shadow overflow-x-auto sm:rounded-lg border border-gray-200 text-black">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
