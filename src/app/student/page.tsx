@@ -29,37 +29,74 @@ export default function StudentDashboard() {
     const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
         queryKey: ['student-dashboard', user?.id],
         queryFn: async () => {
-            const { data: isRevoked } = await supabase.rpc('check_and_revoke_self');
-            if (isRevoked) {
-                window.location.href = '/revoked';
-                return null;
+            console.log('🔄 [Dashboard] Fetching data for:', user?.id);
+
+            // Timeout helper
+            const withTimeout = <T,>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+                return Promise.race([
+                    promise,
+                    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Request Timeout')), ms))
+                ]);
+            };
+
+            try {
+                // Wrap in Promise.resolve to handle the thenable PostgrestBuilder properly
+                const { data: isRevoked, error: revokeError } = await withTimeout(Promise.resolve(supabase.rpc('check_and_revoke_self')));
+                if (revokeError) console.error('❌ [Dashboard] Revoke check error:', revokeError);
+                if (isRevoked) {
+                    window.location.href = '/revoked';
+                    return null;
+                }
+            } catch (e) {
+                console.warn('⚠️ [Dashboard] Revoke check skipped (Timeout or Error):', e);
             }
 
-            const [streakResult, phasesResult, userResult, submissionsResult, activityResult] = await Promise.all([
-                supabase.rpc('update_student_streak', { student_uuid: user?.id }),
-                supabase.from('phases').select('*').eq('is_active', true).order('phase_number', { ascending: true }),
-                supabase.from('users').select('total_time_spent_seconds, points, equipped_theme').eq('id', user?.id).single(),
-                supabase.from('submissions').select('phase_id').eq('student_id', user?.id),
-                supabase.from('student_phase_activity').select('total_time_spent_seconds').eq('student_id', user?.id)
-            ]);
+            try {
+                // Wrap each call to ensure they are treated as standard Promises
+                const streakPromise = Promise.resolve(supabase.rpc('update_student_streak', { student_uuid: user?.id }));
+                const phasesPromise = Promise.resolve(supabase.from('phases').select('*').eq('is_active', true).order('phase_number', { ascending: true }));
+                const userPromise = Promise.resolve(supabase.from('users').select('total_time_spent_seconds, points, equipped_theme').eq('id', user?.id).single());
+                const submissionsPromise = Promise.resolve(supabase.from('submissions').select('phase_id').eq('student_id', user?.id));
+                const activityPromise = Promise.resolve(supabase.from('student_phase_activity').select('total_time_spent_seconds').eq('student_id', user?.id));
 
-            const phases = phasesResult.data || [];
-            const submissionIds = new Set((submissionsResult.data || []).map((s: any) => s.phase_id));
-            const totalLearningTime = (activityResult.data || []).reduce((acc: number, curr: any) => acc + (curr.total_time_spent_seconds || 0), 0);
+                console.log('⏳ [Dashboard] Awaiting parallel data fetch...');
+                const [streakResult, phasesResult, userResult, submissionsResult, activityResult] = await withTimeout(Promise.all([
+                    streakPromise,
+                    phasesPromise,
+                    userPromise,
+                    submissionsPromise,
+                    activityPromise
+                ]));
 
-            return {
-                phases,
-                submissions: submissionIds,
-                stats: {
-                    completedCount: submissionsResult.data?.length || 0,
-                    totalTimeSeconds: totalLearningTime,
-                    points: userResult.data?.points || 0
-                },
-                userMetadata: userResult.data
-            };
+                const phases = phasesResult?.data || [];
+                const submissionIds = new Set((submissionsResult?.data || []).map((s: any) => s.phase_id));
+                const totalLearningTime = (activityResult?.data || []).reduce((acc: number, curr: any) => acc + (curr.total_time_spent_seconds || 0), 0);
+
+                console.log('✅ [Dashboard] Data loaded successfully');
+
+                return {
+                    phases,
+                    submissions: submissionIds,
+                    stats: {
+                        completedCount: (submissionsResult?.data?.length as number) || 0,
+                        totalTimeSeconds: totalLearningTime,
+                        points: userResult?.data?.points || 0
+                    },
+                    userMetadata: userResult?.data
+                };
+            } catch (e: any) {
+                console.error('❌ [Dashboard] Main data fetch failed or timed out:', e);
+                return {
+                    phases: [],
+                    submissions: new Set<string>(),
+                    stats: { completedCount: 0, totalTimeSeconds: 0, points: 0 },
+                    userMetadata: null
+                };
+            }
         },
         enabled: !!user?.id,
         staleTime: 60 * 1000,
+        retry: 2,
     });
 
     const formatDuration = (seconds?: number) => {
@@ -79,7 +116,7 @@ export default function StudentDashboard() {
 
     const loading = authLoading || dashboardLoading;
     const phases = dashboardData?.phases || [];
-    const submissions = dashboardData?.submissions || new Set<string>();
+    const submissions = (dashboardData?.submissions as Set<string>) || new Set<string>();
     const stats = dashboardData?.stats || { completedCount: 0, totalTimeSeconds: 0, points: 0 };
 
     if (loading) {
@@ -88,7 +125,7 @@ export default function StudentDashboard() {
                 <div className="h-48 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="md:col-span-2 space-y-8">
-                        {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />)}
+                        {[1, 2, 3].map((i: number) => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />)}
                     </div>
                     <div className="space-y-8">
                         <div className="h-64 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />
@@ -98,7 +135,7 @@ export default function StudentDashboard() {
         );
     }
 
-    const livePhasesCount = phases.filter((p: Phase) => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'live').length;
+    const livePhasesCount = phases.filter((p: any) => getPhaseStatus(p.start_date, p.end_date, p.is_paused) === 'live').length;
 
     return (
         <div className="relative min-h-[calc(100vh-80px)] font-sans text-foreground">

@@ -103,25 +103,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchUserProfile = async (userId: string) => {
         try {
             console.log('🔄 [Auth] Fetching profile for:', userId);
-            const { data: userData, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', userId)
-                .single();
 
-            if (error) throw error;
+            // 3s timeout for profile fetch to avoid blocking the app
+            const profilePromise = supabase.from('users').select('*').eq('id', userId).single();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Profile timeout'), 3000));
+
+            const { data: userData, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
+
+            if (error) {
+                console.error('❌ [Auth] Profile record error:', error.message);
+                if (error.code === 'PGRST116') {
+                    console.error('🚫 [Auth] CRITICAL: User record MISSING in users table for ID:', userId);
+                    console.error('💡 [Auth] SOLUTION: Go to Supabase SQL Editor and run: INSERT INTO users (id, email, name, role) VALUES (\'' + userId + '\', \'...', 'Student\', \'student\');');
+                }
+                throw error;
+            }
 
             if (userData && userRef.current?.id === userId) {
-                console.log('✅ [Auth] Profile loaded');
+                console.log('✅ [Auth] Profile loaded successfully for:', userData.email);
                 const newUser = userData as User;
                 setUser(newUser);
                 userRef.current = newUser;
                 if (newUser.equipped_theme) {
                     localStorage.setItem('levelone-theme', newUser.equipped_theme);
                 }
+            } else if (!userData) {
+                console.warn('⚠️ [Auth] No profile data returned for:', userId);
             }
         } catch (err) {
-            console.warn('⚠️ [Auth] Profile fetch failed (Background Sync), using fallback:', err);
+            console.warn('⚠️ [Auth] Profile background sync failed:', err);
         }
     };
 

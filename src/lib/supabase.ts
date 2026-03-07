@@ -13,6 +13,7 @@ const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim()
 
 // Determine the "Final" URL for the client.
 let finalBaseUrl = supabaseUrl;
+const projectHost = new URL(supabaseUrl).hostname;
 
 if (typeof window !== 'undefined') {
     const origin = window.location.origin;
@@ -20,9 +21,11 @@ if (typeof window !== 'undefined') {
     const isDev = origin.includes('localhost') || origin.includes('127.0.0.1');
 
     // In Production (EdgeOne), we MUST use the current origin as the proxy to bypass India ISP blocks
+    // This allows REST, Auth, and Storage to flow through the same domain.
     if (isEdgeOne && !isDev) {
         finalBaseUrl = origin;
         console.log('🚀 [Supabase] India Bypass Active: Tunneling via', origin);
+        console.log('📍 [Supabase] Destination:', projectHost);
     }
 }
 
@@ -37,7 +40,11 @@ export const supabase = createClient(
             flowType: 'pkce'
         },
         global: {
-            headers: { 'x-client-info': 'levelone-bypass-v4' }
+            headers: {
+                'x-client-info': 'levelone-bypass-v2.1',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
         }
     }
 );

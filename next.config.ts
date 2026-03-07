@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
       {
         source: '/storage/v1/:path*',
         destination: `https://${projectHost}/storage/v1/:path*`,
+      },
+      {
+        source: '/realtime/v1/:path*',
+        destination: `https://${projectHost}/realtime/v1/:path*`,
       }
     ];
   },

@@ -40,26 +40,31 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // AUTO-SYNC VERSION: 2.0.0 (Bypass ISP Block Fix)
+              // AUTO-SYNC VERSION: 2.1.0 (Critical Cache Purge)
               (function() {
-                const CURRENT_DEPLOY = "2.0.0-final";
-                const lastSync = localStorage.getItem("levelone_last_sync");
+                const CURRENT_DEPLOY = "2.1.0-final";
+                const lastSync = localStorage.getItem("levelone_last_sync_v2");
                 
                 if (lastSync !== CURRENT_DEPLOY) {
-                  console.log("🚀 [Sync] New version detected, updating system...");
+                  console.log("🚀 [Sync] Critical update detected, purging legacy caches...");
                   
-                  // 1. Silent SW Cleanup
+                  // 1. Force unregister all service workers (legacy cleanup)
                   if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(regs => {
-                      for(let reg of regs) reg.unregister();
+                      for(let reg of regs) {
+                        reg.unregister();
+                        console.log("🧹 [Sync] Unregistered stale worker:", reg.scope);
+                      }
                     }).catch(() => {});
                   }
                   
-                  // 2. Clear stale cache identifiers
-                  localStorage.setItem("levelone_last_sync", CURRENT_DEPLOY);
+                  // 2. Clear known stale storage keys
+                  localStorage.removeItem("supabase.auth.token"); // Force session refresh if stuck
+                  localStorage.setItem("levelone_last_sync_v2", CURRENT_DEPLOY);
                   
-                  // 3. One-time silent reload to fetch fresh scripts
-                  setTimeout(() => window.location.reload(true), 500);
+                  // 3. One-time hard reload with cache bypass
+                  console.warn("🔄 [Sync] System restart in 1s...");
+                  setTimeout(() => window.location.reload(), 1000);
                 }
               })();
             `
