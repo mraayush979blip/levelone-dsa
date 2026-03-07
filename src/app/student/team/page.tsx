@@ -16,6 +16,7 @@ const team = [
         portfolio: "https://aayush-sharma-beige.vercel.app/",
         avatar: "⚡",
         color: "from-indigo-500 to-blue-500",
+        bgImage: "/images/team/aayush.png",
         icon: Code2
     },
     {
@@ -25,6 +26,7 @@ const team = [
         linkedin: "https://www.linkedin.com/in/palak-chaurasia-6a1388388/",
         avatar: "🎨",
         color: "from-purple-500 to-pink-500",
+        bgImage: "/images/team/palak.png",
         icon: Palette
     },
     {
@@ -34,6 +36,7 @@ const team = [
         linkedin: "https://www.linkedin.com/in/kritagyajain21/",
         avatar: "🛡️",
         color: "from-emerald-500 to-teal-500",
+        bgImage: "/images/team/kritagya.png",
         icon: ShieldCheck
     }
 ];
@@ -97,9 +100,18 @@ export default function TeamPage() {
                                 whileHover={{ y: -10, rotate: 1 }}
                                 className="group relative h-full bg-card/40 backdrop-blur-xl border border-card-border p-8 rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:bg-card/60"
                             >
-                                {/* Member Abstract Background */}
+                                {/* Member Background Image Overlay */}
+                                {member.bgImage && (
+                                    <img
+                                        src={member.bgImage}
+                                        alt={`${member.name} background`}
+                                        className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 group-hover:opacity-70 transition-opacity duration-1000 pointer-events-none mix-blend-luminosity"
+                                    />
+                                )}
+
+                                {/* Member Abstract Glow */}
                                 <div className={cn(
-                                    "absolute -bottom-10 -right-10 w-40 h-40 bg-gradient-to-br opacity-5 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000",
+                                    "absolute -bottom-10 -right-10 w-40 h-40 bg-gradient-to-br opacity-5 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000 z-0",
                                     member.color
                                 )} />
 
