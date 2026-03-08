@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users, Download, Smartphone } from 'lucide-react';
+import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users, Download, Smartphone, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import Link from 'next/link';
@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 
 const themes = [
     { id: 'theme-light', name: 'Ivory', icon: Sun, color: '#0891b2' },
-    { id: 'theme-dark', name: 'Midnight', icon: Zap, color: '#f59e0b' }
+    { id: 'theme-dark', name: 'Midnight', icon: Zap, color: '#f59e0b' },
+    { id: 'theme-holi', name: 'Holi 🎨', icon: Sparkles, color: '#FF6D00' }
 ];
 
 export default function NavigationMenu() {
@@ -110,7 +111,7 @@ export default function NavigationMenu() {
                                     <p className="text-[9px] font-black uppercase tracking-widest text-muted mb-4 flex items-center gap-2">
                                         <Palette className="w-3 h-3" /> Appearance
                                     </p>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-3 gap-2">
                                         {themes.map((t) => (
                                             <button
                                                 key={t.id}

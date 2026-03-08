@@ -2,13 +2,14 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Check, Moon, Sun, Monitor, Pipette, Zap } from 'lucide-react';
+import { Palette, Check, Moon, Sun, Monitor, Pipette, Zap, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 const themes = [
     { id: 'theme-light', name: 'Arctic Ivory', icon: Sun, color: '#0891b2' },
-    { id: 'theme-dark', name: 'Midnight Pro', icon: Zap, color: '#f59e0b' }
+    { id: 'theme-dark', name: 'Midnight Pro', icon: Zap, color: '#f59e0b' },
+    { id: 'theme-holi', name: 'Holi Gulaal 🎨', icon: Sparkles, color: '#FF6D00' }
 ];
 
 export default function ThemeSwitcher() {
