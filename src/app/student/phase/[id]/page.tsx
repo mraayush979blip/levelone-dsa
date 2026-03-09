@@ -77,7 +77,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
             const { data, error } = await supabase
                 .from('phases')
-                .select('id, phase_number, title, description, youtube_url, assignment_file_url, assignment_resource_url, assignment_leetcode_url, leetcode_problem_slug, allowed_submission_type, start_date, end_date, is_paused, bypass_time_requirement, min_seconds_required, total_assignments')
+                .select('*')
                 .eq('id', id)
                 .single();
 

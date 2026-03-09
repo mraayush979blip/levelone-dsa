@@ -55,7 +55,7 @@ export default function StudentDashboard() {
                 // Wrap each call to ensure they are treated as standard Promises
                 const streakPromise = Promise.resolve(supabase.rpc('update_student_streak', { student_uuid: user?.id }));
                 const phasesPromise = Promise.resolve(supabase.from('phases')
-                    .select('id, phase_number, title, description, start_date, end_date, total_assignments, min_seconds_required, bypass_time_requirement, is_paused, status, is_active, is_mandatory, created_at, updated_at')
+                    .select('*')
                     .eq('is_active', true)
                     .order('phase_number', { ascending: true }));
                 const userPromise = Promise.resolve(supabase.from('users')
@@ -82,7 +82,12 @@ export default function StudentDashboard() {
                 const submissionIds = new Set((submissionsResult?.data || []).map((s: any) => s.phase_id));
                 const totalLearningTime = (activityResult?.data || []).reduce((acc: number, curr: any) => acc + (curr.total_time_spent_seconds || 0), 0);
 
-                console.log('✅ [Dashboard] Data loaded successfully');
+                if (phasesResult?.error) console.error('❌ [Dashboard] Phases fetch error:', phasesResult.error);
+                if (userResult?.error) console.error('❌ [Dashboard] User fetch error:', userResult.error);
+                if (submissionsResult?.error) console.error('❌ [Dashboard] Submissions fetch error:', submissionsResult.error);
+                if (activityResult?.error) console.error('❌ [Dashboard] Activity fetch error:', activityResult.error);
+
+                console.log('✅ [Dashboard] Data loaded successfully, phases count:', phases.length);
 
                 return {
                     phases,
