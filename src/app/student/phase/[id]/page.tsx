@@ -199,12 +199,10 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         const req = phase.min_seconds_required || 0;
         let shouldUnlock = false;
 
-        if (phase.bypass_time_requirement) {
+        if (phase.bypass_time_requirement || req <= 0) {
             shouldUnlock = true;
-        } else if (req > 0) {
-            shouldUnlock = timeSpent >= req;
         } else {
-            shouldUnlock = videoCompleted;
+            shouldUnlock = timeSpent >= req;
         }
 
         setIsUnlocked(shouldUnlock);
@@ -780,16 +778,6 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                             <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100 mb-1">Solved on LeetCode?</h4>
                                                             <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
 
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black uppercase tracking-widest text-orange-500 text-left block">Your LeetCode ID</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter LeetCode Username"
-                                                                    value={leetcodeUsername}
-                                                                    onChange={(e) => setLeetcodeUsername(e.target.value)}
-                                                                    className="w-full bg-white dark:bg-orange-900/50 border-orange-100 dark:border-orange-500/10 focus:ring-orange-500 text-orange-900 placeholder:text-orange-300"
-                                                                />
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 )}

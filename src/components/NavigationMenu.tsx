@@ -147,21 +147,29 @@ export default function NavigationMenu() {
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="text"
+                                            id="nav-leetcode-input"
                                             placeholder="Enter LeetCode username"
                                             defaultValue={user?.leetcode_username || ''}
                                             className="w-full text-xs px-3 py-2 bg-background border border-card-border rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
-                                            onBlur={async (e) => {
-                                                const val = e.target.value.trim();
-                                                if (val !== user?.leetcode_username && user?.id) {
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const val = (document.getElementById('nav-leetcode-input') as HTMLInputElement).value.trim();
+                                                if (user?.id) {
                                                     try {
                                                         const { supabase } = await import('@/lib/supabase');
                                                         await supabase.from('users').update({ leetcode_username: val }).eq('id', user.id);
+                                                        alert('✅ LeetCode Profile Saved!');
                                                     } catch (err) { }
                                                 }
                                             }}
-                                        />
+                                            className="bg-orange-500 hover:bg-orange-600 px-3 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-sm shadow-orange-500/20"
+                                        >
+                                            Save
+                                        </button>
                                     </div>
-                                    <p className="text-[8px] text-muted font-medium mt-1 ml-1 opacity-70">Saves automatically on blur.</p>
+                                    <p className="text-[8px] text-muted font-medium mt-1.5 ml-1 opacity-70">Used for auto-verifying assignments.</p>
                                 </div>
 
                                 <div className="h-px bg-card-border mx-2" />
