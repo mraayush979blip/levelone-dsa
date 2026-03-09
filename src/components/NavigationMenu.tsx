@@ -22,6 +22,8 @@ export default function NavigationMenu() {
     const [showIOSGuide, setShowIOSGuide] = useState(false);
 
     // Use a combined condition or just depend on the hook entirely (we'll relax it to show it more often for desktops)
+    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
     const showInstall = isInstallable || isIOS;
 
     useEffect(() => {
