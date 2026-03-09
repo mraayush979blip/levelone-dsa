@@ -780,8 +780,35 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                                 <Zap className="h-6 w-6 text-orange-500" />
                                                             </div>
                                                             <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100 mb-1">Solved on LeetCode?</h4>
-                                                            <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
 
+                                                            {!user?.leetcode_username ? (
+                                                                <div className="text-left mt-6 bg-white dark:bg-slate-900 p-4 rounded-xl border border-red-200 dark:border-red-900/50">
+                                                                    <div className="flex items-center gap-2 text-red-600 mb-3">
+                                                                        <Lock className="w-4 h-4" />
+                                                                        <span className="font-bold text-sm">LeetCode Profile Required</span>
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex items-start gap-3">
+                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Create a <a href="https://leetcode.com" target="_blank" className="text-orange-500 hover:underline">LeetCode Account</a> if you haven't.</p>
+                                                                        </div>
+                                                                        <div className="flex items-start gap-3">
+                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Copy your exactly matching username.</p>
+                                                                        </div>
+                                                                        <div className="flex items-start gap-3">
+                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Open the <strong>Top Right Menu (Three Bars)</strong>.</p>
+                                                                        </div>
+                                                                        <div className="flex items-start gap-3">
+                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">4</div>
+                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Paste your username under <strong>LeetCode Profile</strong> and click <strong>Save</strong>.</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
@@ -812,7 +839,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
                                             <button
                                                 type="submit"
-                                                disabled={submittingIndex === idx || !isUnlocked || isPastDeadline}
+                                                disabled={submittingIndex === idx || !isUnlocked || isPastDeadline || (data.submissionType === 'leetcode' && !user?.leetcode_username)}
                                                 className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
                                             >
                                                 <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
