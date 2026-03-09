@@ -58,6 +58,9 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         error?: string | null;
     }>>({});
     const [success, setSuccess] = useState<string | null>(null);
+    const [leetcodeUsername, setLeetcodeUsername] = useState<string>('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [showUsernameModal, setShowUsernameModal] = useState(false);
     const [isVideoStarted, setIsVideoStarted] = useState(false);
 
     // --- Data Fetching (React Query) ---
@@ -74,7 +77,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
             const { data, error } = await supabase
                 .from('phases')
-                .select('id, phase_number, title, description, youtube_url, assignment_file_url, assignment_resource_url, allowed_submission_type, start_date, end_date, is_paused, bypass_time_requirement, min_seconds_required, total_assignments')
+                .select('id, phase_number, title, description, youtube_url, assignment_file_url, assignment_resource_url, assignment_leetcode_url, leetcode_problem_slug, allowed_submission_type, start_date, end_date, is_paused, bypass_time_requirement, min_seconds_required, total_assignments')
                 .eq('id', id)
                 .single();
 
@@ -127,7 +130,10 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
             timeSpentRef.current = activityData.total_time_spent_seconds || 0;
             setVideoCompleted(activityData.video_completed || false);
         }
-    }, [activityData]);
+        if (user?.leetcode_username) {
+            setLeetcodeUsername(user.leetcode_username);
+        }
+    }, [activityData, user]);
 
     useEffect(() => {
         if (phase && submissionsData) {
@@ -157,6 +163,13 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                         selectedFile: null,
                         existingFileUrl: null
                     };
+                }
+            }
+
+            // Sync LeetCode URL to initial form data if needed
+            for (let i = 1; i <= totalAssignments; i++) {
+                if (phase.allowed_submission_type === 'leetcode' && !initialFormData[i].notes) {
+                    initialFormData[i].notes = 'Verified via LeetCode';
                 }
             }
 
@@ -351,11 +364,52 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 }));
                 return;
             }
-        } else if (data.submissionType === 'file') {
             if (!data.selectedFile && !data.existingFileUrl) {
                 setFormData(prev => ({ ...prev, [index]: { ...prev[index], error: 'Please select a file' } }));
                 return;
             }
+        } else if (data.submissionType === 'leetcode') {
+            if (!leetcodeUsername) {
+                setShowUsernameModal(true);
+                return;
+            }
+
+            setIsVerifying(true);
+            try {
+                const response = await fetch('/api/leetcode/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: leetcodeUsername,
+                        problemSlug: phase?.leetcode_problem_slug
+                    })
+                });
+
+                const verifyData = await response.json();
+
+                if (!verifyData.success) {
+                    setFormData(prev => ({
+                        ...prev,
+                        [index]: { ...prev[index], error: verifyData.error || 'Verification failed. Make sure you solved the problem!' }
+                    }));
+                    setIsVerifying(false);
+                    return;
+                }
+
+                // If username was changed during the process, update it in DB
+                if (leetcodeUsername !== user?.leetcode_username) {
+                    await supabase.from('users').update({ leetcode_username: leetcodeUsername }).eq('id', user?.id);
+                }
+
+            } catch (err) {
+                setFormData(prev => ({
+                    ...prev,
+                    [index]: { ...prev[index], error: 'Error connecting to verification service' }
+                }));
+                setIsVerifying(false);
+                return;
+            }
+            setIsVerifying(false);
         }
 
         setSubmittingIndex(index);
@@ -552,6 +606,25 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                     </div>
                                     <ChevronDown className="h-4 w-4 text-slate-400 group-hover:translate-y-0.5 transition-transform" />
                                 </button>
+                                {phase.assignment_leetcode_url && (
+                                    <a
+                                        href={phase.assignment_leetcode_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-between p-5 bg-orange-50 dark:bg-orange-950/20 hover:bg-white dark:hover:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-500/10 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                                                <Zap className="h-5 w-5 text-orange-500" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-extrabold text-orange-900 dark:text-orange-100">Let&apos;s Code</p>
+                                                <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Solve on LeetCode</p>
+                                            </div>
+                                        </div>
+                                        <Zap className="h-4 w-4 text-orange-400 group-hover:rotate-12 transition-transform" />
+                                    </a>
+                                )}
                             </div>
                         ) : (
                             <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
@@ -646,6 +719,16 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                     >
                                                         Local File
                                                     </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'leetcode' } }))}
+                                                        className={cn(
+                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                            data.submissionType === 'leetcode' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                        )}
+                                                    >
+                                                        LeetCode
+                                                    </button>
                                                 </div>
                                             )}
 
@@ -664,7 +747,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                             disabled={!isUnlocked || isPastDeadline}
                                                         />
                                                     </div>
-                                                ) : (
+                                                ) : data.submissionType === 'file' ? (
                                                     <div className={cn(
                                                         "group relative border-2 border-dashed rounded-2xl p-6 transition-all text-center",
                                                         (!isUnlocked || isPastDeadline) ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
@@ -676,7 +759,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                                     <FileText className="h-5 w-5 text-emerald-500 shrink-0" />
                                                                     <span className="text-sm font-bold truncate">{data.selectedFile.name}</span>
                                                                 </div>
-                                                                <button onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
+                                                                <button type="button" onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
                                                             </div>
                                                         ) : (
                                                             <label className={cn("cursor-pointer block", (!isUnlocked || isPastDeadline) && 'pointer-events-none')}>
@@ -685,6 +768,27 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Project File</p>
                                                             </label>
                                                         )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        <div className="p-6 bg-orange-50 dark:bg-orange-950/20 rounded-2xl border border-orange-100 dark:border-orange-500/10 text-center">
+                                                            <div className="w-12 h-12 bg-white dark:bg-orange-900 rounded-2xl flex items-center justify-center shadow-md mx-auto mb-4">
+                                                                <Zap className="h-6 w-6 text-orange-500" />
+                                                            </div>
+                                                            <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100 mb-1">Solved on LeetCode?</h4>
+                                                            <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
+
+                                                            <div className="space-y-2">
+                                                                <label className="text-[10px] font-black uppercase tracking-widest text-orange-500 text-left block">Your LeetCode ID</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter LeetCode Username"
+                                                                    value={leetcodeUsername}
+                                                                    onChange={(e) => setLeetcodeUsername(e.target.value)}
+                                                                    className="w-full bg-white dark:bg-orange-900/50 border-orange-100 dark:border-orange-500/10 focus:ring-orange-500 text-orange-900 placeholder:text-orange-300"
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
 
@@ -718,10 +822,14 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                                 className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
                                             >
                                                 <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                                                {submittingIndex === idx ? (
+                                                {submittingIndex === idx || isVerifying ? (
                                                     <Loader2 className="h-5 w-5 animate-spin" />
                                                 ) : (
-                                                    <span>{isSubmitted ? 'Update Engineering Submission' : 'Commit Final Assignment'}</span>
+                                                    <span>
+                                                        {data.submissionType === 'leetcode'
+                                                            ? (isSubmitted ? 'Re-Verify Master Submission' : 'Verify My Solution')
+                                                            : (isSubmitted ? 'Update Engineering Submission' : 'Commit Final Assignment')}
+                                                    </span>
                                                 )}
                                             </button>
                                         </form>
@@ -732,6 +840,50 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                     </aside>
                 </div>
             </div>
+
+            {/* Username Modal */}
+            <AnimatePresence>
+                {showUsernameModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-card w-full max-w-md rounded-[2.5rem] border border-card-border shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-10 space-y-6">
+                                <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500">
+                                    <Zap className="h-8 w-8" />
+                                </div>
+                                <h2 className="text-2xl font-black tracking-tight">LeetCode Identity Required</h2>
+                                <p className="text-muted text-sm leading-relaxed">
+                                    We need your LeetCode username to verify your solution. Please ensure your profile &quot;Solved Problems&quot; section is set to public.
+                                </p>
+                                <div className="space-y-4">
+                                    <input
+                                        type="text"
+                                        placeholder="LeetCode Handle"
+                                        className="w-full h-14"
+                                        value={leetcodeUsername}
+                                        onChange={(e) => setLeetcodeUsername(e.target.value)}
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={() => setShowUsernameModal(false)}
+                                        className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl shadow-lg shadow-indigo-600/20"
+                                    >
+                                        Save & Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

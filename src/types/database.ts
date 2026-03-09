@@ -1,7 +1,7 @@
 // Database Types
 export type UserRole = 'admin' | 'student';
 export type UserStatus = 'active' | 'revoked';
-export type SubmissionType = 'github' | 'file';
+export type SubmissionType = 'github' | 'file' | 'leetcode';
 export type SubmissionStatus = 'valid' | 'late' | 'deleted';
 export type PhaseStatus = 'upcoming' | 'live' | 'ended' | 'paused';
 export type ActivityType = 'HEARTBEAT' | 'PAGE_VIEW' | 'VIDEO_PROGRESS' | 'SUBMISSION_CREATED' | 'SUBMISSION_UPDATED' | 'SUBMISSION_DELETED';
@@ -28,6 +28,7 @@ export interface User {
   equipped_theme?: string;
   equipped_banner?: string;
   equipped_avatar?: string;
+  leetcode_username?: string;
 }
 
 // Phase Interface
@@ -39,7 +40,9 @@ export interface Phase {
   youtube_url?: string;
   assignment_resource_url?: string;
   assignment_file_url?: string;
-  allowed_submission_type?: 'github' | 'file' | 'both';
+  assignment_leetcode_url?: string;
+  leetcode_problem_slug?: string;
+  allowed_submission_type?: 'github' | 'file' | 'both' | 'leetcode';
   start_date: string;
   end_date: string;
   status: PhaseStatus;

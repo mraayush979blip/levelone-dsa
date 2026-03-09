@@ -11,7 +11,8 @@ import {
     AlertCircle,
     Upload,
     X,
-    Download
+    Download,
+    Target
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Phase } from '@/types/database';
@@ -43,6 +44,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
         is_mandatory: true,
         min_seconds_required: 900, // Default 15 minutes
         total_assignments: 1,
+        assignment_leetcode_url: '',
+        leetcode_problem_slug: '',
     });
 
     useEffect(() => {
@@ -352,6 +355,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 <option value="both">Both (GitHub Link & File Upload)</option>
                                 <option value="github">GitHub Link Only</option>
                                 <option value="file">File Upload Only</option>
+                                <option value="leetcode">LeetCode Verification</option>
                             </select>
                         </div>
                         <p className="mt-1 text-xs text-gray-500">Choose how students are allowed to submit their work for this phase.</p>
@@ -425,6 +429,56 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 )}
                             </div>
                         </div>
+                    </div>
+
+                    <div className="sm:col-span-6 border-t border-gray-100 pt-6">
+                        <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4 text-orange-600">
+                            <Target className="mr-2 h-5 w-5" /> LeetCode Configuration
+                        </h3>
+                    </div>
+
+                    <div className="sm:col-span-6">
+                        <label htmlFor="assignment_leetcode_url" className="block text-sm font-bold text-gray-700">
+                            LeetCode Problem URL
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                type="url"
+                                name="assignment_leetcode_url"
+                                id="assignment_leetcode_url"
+                                placeholder="https://leetcode.com/problems/two-sum/"
+                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                value={formData.assignment_leetcode_url || ''}
+                                onChange={(e) => {
+                                    const url = e.target.value;
+                                    let slug = formData.leetcode_problem_slug;
+                                    // Auto-extract slug from LeetCode URL
+                                    if (url.includes('leetcode.com/problems/')) {
+                                        const match = url.match(/problems\/([^/]+)/);
+                                        if (match && match[1]) slug = match[1];
+                                    }
+                                    setFormData({ ...formData, assignment_leetcode_url: url, leetcode_problem_slug: slug });
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="sm:col-span-6">
+                        <label htmlFor="leetcode_problem_slug" className="block text-sm font-bold text-gray-700">
+                            LeetCode Problem Slug
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                type="text"
+                                name="leetcode_problem_slug"
+                                id="leetcode_problem_slug"
+                                placeholder="e.g. two-sum"
+                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                value={formData.leetcode_problem_slug || ''}
+                                onChange={(e) => setFormData({ ...formData, leetcode_problem_slug: e.target.value })}
+                            />
+                        </div>
+                        <p className="mt-1 text-xs text-gray-500 italic">This identifier is used for automatic verification via API.</p>
                     </div>
 
                     <div className="sm:col-span-6">
