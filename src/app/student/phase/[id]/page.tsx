@@ -240,6 +240,10 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                             last_activity_at: new Date().toISOString()
                         });
                 }
+
+                // Award points logic (try every 30s, the DB will safely throttle to 1 point per 50sec ~ 1min)
+                await supabase.rpc('award_activity_point');
+
             } catch (err) {
                 console.error('Heartbeat error:', err);
             }
