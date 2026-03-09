@@ -38,8 +38,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
         assignment_resource_url: '',
         assignment_file_url: '',
         allowed_submission_type: 'both',
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        start_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
+        end_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000 + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         is_active: true,
         is_mandatory: true,
         min_seconds_required: 900, // Default 15 minutes
@@ -62,8 +62,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                 if (data) {
                     setFormData({
                         ...data,
-                        start_date: new Date(data.start_date).toISOString().split('T')[0],
-                        end_date: new Date(data.end_date).toISOString().split('T')[0],
+                        start_date: data.start_date ? new Date(new Date(data.start_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+                        end_date: data.end_date ? new Date(new Date(data.end_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
                     });
                 }
             } catch (error: any) {
@@ -591,7 +591,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                         </label>
                         <div className="mt-1">
                             <input
-                                type="date"
+                                type="datetime-local"
                                 name="start_date"
                                 id="start_date"
                                 required
@@ -608,7 +608,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                         </label>
                         <div className="mt-1">
                             <input
-                                type="date"
+                                type="datetime-local"
                                 name="end_date"
                                 id="end_date"
                                 required

@@ -157,7 +157,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
             for (let i = 1; i <= totalAssignments; i++) {
                 if (!initialFormData[i]) {
                     initialFormData[i] = {
-                        submissionType: phase.allowed_submission_type === 'file' ? 'file' : 'github',
+                        submissionType: phase.allowed_submission_type === 'both' ? 'github' : (phase.allowed_submission_type || 'github'),
                         githubUrl: '',
                         notes: '',
                         selectedFile: null,
