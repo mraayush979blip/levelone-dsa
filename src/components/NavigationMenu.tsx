@@ -21,10 +21,8 @@ export default function NavigationMenu() {
     const [mounted, setMounted] = useState(false);
     const [showIOSGuide, setShowIOSGuide] = useState(false);
 
-    // Detect iOS Safari (doesn't support beforeinstallprompt)
-    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-    const showInstall = (isInstallable || (isIOS && !isStandalone));
+    // Use a combined condition or just depend on the hook entirely (we'll relax it to show it more often for desktops)
+    const showInstall = isInstallable || isIOS;
 
     useEffect(() => {
         setMounted(true);
@@ -135,6 +133,33 @@ export default function NavigationMenu() {
                                             </button>
                                         ))}
                                     </div>
+                                </div>
+
+                                <div className="h-px bg-card-border mx-2" />
+
+                                {/* LeetCode Setup Section */}
+                                <div className="px-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-muted mb-2 flex items-center gap-2">
+                                        <Zap className="w-3 h-3 text-orange-500" /> LeetCode Profile
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Enter LeetCode username"
+                                            defaultValue={user?.leetcode_username || ''}
+                                            className="w-full text-xs px-3 py-2 bg-background border border-card-border rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
+                                            onBlur={async (e) => {
+                                                const val = e.target.value.trim();
+                                                if (val !== user?.leetcode_username && user?.id) {
+                                                    try {
+                                                        const { supabase } = await import('@/lib/supabase');
+                                                        await supabase.from('users').update({ leetcode_username: val }).eq('id', user.id);
+                                                    } catch (err) { }
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="text-[8px] text-muted font-medium mt-1 ml-1 opacity-70">Saves automatically on blur.</p>
                                 </div>
 
                                 <div className="h-px bg-card-border mx-2" />

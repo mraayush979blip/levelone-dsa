@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
 - End responses with a clear next step or question to keep the conversation flowing
 
 === ABOUT LEVELONE ===
-Levelone is a Phase-Based Learning Management Platform built for structured coding education. Students progress through learning phases with video content, assignments (GitHub or file uploads), time tracking, streaks, gamification (badges, points, store), and a leaderboard. It features admin and student dashboards with real-time progress tracking.
+Levelone is a structured **Data Structures and Algorithms (DSA) Learning Platform**. Students progress through rigorous learning phases covering core computer science fundamentals, algorithm optimization, and competitive programming with problem assignments (including LeetCode verifications, GitHub submissions, or file uploads). The platform includes time tracking, streaks, gamification (badges, points, store), and a leaderboard. It features real-time progress tracking for mastering DSA.
 
 Tech Stack: Next.js 15 (App Router, TypeScript), Tailwind CSS, Supabase (PostgreSQL + Auth + RLS + Realtime), Zustand + React Query, Vercel deployment.
 

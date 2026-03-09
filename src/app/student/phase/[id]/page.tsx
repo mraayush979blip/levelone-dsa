@@ -117,7 +117,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 .select('total_time_spent_seconds, video_completed')
                 .eq('phase_id', id)
                 .eq('student_id', user?.id)
-                .single();
+                .maybeSingle();
             return data;
         },
         enabled: !!id && !!user,
@@ -222,7 +222,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                     .select('id')
                     .eq('phase_id', id)
                     .eq('student_id', user.id)
-                    .single();
+                    .maybeSingle();
 
                 if (existing) {
                     await supabase
@@ -589,23 +589,25 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 Engineering Resources
                             </h2>
                         </div>
-                        {phase.assignment_file_url || phase.assignment_resource_url ? (
+                        {phase.assignment_file_url || phase.assignment_resource_url || phase.assignment_leetcode_url ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={(e) => handleDownloadAssignment(e, phase.assignment_file_url || phase.assignment_resource_url)}
-                                    className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all group"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                                            <FileText className="h-5 w-5 text-indigo-600" />
+                                {(phase.assignment_file_url || phase.assignment_resource_url) && (
+                                    <button
+                                        onClick={(e) => handleDownloadAssignment(e, (phase.assignment_file_url || phase.assignment_resource_url) as string)}
+                                        className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                                                <FileText className="h-5 w-5 text-indigo-600" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold">Assignment Specification</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PDF Document</p>
+                                            </div>
                                         </div>
-                                        <div className="text-left">
-                                            <p className="text-sm font-bold">Assignment Specification</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PDF Document</p>
-                                        </div>
-                                    </div>
-                                    <ChevronDown className="h-4 w-4 text-slate-400 group-hover:translate-y-0.5 transition-transform" />
-                                </button>
+                                        <ChevronDown className="h-4 w-4 text-slate-400 group-hover:translate-y-0.5 transition-transform" />
+                                    </button>
+                                )}
                                 {phase.assignment_leetcode_url && (
                                     <a
                                         href={phase.assignment_leetcode_url}

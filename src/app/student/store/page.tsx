@@ -55,10 +55,14 @@ export default function StorePage() {
                 const invSet = new Set((invData || []).map((i: any) => i.item_id));
                 setInventory(invSet);
 
-                const { data: itemData } = await supabase
+                const { data: itemData, error: itemError } = await supabase
                     .from('store_items')
                     .select('*')
                     .order('cost', { ascending: true });
+
+                if (itemError) {
+                    console.error('❌ Store Error Fetching Items:', itemError);
+                }
 
                 const fetchedItems = itemData || [];
 
