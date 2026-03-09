@@ -16,7 +16,7 @@ const team = [
         linkedin: "https://www.linkedin.com/in/aayush-sharma-2013d",
         portfolio: "https://aayush-sharma-beige.vercel.app/",
         avatar: "⚡",
-        color: "from-indigo-500 to-blue-500",
+        color: "from-zinc-500 to-slate-400",
         bgImage: "/images/team/aayush.png",
         icon: Code2
     },
@@ -26,7 +26,7 @@ const team = [
         description: "Crafting the visual identity and premium aesthetic of Levelone.",
         linkedin: "https://www.linkedin.com/in/palak-chaurasia-6a1388388/",
         avatar: "🎨",
-        color: "from-purple-500 to-pink-500",
+        color: "from-gray-500 to-slate-300",
         bgImage: "/images/team/palak.png",
         icon: Palette
     },
@@ -36,7 +36,7 @@ const team = [
         description: "Ensuring the scalability and precision of our educational infrastructure.",
         linkedin: "https://www.linkedin.com/in/kritagyajain21/",
         avatar: "🛡️",
-        color: "from-emerald-500 to-teal-500",
+        color: "from-zinc-600 to-slate-500",
         bgImage: "/images/team/kritagya.png",
         icon: ShieldCheck
     }
@@ -84,12 +84,12 @@ export default function TeamPage() {
 
                     <SlideUp>
                         <div className="space-y-6">
-                            <div className="flex items-center justify-center gap-3 text-primary">
+                            <div className="flex items-center justify-center gap-3 text-zinc-400">
                                 <Users className="w-5 h-5" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.4em]">Architects of Excellence</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground drop-shadow-2xl">
-                                Meet <span className="text-primary italic">Our Team</span>
+                                Meet <span className="text-zinc-300 italic">Our Team</span>
                             </h1>
                             <p className="text-muted text-lg font-medium max-w-2xl mx-auto leading-relaxed">
                                 A collective of visionaries, engineers, and designers dedicated to redefining the digital educational landscape.
@@ -126,13 +126,13 @@ export default function TeamPage() {
                                         <div className="h-20 w-20 rounded-[2rem] bg-card border border-card-border flex items-center justify-center text-4xl shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
                                             {member.avatar}
                                         </div>
-                                        <member.icon className="w-6 h-6 text-primary opacity-20 group-hover:opacity-100 transition-opacity" />
+                                        <member.icon className="w-6 h-6 text-zinc-400 opacity-20 group-hover:opacity-100 transition-opacity" />
                                     </div>
 
                                     <div className="space-y-4">
                                         <div>
                                             <h3 className="text-2xl font-black tracking-tight text-foreground">{member.name}</h3>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">{member.role}</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{member.role}</p>
                                         </div>
                                         <p className="text-sm text-muted font-medium leading-relaxed">
                                             {member.description}
@@ -144,7 +144,7 @@ export default function TeamPage() {
                                             href={member.linkedin}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-3 bg-background border border-card-border rounded-2xl text-muted hover:text-primary hover:bg-primary/5 transition-all shadow-sm"
+                                            className="p-3 bg-background border border-card-border rounded-2xl text-muted hover:text-white hover:bg-white/5 transition-all shadow-sm"
                                         >
                                             <Linkedin className="w-5 h-5" />
                                         </a>
@@ -153,7 +153,7 @@ export default function TeamPage() {
                                                 href={member.portfolio}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="p-3 bg-background border border-card-border rounded-2xl text-muted hover:text-primary hover:bg-primary/5 transition-all shadow-sm"
+                                                className="p-3 bg-background border border-card-border rounded-2xl text-muted hover:text-white hover:bg-white/5 transition-all shadow-sm"
                                             >
                                                 <Globe className="w-5 h-5" />
                                             </a>
@@ -167,7 +167,7 @@ export default function TeamPage() {
 
                 <FadeIn delay={0.8} className="text-center pt-10">
                     <div className="inline-flex items-center gap-3 px-6 py-3 bg-card border border-card-border rounded-full shadow-2xl">
-                        <Sparkles className="w-4 h-4 text-primary animate-spin-slow" />
+                        <Sparkles className="w-4 h-4 text-zinc-400 animate-spin-slow" />
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">Building the Future of Education • Levelone v2.4</span>
                     </div>
                 </FadeIn>

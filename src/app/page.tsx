@@ -50,14 +50,14 @@ export default function HomePage() {
 
             <StaggerItem>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white drop-shadow-sm font-sans leading-tight">
-                Master Web Development <br className="hidden md:inline" />
-                <span className="bg-clip-text text-transparent bg-gradient-to-b from-zinc-300 to-zinc-600">The Modern Way</span>
+                Master Data Structures <br className="hidden md:inline" />
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-zinc-300 to-zinc-600">& Algorithms</span>
               </h1>
             </StaggerItem>
 
             <StaggerItem>
               <p className="max-w-[700px] text-zinc-400 font-medium md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed tracking-wide">
-                Experience a gamified, interactive learning environment designed to take you from zero to hero.
+                Experience a gamified, phase-based learning environment tailored to help you conquer DSA and competitive programming.
               </p>
             </StaggerItem>
 
@@ -80,8 +80,8 @@ export default function HomePage() {
                 <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-white shadow-inner">
                   <Terminal className="h-5 w-5" />
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Interactive Coding</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">Run code directly in your browser with our advanced playground.</p>
+                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Real-World Problem Solving</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Verify your logic directly on LeetCode with our automated assignment tracking.</p>
               </div>
             </StaggerItem>
 
@@ -100,8 +100,8 @@ export default function HomePage() {
                 <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-white shadow-inner">
                   <BookOpen className="h-5 w-5" />
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">Curated Curriculum</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">Structured learning path from basics to advanced concepts.</p>
+                <h3 className="mb-3 text-xl font-bold text-white tracking-tight">DSA Roadmaps</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Phase-by-phase learning pathways driving deep algorithmic intuition.</p>
               </div>
             </StaggerItem>
           </StaggerContainer>
