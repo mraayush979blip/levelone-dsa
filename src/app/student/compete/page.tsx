@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Trophy, Flame, Users, CheckCircle2, Loader2, ArrowLeft, Medal, Zap, Sparkles, Crown } from 'lucide-react';
+import { Trophy, Flame, Users, CheckCircle2, Loader2, ArrowLeft, Medal, Zap, Sparkles, Crown, Star, BookOpen, Award } from 'lucide-react';
 import Link from 'next/link';
 import BadgeList from '@/components/gamification/BadgeList';
 import { SlideUp, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/motion-wrapper';
@@ -17,6 +17,7 @@ interface LeaderboardEntry {
     completed_phases: number;
     current_streak: number;
     activity_points: number;
+    earned_badges: string[];
 }
 
 interface PhaseStats {
@@ -71,7 +72,8 @@ export default function CompetePage() {
                     avatar: entry.user_avatar || '👤',
                     current_streak: entry.current_streak || 0,
                     completed_phases: Number(entry.completed_phases) || 0,
-                    activity_points: entry.activity_points || 0
+                    activity_points: entry.activity_points || 0,
+                    earned_badges: entry.earned_badges || []
                 }));
                 setLeaderboard(processedLB);
 
@@ -261,6 +263,17 @@ export default function CompetePage() {
                                                         <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500 fill-amber-500" />
                                                         <span>{entry.activity_points || 0}</span>
                                                     </span>
+                                                    {entry.earned_badges && entry.earned_badges.length > 0 && (
+                                                        <span className="flex items-center gap-0.5 sm:gap-1 border-l border-card-border pl-2 sm:pl-3 ml-1">
+                                                            {entry.earned_badges.slice(0, 5).map((iconName, i) => {
+                                                                if (iconName === 'Flame') return <Flame key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-500" />;
+                                                                if (iconName === 'Star') return <Star key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-500" />;
+                                                                if (iconName === 'BookOpen') return <BookOpen key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-500" />;
+                                                                if (iconName === 'Award') return <Award key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-purple-500" />;
+                                                                return <Sparkles key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-fuchsia-500" />;
+                                                            })}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -306,6 +319,17 @@ export default function CompetePage() {
                                                                     <Zap className="h-2.5 w-2.5 text-amber-500 fill-amber-500" />
                                                                     {userEntry.activity_points}
                                                                 </span>
+                                                                {userEntry.earned_badges && userEntry.earned_badges.length > 0 && (
+                                                                    <span className="flex items-center gap-0.5 border-l border-card-border pl-2 ml-1">
+                                                                        {userEntry.earned_badges.slice(0, 5).map((iconName, i) => {
+                                                                            if (iconName === 'Flame') return <Flame key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-500" />;
+                                                                            if (iconName === 'Star') return <Star key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-500" />;
+                                                                            if (iconName === 'BookOpen') return <BookOpen key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-500" />;
+                                                                            if (iconName === 'Award') return <Award key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-purple-500" />;
+                                                                            return <Sparkles key={i} className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-fuchsia-500" />;
+                                                                        })}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
