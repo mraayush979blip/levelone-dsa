@@ -152,25 +152,25 @@ export default function StudentListPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Student Management</h1>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h1 className="text-2xl font-bold text-white">Student Management</h1>
+                    <p className="mt-1 text-sm text-zinc-400">
                         View and manage student access and progress.
                     </p>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                <div className="flex items-center space-x-2 text-sm text-zinc-300 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 shadow-sm">
                     <UsersIcon className="h-4 w-4" />
                     <span>{students.length} Total Students</span>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-zinc-900/50 backdrop-blur-md p-4 rounded-lg shadow-sm border border-zinc-800">
                 <div className="relative w-full lg:max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <Search className="h-5 w-5 text-zinc-500" aria-hidden="true" />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-zinc-700 rounded-md leading-5 bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 sm:text-sm"
                         placeholder="Search by name, email, or roll number..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,16 +193,16 @@ export default function StudentListPage() {
                             <ShieldOff className="h-4 w-4 mr-2" /> Revoke All
                         </button>
                     </div>
-                    <div className="flex items-center space-x-2 sm:border-l sm:pl-3 sm:border-t-0 border-t pt-3 sm:pt-0 w-full sm:w-auto">
-                        <Filter className="h-5 w-5 text-gray-400 shrink-0" />
+                    <div className="flex items-center space-x-2 sm:border-l sm:border-zinc-700 sm:pl-3 sm:border-t-0 border-t border-zinc-700 pt-3 sm:pt-0 w-full sm:w-auto">
+                        <Filter className="h-5 w-5 text-zinc-500 shrink-0" />
                         <select
-                            className="block w-full sm:w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                            className="block w-full sm:w-40 pl-3 pr-10 py-2 text-base border-zinc-700 bg-zinc-800/50 text-white focus:outline-none focus:ring-zinc-500 focus:border-zinc-500 sm:text-sm rounded-md border"
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value as any)}
                         >
-                            <option value="all">All Students</option>
-                            <option value="active">Active Only</option>
-                            <option value="revoked">Revoked Only</option>
+                            <option value="all" className="bg-zinc-900">All Students</option>
+                            <option value="active" className="bg-zinc-900">Active Only</option>
+                            <option value="revoked" className="bg-zinc-900">Revoked Only</option>
                         </select>
                     </div>
                 </div>
@@ -213,29 +213,29 @@ export default function StudentListPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
             ) : filteredStudents.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
-                    <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No students found</h3>
-                    <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
+                <div className="text-center py-12 bg-zinc-900/50 backdrop-blur-md rounded-lg border border-zinc-800 shadow-sm">
+                    <UsersIcon className="mx-auto h-12 w-12 text-zinc-600" />
+                    <h3 className="mt-2 text-sm font-medium text-white">No students found</h3>
+                    <p className="mt-1 text-sm text-zinc-400">Try adjusting your search or filters.</p>
                 </div>
             ) : (
-                <div className="bg-white shadow overflow-x-auto sm:rounded-lg border border-gray-200 text-black">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                <div className="bg-zinc-900/50 backdrop-blur-md shadow overflow-x-auto sm:rounded-lg border border-zinc-800 text-white">
+                    <table className="min-w-full divide-y divide-zinc-800">
+                        <thead className="bg-zinc-800/50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Name / Email
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Roll Number
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Phone
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Status
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
                                     Joined Date
                                 </th>
                                 <th scope="col" className="relative px-6 py-3">
@@ -243,22 +243,22 @@ export default function StudentListPage() {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-transparent divide-y divide-zinc-800">
                             {filteredStudents.map((student) => (
                                 <tr key={student.id}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div>
-                                                <div className="text-sm font-bold text-gray-900">{student.name}</div>
-                                                <div className="text-sm text-gray-500">{student.email}</div>
+                                                <div className="text-sm font-bold text-white">{student.name}</div>
+                                                <div className="text-sm text-zinc-400">{student.email}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900 font-medium">{student.roll_number || '-'}</div>
+                                        <div className="text-sm text-zinc-200 font-medium">{student.roll_number || '-'}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{student.phone || '-'}</div>
+                                        <div className="text-sm text-zinc-400">{student.phone || '-'}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${student.status === 'active'
@@ -268,13 +268,13 @@ export default function StudentListPage() {
                                             {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
                                         {new Date(student.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                         <Link
                                             href={`/admin/students/${student.id}`}
-                                            className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+                                            className="text-white hover:text-zinc-300 inline-flex items-center"
                                             title="View Details"
                                         >
                                             <Eye className="h-5 w-5" />

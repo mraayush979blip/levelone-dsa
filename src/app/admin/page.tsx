@@ -122,66 +122,66 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-4 md:space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard Overview</h2>
-                <div className="text-xs md:text-sm font-medium text-gray-500 bg-white px-2 py-1 md:px-3 rounded-full border border-gray-200">
+                <h2 className="text-xl md:text-2xl font-bold text-white">Dashboard Overview</h2>
+                <div className="text-xs md:text-sm font-medium text-zinc-400 bg-zinc-900 px-2 py-1 md:px-3 rounded-full border border-zinc-800">
                     Last sync: {new Date().toLocaleTimeString()}
                 </div>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Total Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1 md:mt-2">
+                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Total Students</p>
+                            <p className="text-2xl md:text-3xl font-bold text-white mt-1 md:mt-2">
                                 {stats.totalStudents}
                             </p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-2 md:p-3 shrink-0">
-                            <Users className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                        <div className="bg-zinc-800 rounded-lg p-2 md:p-3 shrink-0">
+                            <Users className="w-5 h-5 md:w-6 md:h-6 text-zinc-300" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Active Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-emerald-600 mt-1 md:mt-2">
+                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Active Students</p>
+                            <p className="text-2xl md:text-3xl font-bold text-emerald-400 mt-1 md:mt-2">
                                 {stats.activeStudents}
                             </p>
                         </div>
-                        <div className="bg-emerald-50 rounded-lg p-2 md:p-3 shrink-0">
-                            <Shield className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
+                        <div className="bg-emerald-500/10 rounded-lg p-2 md:p-3 shrink-0">
+                            <Shield className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Revoked Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-rose-600 mt-1 md:mt-2">
+                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Revoked Students</p>
+                            <p className="text-2xl md:text-3xl font-bold text-rose-400 mt-1 md:mt-2">
                                 {stats.revokedStudents}
                             </p>
                         </div>
-                        <div className="bg-rose-50 rounded-lg p-2 md:p-3 shrink-0">
-                            <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 text-rose-600" />
+                        <div className="bg-rose-500/10 rounded-lg p-2 md:p-3 shrink-0">
+                            <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Live Phases</p>
-                            <p className="text-2xl md:text-3xl font-bold text-indigo-600 mt-1 md:mt-2">
+                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Live Phases</p>
+                            <p className="text-2xl md:text-3xl font-bold text-zinc-100 mt-1 md:mt-2">
                                 {stats.livePhases}
                             </p>
                         </div>
-                        <div className="bg-indigo-50 rounded-lg p-2 md:p-3 shrink-0">
-                            <Layers className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
+                        <div className="bg-zinc-800 rounded-lg p-2 md:p-3 shrink-0">
+                            <Layers className="w-5 h-5 md:w-6 md:h-6 text-zinc-300" />
                         </div>
                     </div>
                 </div>
@@ -189,10 +189,10 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Retention Stats */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+                <div className="lg:col-span-2 bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
-                        <h3 className="text-base md:text-lg font-bold text-gray-900 flex items-center">
-                            <BarChart3 className="mr-2 h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+                        <h3 className="text-base md:text-lg font-bold text-white flex items-center">
+                            <BarChart3 className="mr-2 h-4 w-4 md:h-5 md:w-5 text-zinc-400" />
                             Student Retention Analysis
                         </h3>
                     </div>
@@ -204,37 +204,37 @@ export default function AdminDashboard() {
                                     <div className="relative pt-1 max-w-sm">
                                         <div className="flex mb-2 items-center justify-between">
                                             <div>
-                                                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-100">
+                                                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-zinc-300 bg-zinc-800">
                                                     Retention Rate
                                                 </span>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-xs font-semibold inline-block text-emerald-600 font-bold">
+                                                <span className="text-xs font-semibold inline-block text-zinc-300 font-bold">
                                                     {retentionData.retention_percent}%
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-emerald-100">
-                                            <div style={{ width: `${retentionData.retention_percent}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500"></div>
+                                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-zinc-800">
+                                            <div style={{ width: `${retentionData.retention_percent}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-zinc-900 justify-center bg-zinc-400"></div>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-gray-50 rounded-lg p-4 font-bold">
-                                            <p className="text-xs text-gray-500 uppercase">Retained</p>
-                                            <p className="text-xl font-bold text-gray-900">{retentionData.retained_count}</p>
+                                        <div className="bg-zinc-800/50 rounded-lg p-4 font-bold">
+                                            <p className="text-xs text-zinc-500 uppercase">Retained</p>
+                                            <p className="text-xl font-bold text-white">{retentionData.retained_count}</p>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 font-bold">
-                                            <p className="text-xs text-gray-500 uppercase">Dropped/Revoked</p>
-                                            <p className="text-xl font-bold text-gray-900">{retentionData.revoked_count}</p>
+                                        <div className="bg-zinc-800/50 rounded-lg p-4 font-bold">
+                                            <p className="text-xs text-zinc-500 uppercase">Dropped/Revoked</p>
+                                            <p className="text-xl font-bold text-white">{retentionData.revoked_count}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="hidden sm:flex flex-col items-center justify-center p-8 bg-emerald-50 rounded-2xl">
-                                    <TrendingUp className="h-12 w-12 text-emerald-600 mb-2" />
-                                    <span className="text-2xl font-black text-emerald-700">{retentionData.retention_percent}%</span>
-                                    <span className="text-xs text-emerald-600 font-medium">Efficiency</span>
+                                <div className="hidden sm:flex flex-col items-center justify-center p-8 bg-zinc-800/50 border border-zinc-700 rounded-2xl">
+                                    <TrendingUp className="h-12 w-12 text-zinc-400 mb-2" />
+                                    <span className="text-2xl font-black text-white">{retentionData.retention_percent}%</span>
+                                    <span className="text-xs text-zinc-500 font-medium">Efficiency</span>
                                 </div>
                             </div>
                         </div>
@@ -242,49 +242,49 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 font-bold">
-                    <h3 className="text-base md:text-lg font-bold text-gray-900 mb-4 md:mb-6">Quick Actions</h3>
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 font-bold">
+                    <h3 className="text-base md:text-lg font-bold text-white mb-4 md:mb-6">Quick Actions</h3>
                     <div className="space-y-3">
-                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-3 md:p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group">
+                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
                             <div className="flex items-center">
-                                <Plus className="h-4 w-4 md:h-5 md:w-5 text-blue-600 mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-blue-700">Create New Phase</span>
+                                <Plus className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
+                                <span className="text-xs md:text-sm font-bold text-zinc-200">Create New Phase</span>
                             </div>
-                            <span className="text-blue-300 group-hover:text-blue-600 transition-colors">→</span>
+                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
                         </Link>
 
-                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-3 md:p-4 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors group">
+                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
                             <div className="flex items-center">
-                                <Upload className="h-4 w-4 md:h-5 md:w-5 text-emerald-600 mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-emerald-700">Import Students</span>
+                                <Upload className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
+                                <span className="text-xs md:text-sm font-bold text-zinc-200">Import Students</span>
                             </div>
-                            <span className="text-emerald-300 group-hover:text-emerald-600 transition-colors">→</span>
+                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
                         </Link>
 
-                        <Link href="/admin/students" className="w-full flex items-center justify-between p-3 md:p-4 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors group">
+                        <Link href="/admin/students" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
                             <div className="flex items-center">
-                                <Users className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-indigo-700">View All Students</span>
+                                <Users className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
+                                <span className="text-xs md:text-sm font-bold text-zinc-200">View All Students</span>
                             </div>
-                            <span className="text-indigo-300 group-hover:text-indigo-600 transition-colors">→</span>
+                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
                         </Link>
 
                         <button
                             onClick={handleSyncRevocation}
                             disabled={isSyncing}
-                            className="w-full flex items-center justify-between p-3 md:p-4 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all group mt-2 md:mt-4 border border-rose-100 disabled:opacity-50"
+                            className="w-full flex items-center justify-between p-3 md:p-4 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-all group mt-2 md:mt-4 border border-rose-500/20 disabled:opacity-50"
                         >
                             <div className="flex items-center">
                                 {isSyncing ? (
-                                    <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-rose-600 mr-2 md:mr-3 animate-spin shrink-0" />
+                                    <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-rose-400 mr-2 md:mr-3 animate-spin shrink-0" />
                                 ) : (
-                                    <ShieldAlert className="h-4 w-4 md:h-5 md:w-5 text-rose-600 mr-2 md:mr-3 shrink-0" />
+                                    <ShieldAlert className="h-4 w-4 md:h-5 md:w-5 text-rose-400 mr-2 md:mr-3 shrink-0" />
                                 )}
-                                <span className="text-xs md:text-sm font-bold text-rose-700">
+                                <span className="text-xs md:text-sm font-bold text-rose-400">
                                     {isSyncing ? 'Syncing...' : 'Sync Revocations'}
                                 </span>
                             </div>
-                            {!isSyncing && <span className="text-rose-300 group-hover:text-rose-600 transition-colors">↻</span>}
+                            {!isSyncing && <span className="text-rose-500/50 group-hover:text-rose-400 transition-colors">↻</span>}
                         </button>
                     </div>
                 </div>
