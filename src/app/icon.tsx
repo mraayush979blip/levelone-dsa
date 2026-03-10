@@ -14,43 +14,26 @@ export default function Icon() {
             <div
                 style={{
                     fontSize: 300,
-                    background: '#ffffff',
+                    background: '#09090b', // Default zinc-950 background
                     width: '100%',
                     height: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '112px',
-                    border: '4px solid #f4f4f5'
                 }}
             >
                 <svg
-                    width="70%"
-                    height="70%"
-                    viewBox="0 0 40 40"
-                    fill="none"
                     xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="#f97316" // Orange-500
+                    stroke="#f97316"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ width: '60%', height: '60%' }}
                 >
-                    <path
-                        d="M10 32H24"
-                        stroke="#0f172a"
-                        strokeWidth="5"
-                        strokeLinecap="round"
-                    />
-                    <path
-                        d="M10 32V8M10 8L5 13M10 8L15 13"
-                        stroke="#10b981"
-                        strokeWidth="5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                    <path
-                        d="M32 8V32M32 8L28 12"
-                        stroke="#1e40af"
-                        strokeWidth="5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
+                    <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
                 </svg>
             </div>
         ),
