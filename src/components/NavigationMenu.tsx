@@ -357,7 +357,7 @@ export default function NavigationMenu() {
                                                 } else if (isIOS) {
                                                     setShowIOSGuide(true);
                                                 } else {
-                                                    alert("Your browser may already have this installed, or you need to click the default Install icon inside the URL bar at the top right.");
+                                                    alert("Native install prompt unavailable. \n\nTo install Levelone:\nLook for the 'Install App' or 'App Available' icon (often a small computer screen with a down-arrow) in the far right of your browser's URL address bar and click it.");
                                                 }
                                             }}
                                             className="w-full h-12 bg-primary text-white font-black uppercase tracking-[0.15em] text-[10px] rounded-xl transition-all shadow-glow hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
