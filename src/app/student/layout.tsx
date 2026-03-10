@@ -145,7 +145,18 @@ export default function StudentLayout({
                 )}
 
                 <main className={cn("flex-1", !isFullscreen ? 'py-10' : '')}>
-                    {children}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={pathname}
+                            initial={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', y: 15 }}
+                            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', y: 0 }}
+                            exit={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', y: -15 }}
+                            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                            className="h-full"
+                        >
+                            {children}
+                        </motion.div>
+                    </AnimatePresence>
                 </main>
 
                 {!isFullscreen && (

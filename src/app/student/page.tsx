@@ -136,14 +136,53 @@ export default function StudentDashboard() {
 
     if (loading) {
         return (
-            <div className="max-w-7xl mx-auto px-6 py-12 space-y-12 animate-pulse overflow-hidden">
-                <div className="h-48 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="md:col-span-2 space-y-8">
-                        {[1, 2, 3].map((i: number) => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />)}
+            <div className="max-w-7xl mx-auto px-6 py-12 space-y-12 overflow-hidden min-h-screen">
+                {/* Header Skeleton */}
+                <div className="flex flex-col md:flex-row justify-between gap-8 pb-10 border-b border-card-border">
+                    <div className="space-y-4 w-full max-w-md">
+                        <div className="h-4 w-24 bg-card border border-card-border rounded-full shimmer" />
+                        <div className="h-10 w-3/4 bg-card border border-card-border rounded-2xl shimmer" />
+                        <div className="h-5 w-1/2 bg-card border border-card-border rounded-xl shimmer" />
+                    </div>
+                    <div className="flex gap-10">
+                        <div className="space-y-2 text-right">
+                            <div className="h-3 w-20 bg-card border border-card-border rounded-full ml-auto shimmer" />
+                            <div className="h-8 w-16 bg-card border border-card-border rounded-xl ml-auto shimmer" />
+                        </div>
+                        <div className="space-y-2 text-right">
+                            <div className="h-3 w-24 bg-card border border-card-border rounded-full ml-auto shimmer" />
+                            <div className="h-8 w-20 bg-card border border-card-border rounded-xl ml-auto shimmer" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Body Skeleton */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="flex justify-between items-center mb-8">
+                            <div className="h-6 w-48 bg-card border border-card-border rounded-xl shimmer" />
+                            <div className="h-6 w-24 bg-card border border-card-border rounded-full shimmer" />
+                        </div>
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="h-32 bg-card border border-card-border rounded-3xl md:rounded-[2rem] p-6 flex items-center justify-between shimmer">
+                                <div className="flex items-center gap-6 w-full">
+                                    <div className="w-12 h-12 rounded-2xl bg-background border border-card-border shrink-0" />
+                                    <div className="space-y-3 w-full max-w-md">
+                                        <div className="h-5 w-3/4 bg-background border border-card-border rounded-lg" />
+                                        <div className="h-4 w-1/2 bg-background border border-card-border rounded-lg" />
+                                    </div>
+                                </div>
+                                <div className="hidden md:block w-32 h-10 bg-background border border-card-border rounded-xl mt-4" />
+                            </div>
+                        ))}
                     </div>
                     <div className="space-y-8">
-                        <div className="h-64 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />
+                        <div className="h-6 w-32 bg-card border border-card-border rounded-xl mb-8 shimmer" />
+                        <div className="h-64 bg-card border border-card-border rounded-[2rem] p-6 shimmer">
+                            <div className="w-16 h-16 rounded-2xl bg-background border border-card-border mb-4" />
+                            <div className="h-5 w-1/2 bg-background border border-card-border rounded-lg mb-2" />
+                            <div className="h-4 w-3/4 bg-background border border-card-border rounded-lg" />
+                        </div>
                     </div>
                 </div>
             </div>

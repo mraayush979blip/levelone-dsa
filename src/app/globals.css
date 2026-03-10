@@ -158,22 +158,22 @@ body {
 }
 
 /* Standardized Inputs */
-input,
-textarea,
-select {
-  background-color: var(--card-bg) !important;
-  color: var(--foreground) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 0.75rem !important;
-  padding: 0.75rem 1rem !important;
+input:not(.raw-input),
+textarea:not(.raw-input),
+select:not(.raw-input) {
+  background-color: var(--card-bg);
+  color: var(--foreground);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none !important;
+  outline: none;
 }
 
-input:focus,
-textarea:focus {
-  border-color: var(--theme-primary) !important;
-  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.1) !important;
+input:not(.raw-input):focus,
+textarea:not(.raw-input):focus {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.1);
 }
 
 ::selection {

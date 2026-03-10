@@ -94,7 +94,7 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full h-14 px-5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/50 focus:bg-white/10 transition-all font-medium text-sm"
+                            className="raw-input w-full h-14 px-5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/10 transition-all font-medium text-sm"
                             placeholder="Email Address"
                         />
                     </motion.div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full h-14 px-5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/50 focus:bg-white/10 transition-all font-medium text-sm"
+                            className="raw-input w-full h-14 px-5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/10 transition-all font-medium text-sm"
                             placeholder="Password"
                         />
                     </motion.div>
