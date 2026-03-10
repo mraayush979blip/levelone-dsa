@@ -95,7 +95,7 @@ export default function StudentDashboard() {
                     stats: {
                         completedCount: (submissionsResult?.data?.length as number) || 0,
                         totalTimeSeconds: totalLearningTime,
-                        points: Math.floor(totalLearningTime / 60)
+                        points: userResult?.data?.points || 0
                     },
                     userMetadata: userResult?.data
                 };
