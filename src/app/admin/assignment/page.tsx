@@ -56,38 +56,38 @@ export default function AssignmentPhasesPage() {
         <Link
             href={`/admin/assignment/${phase.id}`}
             key={phase.id}
-            className="group block bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200"
+            className="group block bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 shadow-sm hover:shadow-md hover:border-zinc-700 transition-all duration-200"
         >
             <div className="p-5">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-3">
-                        <div className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
+                        <div className="bg-white/10 text-white border border-white/20 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest mr-3">
                             Phase {phase.phase_number}
                         </div>
-                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                        <h3 className="text-lg font-black text-white group-hover:text-zinc-200 transition-colors line-clamp-1">
                             {phase.title}
                         </h3>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="h-5 w-5 text-zinc-500 group-hover:text-white transform group-hover:translate-x-1 transition-all" />
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-4 text-sm text-zinc-400">
                     <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                        <Calendar className="h-4 w-4 mr-1.5 text-zinc-500" />
                         <span>Ends {new Date(phase.end_date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center">
                         <div className={cn(
-                            "flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
-                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-green-100 text-green-800" :
-                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-100 text-red-800" :
-                                    "bg-gray-100 text-gray-800"
+                            "flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                    "bg-zinc-800 text-zinc-400 border-zinc-700"
                         )}>
                             <div className={cn(
                                 "w-1.5 h-1.5 rounded-full mr-1.5",
-                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-green-500 animate-pulse" :
+                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-500 animate-pulse" :
                                     getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-500" :
-                                        "bg-gray-500"
+                                        "bg-zinc-500"
                             )} />
                             {getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused).toUpperCase()}
                         </div>
@@ -101,8 +101,8 @@ export default function AssignmentPhasesPage() {
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight">Assignment Management</h1>
-                    <p className="mt-1 text-muted-foreground font-medium">
+                    <h1 className="text-3xl font-black text-white tracking-tight">Assignment Management</h1>
+                    <p className="mt-1 text-zinc-400 font-medium tracking-wide">
                         Track student submissions and analyze phase performance.
                     </p>
                 </div>
@@ -111,11 +111,11 @@ export default function AssignmentPhasesPage() {
             {/* Search */}
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-5 w-5 text-zinc-500" />
                 </div>
                 <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                    className="block w-full pl-10 pr-3 py-3 border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm rounded-xl leading-5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all shadow-sm"
                     placeholder="Search phases by title or number..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -125,14 +125,14 @@ export default function AssignmentPhasesPage() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-40 bg-card rounded-xl border border-border animate-pulse" />
+                        <div key={i} className="h-40 bg-zinc-900/50 rounded-xl border border-zinc-800 animate-pulse" />
                     ))}
                 </div>
             ) : filteredPhases.length === 0 ? (
-                <div className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-border">
-                    <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-bold text-foreground">No phases matching your search</h3>
-                    <p className="mt-2 text-muted-foreground">Try adjusting your search terms.</p>
+                <div className="text-center py-20 bg-zinc-900/50 rounded-2xl border border-zinc-800 backdrop-blur-sm">
+                    <AlertCircle className="mx-auto h-12 w-12 text-zinc-600" />
+                    <h3 className="mt-4 text-lg font-bold text-white uppercase tracking-wider">No phases matching your search</h3>
+                    <p className="mt-2 text-zinc-400">Try adjusting your search terms.</p>
                 </div>
             ) : (
                 <div className="space-y-12">
@@ -140,8 +140,8 @@ export default function AssignmentPhasesPage() {
                     {livePhases.length > 0 && (
                         <section>
                             <div className="flex items-center space-x-2 mb-6">
-                                <Clock className="h-5 w-5 text-emerald-500" />
-                                <h2 className="text-xl font-bold text-foreground">Live Phases</h2>
+                                <Clock className="h-5 w-5 text-emerald-400" />
+                                <h2 className="text-xl font-black text-white uppercase tracking-widest">Live Phases</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {livePhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}
@@ -153,8 +153,8 @@ export default function AssignmentPhasesPage() {
                     {pastPhases.length > 0 && (
                         <section>
                             <div className="flex items-center space-x-2 mb-6">
-                                <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-                                <h2 className="text-xl font-bold text-foreground">Past Phases</h2>
+                                <CheckCircle2 className="h-5 w-5 text-zinc-500" />
+                                <h2 className="text-xl font-black text-zinc-400 uppercase tracking-widest">Past Phases</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-85">
                                 {pastPhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}
@@ -165,9 +165,9 @@ export default function AssignmentPhasesPage() {
                     {/* Other Phases (Upcoming/Paused) */}
                     {otherPhases.length > 0 && (
                         <section>
-                            <div className="flex items-center space-x-2 mb-6 text-gray-500">
+                            <div className="flex items-center space-x-2 mb-6 text-zinc-500">
                                 <Calendar className="h-5 w-5" />
-                                <h2 className="text-xl font-bold">Upcoming & Other</h2>
+                                <h2 className="text-xl font-black uppercase tracking-widest">Upcoming & Other</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
                                 {otherPhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}

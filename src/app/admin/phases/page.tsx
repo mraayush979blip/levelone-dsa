@@ -83,14 +83,14 @@ export default function PhaseListPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Learning Phases</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <h1 className="text-2xl font-black text-white tracking-tight">Learning Phases</h1>
+                    <p className="mt-1 text-sm text-zinc-400 font-medium">
                         Manage your curriculum phases and student deadlines.
                     </p>
                 </div>
                 <Link
                     href="/admin/phases/new"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-[0_0_15px_rgba(255,255,255,0.1)] text-sm font-bold text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all transform hover:scale-105"
                 >
                     <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                     Create Phase
@@ -98,14 +98,14 @@ export default function PhaseListPage() {
             </div>
 
             {/* Search and Filter */}
-            <div className="flex items-center px-4 py-3 bg-card rounded-lg shadow-sm border border-border">
+            <div className="flex items-center px-4 py-3 bg-zinc-900/50 rounded-xl shadow-sm border border-zinc-800 backdrop-blur-sm">
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                        <Search className="h-5 w-5 text-zinc-500" aria-hidden="true" />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-border rounded-md leading-5 bg-background placeholder-muted-foreground focus:outline-none focus:placeholder-muted-foreground focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border-0 rounded-md leading-5 bg-transparent placeholder-zinc-500 text-white focus:outline-none focus:ring-0 sm:text-sm"
                         placeholder="Search phases by title or number..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,14 +119,14 @@ export default function PhaseListPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
             ) : filteredPhases.length === 0 ? (
-                <div className="text-center py-12 bg-card rounded-lg border border-border shadow-sm">
-                    <Layers className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-2 text-sm font-medium text-foreground">No phases found</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Get started by creating a new learning phase.</p>
+                <div className="text-center py-12 bg-zinc-900/50 rounded-2xl border border-zinc-800 shadow-sm backdrop-blur-sm">
+                    <Layers className="mx-auto h-12 w-12 text-zinc-600" />
+                    <h3 className="mt-2 text-sm font-bold text-white uppercase tracking-wider">No phases found</h3>
+                    <p className="mt-1 text-sm text-zinc-400 font-medium">Get started by creating a new learning phase.</p>
                     <div className="mt-6">
                         <Link
                             href="/admin/phases/new"
-                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-[0_0_15px_rgba(255,255,255,0.1)] text-sm font-bold rounded-lg text-black bg-white hover:bg-zinc-200 transition-all hover:scale-105"
                         >
                             <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                             New Phase
@@ -134,37 +134,37 @@ export default function PhaseListPage() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-card shadow overflow-hidden sm:rounded-md border border-border">
-                    <ul className="divide-y divide-border">
+                <div className="bg-zinc-900/50 shadow-xl overflow-hidden rounded-2xl border border-zinc-800 backdrop-blur-sm">
+                    <ul className="divide-y divide-zinc-800/50">
                         {filteredPhases.map((phase) => (
                             <li key={phase.id}>
-                                <div className="px-4 py-4 flex items-center sm:px-6 hover:bg-muted/50 transition-colors">
+                                <div className="px-4 py-5 flex items-center sm:px-6 hover:bg-zinc-800/50 transition-colors group">
                                     <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                                         <div className="truncate">
-                                            <div className="flex items-center text-sm font-medium text-primary truncate">
-                                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold mr-3">
+                                            <div className="flex items-center text-sm font-medium truncate">
+                                                <span className="bg-white/10 text-white border border-white/20 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest mr-3">
                                                     Phase {phase.phase_number}
                                                 </span>
-                                                <span className="text-lg font-bold text-foreground">{phase.title}</span>
+                                                <span className="text-lg font-black text-white group-hover:text-zinc-200 transition-colors">{phase.title}</span>
                                             </div>
-                                            <div className="mt-2 flex">
-                                                <div className="flex items-center text-sm text-muted-foreground mr-6">
+                                            <div className="mt-3 flex">
+                                                <div className="flex items-center text-xs font-medium text-zinc-400 mr-6">
                                                     <span>
                                                         {new Date(phase.start_date).toLocaleDateString()} - {new Date(phase.end_date).toLocaleDateString()}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center">
                                                     {phase.is_paused ? (
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        <span className="px-2.5 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
                                                             Paused
                                                         </span>
                                                     ) : (
                                                         <span className={cn(
-                                                            "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
-                                                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-green-100 text-green-800" :
-                                                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'upcoming' ? "bg-blue-100 text-blue-800" :
-                                                                    getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-100 text-red-800" :
-                                                                        "bg-gray-100 text-gray-800"
+                                                            "px-2.5 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-full border",
+                                                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'upcoming' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                                    getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                                        "bg-zinc-800 text-zinc-400 border-zinc-700"
                                                         )}>
                                                             {getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused)}
                                                         </span>
@@ -177,21 +177,21 @@ export default function PhaseListPage() {
                                         <button
                                             onClick={() => togglePause(phase)}
                                             title={phase.is_paused ? "Resume Phase" : "Pause Phase"}
-                                            className="p-2 text-gray-400 hover:text-yellow-600 transition-colors"
+                                            className="p-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all hover:scale-105 active:scale-95"
                                         >
-                                            {phase.is_paused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+                                            {phase.is_paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
                                         </button>
                                         <Link
                                             href={`/admin/phases/${phase.id}/edit`}
-                                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                            className="p-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all hover:scale-105 active:scale-95 inline-flex"
                                         >
-                                            <Edit2 className="h-5 w-5" />
+                                            <Edit2 className="h-4 w-4" />
                                         </Link>
                                         <button
                                             onClick={() => deletePhase(phase.id)}
-                                            className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                            className="p-2.5 bg-zinc-800 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 hover:border-red-900/50 rounded-xl transition-all hover:scale-105 active:scale-95 border border-transparent"
                                         >
-                                            <Trash2 className="h-5 w-5" />
+                                            <Trash2 className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </div>
