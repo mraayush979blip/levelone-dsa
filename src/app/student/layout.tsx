@@ -11,6 +11,7 @@ import InstallPWA from '@/components/InstallPWA';
 import NavigationMenu from '@/components/NavigationMenu';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '@/components/Logo';
 
 export default function StudentLayout({
     children,
@@ -81,16 +82,7 @@ export default function StudentLayout({
                             <div className="flex justify-between h-20">
                                 <div className="flex items-center space-x-10">
                                     <Link href="/student" className="flex items-center space-x-3 group text-foreground">
-                                        <div className="w-10 h-10 bg-primary rounded-xl rotate-45 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-[135deg] transition-all duration-700">
-                                            <div className="-rotate-45 group-hover:-rotate-[135deg] transition-all duration-700">
-                                                <Zap className="h-5 w-5 text-white fill-white" />
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xl font-black tracking-[-0.05em] leading-none text-foreground">
-                                                LEVELONE
-                                            </span>
-                                        </div>
+                                        <Logo size={40} showText={true} />
                                     </Link>
 
                                     <div className="hidden md:flex items-center space-x-1">
@@ -154,11 +146,7 @@ export default function StudentLayout({
                             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-primary rounded-lg rotate-45 flex items-center justify-center border border-primary/20">
-                                            <div className="-rotate-45">
-                                                <Zap className="h-4 w-4 text-white fill-white" />
-                                            </div>
-                                        </div>
+                                        <Logo size={32} />
                                         <span className="text-lg font-black tracking-tighter">LEVELONE</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-muted font-medium text-xs">

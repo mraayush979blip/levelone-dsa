@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import InstallPWA from './InstallPWA';
+import Logo from './Logo';
 
 const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -64,7 +65,8 @@ export default function AdminSidebar() {
             )}>
                 <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
                     <div className="flex items-center flex-shrink-0 px-4 mb-8">
-                        <span className="text-xl font-black text-white tracking-tighter">Levelone</span>
+                        <Logo size={40} />
+                        <span className="ml-3 text-xl font-black text-white tracking-tighter">Levelone</span>
                         <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold text-zinc-300 bg-zinc-800 rounded uppercase tracking-wider">Admin</span>
                     </div>
                     <nav className="flex-1 px-2 space-y-1 bg-zinc-950">

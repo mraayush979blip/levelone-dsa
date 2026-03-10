@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import NeonLoader from '@/components/NeonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -71,9 +72,9 @@ export default function LoginPage() {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                        className="w-12 h-12 bg-white rounded-full mx-auto mb-6 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                        className="mx-auto mb-6 flex items-center justify-center"
                     >
-                        <div className="w-4 h-4 bg-black rounded-sm rotate-45" />
+                        <Logo size={60} />
                     </motion.div>
 
                     <h1 className="text-4xl font-black tracking-tighter mb-2">Levelone</h1>
