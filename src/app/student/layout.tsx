@@ -124,8 +124,6 @@ export default function StudentLayout({
                                 </div>
 
                                 <div className="flex items-center space-x-6">
-                                    <InstallPWA />
-
                                     <div className="hidden lg:flex items-center gap-4 pl-8 border-l border-card-border">
                                         <div className="text-right">
                                             <p className="text-sm font-black tracking-tight truncate max-w-[150px] text-foreground">
@@ -138,6 +136,7 @@ export default function StudentLayout({
                                     </div>
 
                                     <NavigationMenu />
+                                    <InstallPWA variant="invisible" />
                                 </div>
                             </div>
                         </div>

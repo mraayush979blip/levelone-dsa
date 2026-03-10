@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users, Download, Smartphone, Sparkles } from 'lucide-react';
+import { Menu, X, LogOut, Palette, MessageSquare, Bug, ChevronRight, Sun, Zap, Check, Users, Download, Smartphone, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePWAInstall } from '@/hooks/usePWAInstall';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import InstallPWA from './InstallPWA';
 
 const themes = [
     { id: 'theme-light', name: 'Premium Ivory', icon: Sun, color: '#0f172a' },
@@ -15,10 +15,6 @@ export default function NavigationMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const { user, signOut, updateTheme } = useAuth();
     const [mounted, setMounted] = useState(false);
-
-    // Use a combined condition or just depend on the hook entirely (we'll relax it to show it more often for desktops)
-    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
     useEffect(() => {
         setMounted(true);
@@ -197,6 +193,8 @@ export default function NavigationMenu() {
                                         </div>
                                         <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </Link>
+
+                                    <InstallPWA variant="menu" />
 
                                     <button
                                         onClick={() => {
