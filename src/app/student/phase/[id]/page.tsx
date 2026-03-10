@@ -22,7 +22,8 @@ import {
     Shield,
     MessageSquare,
     ChevronDown,
-    Lock
+    Lock,
+    ListTodo
 } from 'lucide-react';
 import Link from 'next/link';
 import { getPhaseStatus, cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ import { isValidGitHubUrl, isValidFileSize, formatFileSize, isValidAssignmentFil
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface PhasePageProps {
     params: Promise<{ id: string }>;
@@ -60,6 +62,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
     const [success, setSuccess] = useState<string | null>(null);
     const [leetcodeUsername, setLeetcodeUsername] = useState<string>('');
     const [isVerifying, setIsVerifying] = useState(false);
+    const [verifyingTaskId, setVerifyingTaskId] = useState<string | null>(null);
     const [showUsernameModal, setShowUsernameModal] = useState(false);
     const [isVideoStarted, setIsVideoStarted] = useState(false);
 
@@ -119,6 +122,34 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 .eq('student_id', user?.id)
                 .maybeSingle();
             return data;
+        },
+        enabled: !!id && !!user,
+    });
+
+    // 4. Fetch Phase Tasks
+    const { data: tasksData, isLoading: tasksLoading } = useQuery({
+        queryKey: ['phase_tasks', id],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('phase_tasks')
+                .select('*')
+                .eq('phase_id', id)
+                .order('created_at', { ascending: true });
+            return data || [];
+        },
+        enabled: !!id,
+    });
+
+    // 5. Fetch Task Submissions
+    const { data: taskSubmissionsData } = useQuery({
+        queryKey: ['task_submissions', id, user?.id],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('task_submissions')
+                .select('*')
+                .eq('phase_id', id)
+                .eq('student_id', user?.id);
+            return data || [];
         },
         enabled: !!id && !!user,
     });
@@ -488,6 +519,78 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         }
     };
 
+    const handleVerifyTask = async (task: any) => {
+        if (!user || !isUnlocked || isPastDeadline) return;
+
+        if (!leetcodeUsername) {
+            setShowUsernameModal(true);
+            return;
+        }
+
+        setVerifyingTaskId(task.id);
+
+        // Extract slug from URL
+        let problemSlug = '';
+        if (task.url.includes('leetcode.com/problems/')) {
+            const match = task.url.match(/problems\/([^/]+)/);
+            if (match && match[1]) problemSlug = match[1];
+        }
+
+        if (!problemSlug) {
+            toast.error("Could not extract problem slug from LeetCode URL");
+            setVerifyingTaskId(null);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/leetcode/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: leetcodeUsername,
+                    problemSlug: problemSlug
+                })
+            });
+
+            const verifyData = await response.json();
+
+            if (!verifyData.success) {
+                toast.error(verifyData.error || 'Verification failed. Make sure you solved the problem!');
+                setVerifyingTaskId(null);
+                return;
+            }
+
+            // Insert into task_submissions
+            const { error: insertError } = await supabase.from('task_submissions').insert({
+                student_id: user.id,
+                task_id: task.id,
+                phase_id: id
+            });
+
+            if (insertError) {
+                if (insertError.code === '23505') {
+                    toast.success('Task already verified!');
+                } else {
+                    toast.error('Failed to save completion: ' + insertError.message);
+                }
+            } else {
+                toast.success(`Verified! ${task.points} Points Awarded 🎉`);
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['task_submissions', id, user?.id] });
+
+            // If username was changed during the process, update it in DB
+            if (leetcodeUsername !== user?.leetcode_username) {
+                await supabase.from('users').update({ leetcode_username: leetcodeUsername }).eq('id', user?.id);
+            }
+
+        } catch (err) {
+            toast.error('Error connecting to verification service');
+        } finally {
+            setVerifyingTaskId(null);
+        }
+    };
+
     const extractVideoId = (url: string) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -673,190 +776,246 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                         )}
 
                         <div className="space-y-12">
-                            {Array.from({ length: phase.total_assignments || 1 }, (_, i) => i + 1).map((idx) => {
-                                const data = formData[idx] || {
-                                    submissionType: 'github',
-                                    githubUrl: '',
-                                    notes: '',
-                                    selectedFile: null,
-                                    existingFileUrl: null
-                                };
-                                const isSubmitted = !!submissions[idx];
-
-                                return (
-                                    <div key={idx} className={cn(
-                                        "space-y-6 pb-10",
-                                        idx < (phase.total_assignments || 1) ? 'border-b border-slate-100 dark:border-slate-800' : ''
-                                    )}>
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-sm font-black uppercase tracking-tighter flex items-center gap-2">
-                                                Assignment Unit {idx.toString().padStart(2, '0')}
-                                                {isSubmitted && (
-                                                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                                )}
-                                            </h3>
-                                            {isSubmitted && (
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10">Verified</span>
-                                            )}
-                                        </div>
-
-                                        <form onSubmit={(e) => handleSubmit(e, idx)} className="space-y-6">
-                                            {phase.allowed_submission_type === 'both' && (
-                                                <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                            {tasksData && tasksData.length > 0 ? (
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                        <ListTodo className="h-4 w-4" /> Assigned Tasks
+                                    </h3>
+                                    {tasksData.map((task: any, idx: number) => {
+                                        const isCompleted = taskSubmissionsData?.some((ts: any) => ts.task_id === task.id);
+                                        return (
+                                            <div key={task.id} className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div>
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Problem {idx + 1}</span>
+                                                        <h4 className="text-sm font-bold">{task.title}</h4>
+                                                    </div>
+                                                    {isCompleted ? (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10">Verified</span>
+                                                            <span className="text-[10px] font-bold text-slate-400">+{task.points} PTS</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md border border-primary/20">+{task.points} PTS</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <a
+                                                        href={task.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex-1 h-10 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-[10px] rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+                                                    >
+                                                        <Zap className="h-3 w-3" /> Let's Code
+                                                    </a>
                                                     <button
-                                                        type="button"
-                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'github' } }))}
+                                                        onClick={() => handleVerifyTask(task)}
+                                                        disabled={verifyingTaskId === task.id || isCompleted || !isUnlocked || isPastDeadline}
                                                         className={cn(
-                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
-                                                            data.submissionType === 'github' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                            "flex-1 h-10 font-bold uppercase tracking-wider text-[10px] rounded-xl transition-all shadow-sm flex items-center justify-center gap-2",
+                                                            isCompleted
+                                                                ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                                                                : "bg-indigo-600 text-white shadow-indigo-600/20 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600"
                                                         )}
                                                     >
-                                                        Source Link
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'file' } }))}
-                                                        className={cn(
-                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
-                                                            data.submissionType === 'file' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                        {verifyingTaskId === task.id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : isCompleted ? (
+                                                            <><CheckCircle2 className="h-3.5 w-3.5" /> Solved</>
+                                                        ) : (
+                                                            "Verify"
                                                         )}
-                                                    >
-                                                        Local File
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'leetcode' } }))}
-                                                        className={cn(
-                                                            "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
-                                                            data.submissionType === 'leetcode' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
-                                                        )}
-                                                    >
-                                                        LeetCode
                                                     </button>
                                                 </div>
-                                            )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                Array.from({ length: phase.total_assignments || 1 }, (_, i) => i + 1).map((idx) => {
+                                    const data = formData[idx] || {
+                                        submissionType: 'github',
+                                        githubUrl: '',
+                                        notes: '',
+                                        selectedFile: null,
+                                        existingFileUrl: null
+                                    };
+                                    const isSubmitted = !!submissions[idx];
 
-                                            <div className="space-y-4">
-                                                {data.submissionType === 'github' ? (
-                                                    <div className="relative group">
-                                                        <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
-                                                            <Github className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
-                                                        </div>
-                                                        <input
-                                                            type="url"
-                                                            placeholder="GitHub Repository URL"
-                                                            value={data.githubUrl}
-                                                            onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], githubUrl: e.target.value } }))}
-                                                            className="w-full !pl-10 text-sm font-medium"
-                                                            disabled={!isUnlocked || isPastDeadline}
-                                                        />
-                                                    </div>
-                                                ) : data.submissionType === 'file' ? (
-                                                    <div className={cn(
-                                                        "group relative border-2 border-dashed rounded-2xl p-6 transition-all text-center",
-                                                        (!isUnlocked || isPastDeadline) ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
-                                                        data.selectedFile || data.existingFileUrl ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-slate-200 dark:border-slate-800'
-                                                    )}>
-                                                        {data.selectedFile ? (
-                                                            <div className="flex items-center justify-between gap-4">
-                                                                <div className="flex items-center gap-3 overflow-hidden">
-                                                                    <FileText className="h-5 w-5 text-emerald-500 shrink-0" />
-                                                                    <span className="text-sm font-bold truncate">{data.selectedFile.name}</span>
-                                                                </div>
-                                                                <button type="button" onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
-                                                            </div>
-                                                        ) : (
-                                                            <label className={cn("cursor-pointer block", (!isUnlocked || isPastDeadline) && 'pointer-events-none')}>
-                                                                <input type="file" className="hidden" disabled={!isUnlocked || isPastDeadline} onChange={(e) => handleFileSelect(e, idx)} />
-                                                                <Upload className="mx-auto h-8 w-8 text-slate-300 mb-3 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
-                                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Project File</p>
-                                                            </label>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-4">
-                                                        <div className="p-6 bg-orange-50 dark:bg-orange-950/20 rounded-2xl border border-orange-100 dark:border-orange-500/10 text-center">
-                                                            <div className="w-12 h-12 bg-white dark:bg-orange-900 rounded-2xl flex items-center justify-center shadow-md mx-auto mb-4">
-                                                                <Zap className="h-6 w-6 text-orange-500" />
-                                                            </div>
-                                                            <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100 mb-1">Solved on LeetCode?</h4>
-
-                                                            {!user?.leetcode_username ? (
-                                                                <div className="text-left mt-6 bg-white dark:bg-slate-900 p-4 rounded-xl border border-red-200 dark:border-red-900/50">
-                                                                    <div className="flex items-center gap-2 text-red-600 mb-3">
-                                                                        <Lock className="w-4 h-4" />
-                                                                        <span className="font-bold text-sm">LeetCode Profile Required</span>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        <div className="flex items-start gap-3">
-                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Create a <a href="https://leetcode.com" target="_blank" className="text-orange-500 hover:underline">LeetCode Account</a> if you haven't.</p>
-                                                                        </div>
-                                                                        <div className="flex items-start gap-3">
-                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Copy your exactly matching username.</p>
-                                                                        </div>
-                                                                        <div className="flex items-start gap-3">
-                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Open the <strong>Top Right Menu (Three Bars)</strong>.</p>
-                                                                        </div>
-                                                                        <div className="flex items-start gap-3">
-                                                                            <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">4</div>
-                                                                            <p className="text-xs text-slate-600 dark:text-slate-300">Paste your username under <strong>LeetCode Profile</strong> and click <strong>Save</strong>.</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                    return (
+                                        <div key={idx} className={cn(
+                                            "space-y-6 pb-10",
+                                            idx < (phase.total_assignments || 1) ? 'border-b border-slate-100 dark:border-slate-800' : ''
+                                        )}>
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-sm font-black uppercase tracking-tighter flex items-center gap-2">
+                                                    Assignment Unit {idx.toString().padStart(2, '0')}
+                                                    {isSubmitted && (
+                                                        <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                                    )}
+                                                </h3>
+                                                {isSubmitted && (
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10">Verified</span>
                                                 )}
-
-                                                <textarea
-                                                    placeholder="Implementation notes (optional)..."
-                                                    value={data.notes}
-                                                    onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], notes: e.target.value } }))}
-                                                    className="w-full h-24 text-sm font-medium resize-none pb-safe"
-                                                    disabled={!isUnlocked || isPastDeadline}
-                                                />
                                             </div>
 
-                                            <AnimatePresence>
-                                                {data.error && (
-                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/20 text-red-600 rounded-xl border border-red-100 dark:border-red-500/10">
-                                                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                                                        <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.error}</p>
-                                                    </motion.div>
+                                            <form onSubmit={(e) => handleSubmit(e, idx)} className="space-y-6">
+                                                {phase.allowed_submission_type === 'both' && (
+                                                    <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'github' } }))}
+                                                            className={cn(
+                                                                "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                                data.submissionType === 'github' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                            )}
+                                                        >
+                                                            Source Link
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'file' } }))}
+                                                            className={cn(
+                                                                "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                                data.submissionType === 'file' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                            )}
+                                                        >
+                                                            Local File
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(p => ({ ...p, [idx]: { ...p[idx], submissionType: 'leetcode' } }))}
+                                                            className={cn(
+                                                                "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                                                                data.submissionType === 'leetcode' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'
+                                                            )}
+                                                        >
+                                                            LeetCode
+                                                        </button>
+                                                    </div>
                                                 )}
-                                                {data.success && (
-                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-100 dark:border-emerald-500/10">
-                                                        <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
-                                                        <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.success}</p>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
 
-                                            <button
-                                                type="submit"
-                                                disabled={submittingIndex === idx || !isUnlocked || isPastDeadline || (data.submissionType === 'leetcode' && !user?.leetcode_username)}
-                                                className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
-                                            >
-                                                <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                                                {submittingIndex === idx || isVerifying ? (
-                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                ) : (
-                                                    <span>
-                                                        {data.submissionType === 'leetcode'
-                                                            ? (isSubmitted ? 'Re-Verify Master Submission' : 'Verify My Solution')
-                                                            : (isSubmitted ? 'Update Engineering Submission' : 'Commit Final Assignment')}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        </form>
-                                    </div>
-                                );
-                            })}
+                                                <div className="space-y-4">
+                                                    {data.submissionType === 'github' ? (
+                                                        <div className="relative group">
+                                                            <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                                                                <Github className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                            </div>
+                                                            <input
+                                                                type="url"
+                                                                placeholder="GitHub Repository URL"
+                                                                value={data.githubUrl}
+                                                                onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], githubUrl: e.target.value } }))}
+                                                                className="w-full !pl-10 text-sm font-medium"
+                                                                disabled={!isUnlocked || isPastDeadline}
+                                                            />
+                                                        </div>
+                                                    ) : data.submissionType === 'file' ? (
+                                                        <div className={cn(
+                                                            "group relative border-2 border-dashed rounded-2xl p-6 transition-all text-center",
+                                                            (!isUnlocked || isPastDeadline) ? 'opacity-50 grayscale bg-slate-50' : 'hover:border-indigo-600/30 hover:bg-indigo-600/[0.02]',
+                                                            data.selectedFile || data.existingFileUrl ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-slate-200 dark:border-slate-800'
+                                                        )}>
+                                                            {data.selectedFile ? (
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <div className="flex items-center gap-3 overflow-hidden">
+                                                                        <FileText className="h-5 w-5 text-emerald-500 shrink-0" />
+                                                                        <span className="text-sm font-bold truncate">{data.selectedFile.name}</span>
+                                                                    </div>
+                                                                    <button type="button" onClick={() => handleRemoveFile(idx)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"><X className="h-4 w-4" /></button>
+                                                                </div>
+                                                            ) : (
+                                                                <label className={cn("cursor-pointer block", (!isUnlocked || isPastDeadline) && 'pointer-events-none')}>
+                                                                    <input type="file" className="hidden" disabled={!isUnlocked || isPastDeadline} onChange={(e) => handleFileSelect(e, idx)} />
+                                                                    <Upload className="mx-auto h-8 w-8 text-slate-300 mb-3 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
+                                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Project File</p>
+                                                                </label>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-4">
+                                                            <div className="p-6 bg-orange-50 dark:bg-orange-950/20 rounded-2xl border border-orange-100 dark:border-orange-500/10 text-center">
+                                                                <div className="w-12 h-12 bg-white dark:bg-orange-900 rounded-2xl flex items-center justify-center shadow-md mx-auto mb-4">
+                                                                    <Zap className="h-6 w-6 text-orange-500" />
+                                                                </div>
+                                                                <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100 mb-1">Solved on LeetCode?</h4>
+
+                                                                {!user?.leetcode_username ? (
+                                                                    <div className="text-left mt-6 bg-white dark:bg-slate-900 p-4 rounded-xl border border-red-200 dark:border-red-900/50">
+                                                                        <div className="flex items-center gap-2 text-red-600 mb-3">
+                                                                            <Lock className="w-4 h-4" />
+                                                                            <span className="font-bold text-sm">LeetCode Profile Required</span>
+                                                                        </div>
+                                                                        <div className="space-y-3">
+                                                                            <div className="flex items-start gap-3">
+                                                                                <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                                                                                <p className="text-xs text-slate-600 dark:text-slate-300">Create a <a href="https://leetcode.com" target="_blank" className="text-orange-500 hover:underline">LeetCode Account</a> if you haven't.</p>
+                                                                            </div>
+                                                                            <div className="flex items-start gap-3">
+                                                                                <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                                                                                <p className="text-xs text-slate-600 dark:text-slate-300">Copy your exactly matching username.</p>
+                                                                            </div>
+                                                                            <div className="flex items-start gap-3">
+                                                                                <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                                                                                <p className="text-xs text-slate-600 dark:text-slate-300">Open the <strong>Top Right Menu (Three Bars)</strong>.</p>
+                                                                            </div>
+                                                                            <div className="flex items-start gap-3">
+                                                                                <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">4</div>
+                                                                                <p className="text-xs text-slate-600 dark:text-slate-300">Paste your username under <strong>LeetCode Profile</strong> and click <strong>Save</strong>.</p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-xs text-orange-700 dark:text-orange-400 mb-4 opacity-80">Make sure your profile is public and you have solved the problem.</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    <textarea
+                                                        placeholder="Implementation notes (optional)..."
+                                                        value={data.notes}
+                                                        onChange={(e) => setFormData(p => ({ ...p, [idx]: { ...p[idx], notes: e.target.value } }))}
+                                                        className="w-full h-24 text-sm font-medium resize-none pb-safe"
+                                                        disabled={!isUnlocked || isPastDeadline}
+                                                    />
+                                                </div>
+
+                                                <AnimatePresence>
+                                                    {data.error && (
+                                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/20 text-red-600 rounded-xl border border-red-100 dark:border-red-500/10">
+                                                            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                            <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.error}</p>
+                                                        </motion.div>
+                                                    )}
+                                                    {data.success && (
+                                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-100 dark:border-emerald-500/10">
+                                                            <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                                                            <p className="text-[11px] font-bold uppercase tracking-tight leading-relaxed">{data.success}</p>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+
+                                                <button
+                                                    type="submit"
+                                                    disabled={submittingIndex === idx || !isUnlocked || isPastDeadline || (data.submissionType === 'leetcode' && !user?.leetcode_username)}
+                                                    className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
+                                                >
+                                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                                                    {submittingIndex === idx || isVerifying ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : (
+                                                        <span>
+                                                            {data.submissionType === 'leetcode'
+                                                                ? (isSubmitted ? 'Re-Verify Master Submission' : 'Verify My Solution')
+                                                                : (isSubmitted ? 'Update Engineering Submission' : 'Commit Final Assignment')}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    );
+                                }))}
                         </div>
                     </aside>
                 </div>

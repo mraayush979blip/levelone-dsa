@@ -12,10 +12,12 @@ import {
     Upload,
     X,
     Download,
-    Target
+    Target,
+    Plus,
+    Trash2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { Phase } from '@/types/database';
+import { Phase, PhaseTask } from '@/types/database';
 import { isValidFileSize, formatFileSize, isValidAssignmentFileType } from '@/utils/validation';
 import { sendEmailNotification } from '@/actions/sendEmail';
 
@@ -29,6 +31,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
     const [fetching, setFetching] = useState(!!id);
     const [error, setError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [tasks, setTasks] = useState<Partial<PhaseTask>[]>([]);
 
     const [formData, setFormData] = useState<Partial<Phase>>({
         phase_number: 1,
@@ -65,6 +68,14 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                         start_date: data.start_date ? new Date(new Date(data.start_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
                         end_date: data.end_date ? new Date(new Date(data.end_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
                     });
+                }
+                const { data: tasksData, error: tasksError } = await supabase
+                    .from('phase_tasks')
+                    .select('*')
+                    .eq('phase_id', id)
+                    .order('created_at', { ascending: true });
+                if (!tasksError && tasksData) {
+                    setTasks(tasksData);
                 }
             } catch (error: any) {
                 console.error('Error fetching phase:', error);
@@ -148,6 +159,22 @@ export default function PhaseForm({ id }: PhaseFormProps) {
         }
     };
 
+    const handleAddTask = () => {
+        setTasks([...tasks, { title: '', url: '', points: 10 }]);
+    };
+
+    const handleRemoveTask = (index: number) => {
+        const newTasks = [...tasks];
+        newTasks.splice(index, 1);
+        setTasks(newTasks);
+    };
+
+    const handleTaskChange = (index: number, field: keyof PhaseTask, value: any) => {
+        const newTasks = [...tasks];
+        newTasks[index] = { ...newTasks[index], [field]: value };
+        setTasks(newTasks);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -176,6 +203,9 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                 assignment_file_url: fileUrl
             };
 
+
+            let phaseId = id;
+
             if (id) {
                 const { error } = await supabase
                     .from('phases')
@@ -183,12 +213,15 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     .eq('id', id);
                 if (error) throw error;
             } else {
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from('phases')
                     .insert([dataToSave])
                     .select();
 
                 if (error) throw error;
+                if (data && data[0]) {
+                    phaseId = data[0].id;
+                }
 
                 // Create notification for new phase
                 await supabase.from('notifications').insert({
@@ -227,6 +260,25 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     }
                 }
             }
+
+            // Sync tasks
+            if (phaseId) {
+                // Delete existing tasks first
+                await supabase.from('phase_tasks').delete().eq('phase_id', phaseId);
+
+                // Insert new tasks
+                if (tasks.length > 0) {
+                    const tasksToInsert = tasks.map(t => ({
+                        phase_id: phaseId,
+                        title: t.title,
+                        url: t.url,
+                        points: t.points || 10
+                    }));
+                    const { error: insertError } = await supabase.from('phase_tasks').insert(tasksToInsert);
+                    if (insertError) throw insertError;
+                }
+            }
+
             router.push('/admin/phases');
         } catch (error: any) {
             console.error('Error saving phase:', error);
@@ -432,53 +484,75 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-6 border-t border-gray-100 pt-6">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4 text-orange-600">
-                            <Target className="mr-2 h-5 w-5" /> LeetCode Configuration
-                        </h3>
-                    </div>
-
-                    <div className="sm:col-span-6">
-                        <label htmlFor="assignment_leetcode_url" className="block text-sm font-bold text-gray-700">
-                            LeetCode Problem URL
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                type="url"
-                                name="assignment_leetcode_url"
-                                id="assignment_leetcode_url"
-                                placeholder="https://leetcode.com/problems/two-sum/"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
-                                value={formData.assignment_leetcode_url || ''}
-                                onChange={(e) => {
-                                    const url = e.target.value;
-                                    let slug = formData.leetcode_problem_slug;
-                                    // Auto-extract slug from LeetCode URL
-                                    if (url.includes('leetcode.com/problems/')) {
-                                        const match = url.match(/problems\/([^/]+)/);
-                                        if (match && match[1]) slug = match[1];
-                                    }
-                                    setFormData({ ...formData, assignment_leetcode_url: url, leetcode_problem_slug: slug });
-                                }}
-                            />
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-medium text-gray-900 flex items-center text-orange-600">
+                                <Target className="mr-2 h-5 w-5" /> Detailed Tasks / LeetCode Problems
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={handleAddTask}
+                                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                            >
+                                <Plus className="mr-1.5 h-4 w-4" />
+                                Add Problem
+                            </button>
                         </div>
-                    </div>
+                        <p className="text-sm text-gray-500 mb-6">Assign specific problems for students to solve. They will be verified individually.</p>
 
-                    <div className="sm:col-span-6">
-                        <label htmlFor="leetcode_problem_slug" className="block text-sm font-bold text-gray-700">
-                            LeetCode Problem Slug
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                type="text"
-                                name="leetcode_problem_slug"
-                                id="leetcode_problem_slug"
-                                placeholder="e.g. two-sum"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
-                                value={formData.leetcode_problem_slug || ''}
-                                onChange={(e) => setFormData({ ...formData, leetcode_problem_slug: e.target.value })}
-                            />
+                        <div className="space-y-4">
+                            {tasks.map((task, idx) => (
+                                <div key={idx} className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex gap-4 items-start relative pb-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveTask(idx)}
+                                        className="absolute top-2 right-2 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 flex-1 mt-2">
+                                        <div className="sm:col-span-5">
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Problem Title</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="e.g. Two Sum"
+                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border"
+                                                value={task.title || ''}
+                                                onChange={(e) => handleTaskChange(idx, 'title', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-5">
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">LeetCode URL</label>
+                                            <input
+                                                type="url"
+                                                required
+                                                placeholder="https://leetcode.com/problems/..."
+                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border"
+                                                value={task.url || ''}
+                                                onChange={(e) => handleTaskChange(idx, 'url', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Points</label>
+                                            <input
+                                                type="number"
+                                                required
+                                                min="1"
+                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border text-center"
+                                                value={task.points || 10}
+                                                onChange={(e) => handleTaskChange(idx, 'points', parseInt(e.target.value) || 0)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {tasks.length === 0 && (
+                                <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-xl text-gray-500">
+                                    No problems added yet.
+                                </div>
+                            )}
                         </div>
-                        <p className="mt-1 text-xs text-gray-500 italic">This identifier is used for automatic verification via API.</p>
                     </div>
 
                     <div className="sm:col-span-6">

@@ -58,6 +58,24 @@ export interface Phase {
   updated_at: string;
 }
 
+// Phase Phase Task Interface
+export interface PhaseTask {
+  id: string;
+  phase_id: string;
+  title: string;
+  url: string;
+  points: number;
+  created_at: string;
+}
+
+export interface TaskSubmission {
+  id: string;
+  student_id: string;
+  task_id: string;
+  phase_id: string;
+  verified_at: string;
+}
+
 // Submission Interface
 export interface Submission {
   id: string;
