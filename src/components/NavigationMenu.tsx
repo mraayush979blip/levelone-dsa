@@ -282,9 +282,9 @@ export default function NavigationMenu() {
                         >
                             <button
                                 onClick={() => setShowInstallModal(false)}
-                                className="absolute top-6 right-6 p-2 rounded-full hover:bg-background transition-colors"
+                                className="absolute top-6 right-6 p-2 rounded-full bg-card-border/50 hover:bg-card-border transition-colors z-10 box-content"
                             >
-                                <X className="h-4 w-4 text-muted" />
+                                <X className="h-5 w-5 text-foreground" />
                             </button>
 
                             <div className="text-center mb-8">
@@ -352,8 +352,10 @@ export default function NavigationMenu() {
                                             if (isInstallable) {
                                                 handleInstallClick();
                                                 setShowInstallModal(false);
-                                            } else {
+                                            } else if (isIOS) {
                                                 setShowIOSGuide(true);
+                                            } else {
+                                                alert("Your browser may already have this installed, or you need to click the default Install icon inside the URL bar at the top right.");
                                             }
                                         }}
                                         className="w-full h-12 bg-primary text-white font-black uppercase tracking-[0.15em] text-[10px] rounded-xl transition-all shadow-glow hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
@@ -362,7 +364,7 @@ export default function NavigationMenu() {
                                     </button>
 
                                     <AnimatePresence>
-                                        {showIOSGuide && (
+                                        {showIOSGuide && isIOS && (
                                             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2">
                                                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-2 text-left">
                                                     <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Apple iOS Device Detected</p>
