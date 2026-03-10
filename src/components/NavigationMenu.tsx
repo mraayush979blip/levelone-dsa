@@ -19,11 +19,11 @@ export default function NavigationMenu() {
     const { isInstallable, handleInstallClick } = usePWAInstall();
     const [mounted, setMounted] = useState(false);
     const [showIOSGuide, setShowIOSGuide] = useState(false);
+    const [showInstallModal, setShowInstallModal] = useState(false);
 
     // Use a combined condition or just depend on the hook entirely (we'll relax it to show it more often for desktops)
     const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-    const showInstall = isInstallable || isIOS;
 
     useEffect(() => {
         setMounted(true);
@@ -203,28 +203,22 @@ export default function NavigationMenu() {
                                         <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </Link>
 
-                                    {/* PWA Install Button */}
-                                    {showInstall && (
-                                        <button
-                                            onClick={() => {
-                                                if (isInstallable) {
-                                                    handleInstallClick();
-                                                    setIsOpen(false);
-                                                } else if (isIOS) {
-                                                    setShowIOSGuide(!showIOSGuide);
-                                                }
-                                            }}
-                                            className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 text-muted hover:text-primary transition-all group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20">
-                                                    {isIOS ? <Smartphone className="h-4 w-4 text-primary" /> : <Download className="h-4 w-4 text-primary" />}
-                                                </div>
-                                                <span className="text-xs font-bold tracking-tight">Install App</span>
+                                    {/* App Management Button (Always Visible) */}
+                                    <button
+                                        onClick={() => {
+                                            setShowInstallModal(true);
+                                            setIsOpen(false);
+                                        }}
+                                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 text-muted hover:text-primary transition-all group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20">
+                                                {isStandalone ? <Sparkles className="h-4 w-4 text-primary" /> : <Download className="h-4 w-4 text-primary" />}
                                             </div>
-                                            <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </button>
-                                    )}
+                                            <span className="text-xs font-bold tracking-tight">{isStandalone ? 'Update App' : 'Install App'}</span>
+                                        </div>
+                                        <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
 
                                     {/* iOS Manual Guide */}
                                     <AnimatePresence>
@@ -269,6 +263,122 @@ export default function NavigationMenu() {
                             </div>
                         </motion.div>
                     </>
+                )}
+            </AnimatePresence>
+
+            {/* Install / Update Modal */}
+            <AnimatePresence>
+                {showInstallModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-card w-full max-w-sm rounded-[2.5rem] border border-card-border shadow-2xl p-8 relative overflow-hidden"
+                        >
+                            <button
+                                onClick={() => setShowInstallModal(false)}
+                                className="absolute top-6 right-6 p-2 rounded-full hover:bg-background transition-colors"
+                            >
+                                <X className="h-4 w-4 text-muted" />
+                            </button>
+
+                            <div className="text-center mb-8">
+                                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4 border border-primary/20 shadow-glow">
+                                    {isStandalone ? <Sparkles className="h-8 w-8" /> : <Zap className="h-8 w-8" />}
+                                </div>
+                                <h2 className="text-2xl font-black tracking-tight">{isStandalone ? 'Update Levelone' : 'Install Levelone'}</h2>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted mt-2">
+                                    {isStandalone ? 'Sync to the latest version' : 'Supercharge your experience'}
+                                </p>
+                            </div>
+
+                            {!isStandalone ? (
+                                <div className="space-y-4 mb-8 bg-background border border-card-border rounded-2xl p-5">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5"><Check className="h-3 w-3 text-emerald-500" /></div>
+                                        <div>
+                                            <p className="text-xs font-bold">Lightning Fast</p>
+                                            <p className="text-[10px] text-muted">Bypasses browser overhead for instant loading</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5"><Check className="h-3 w-3 text-emerald-500" /></div>
+                                        <div>
+                                            <p className="text-xs font-bold">Native Experience</p>
+                                            <p className="text-[10px] text-muted">Runs standalone without URL bars or distractions</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5"><Check className="h-3 w-3 text-emerald-500" /></div>
+                                        <div>
+                                            <p className="text-xs font-bold">Offline Resilience</p>
+                                            <p className="text-[10px] text-muted">Advanced caching for poor network conditions</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center text-sm text-muted mb-8 px-4 leading-relaxed">
+                                    You already have the premium Levelone app installed! If you feel like your app is out of date or experiencing bugs, click below to force a core engine update.
+                                </div>
+                            )}
+
+                            {isStandalone ? (
+                                <button
+                                    onClick={async () => {
+                                        if (confirm('Verify: Update Levelone Node? This will reload the app.')) {
+                                            localStorage.clear();
+                                            if ('serviceWorker' in navigator) {
+                                                const regs = await navigator.serviceWorker.getRegistrations();
+                                                for (const reg of regs) await reg.unregister();
+                                            }
+                                            const cacheNames = await caches.keys();
+                                            for (const name of cacheNames) await caches.delete(name);
+                                            window.location.reload();
+                                        }
+                                    }}
+                                    className="w-full h-12 bg-primary text-white font-black uppercase tracking-[0.15em] text-[10px] rounded-xl transition-all shadow-glow hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    <Sparkles className="h-4 w-4" /> Force Core Update
+                                </button>
+                            ) : (
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={() => {
+                                            if (isInstallable) {
+                                                handleInstallClick();
+                                                setShowInstallModal(false);
+                                            } else {
+                                                setShowIOSGuide(true);
+                                            }
+                                        }}
+                                        className="w-full h-12 bg-primary text-white font-black uppercase tracking-[0.15em] text-[10px] rounded-xl transition-all shadow-glow hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        <Download className="h-4 w-4" /> {isIOS ? 'Show iOS Install Steps' : 'Install PWA Native Engine'}
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {showIOSGuide && (
+                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2">
+                                                <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-2 text-left">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Apple iOS Device Detected</p>
+                                                    <ol className="text-[10px] text-muted font-medium space-y-2 list-decimal list-inside leading-relaxed">
+                                                        <li>Tap the <strong className="text-foreground">Share</strong> icon (□↑) at the bottom</li>
+                                                        <li>Scroll down the sheet options</li>
+                                                        <li>Select <strong className="text-foreground">"Add to Home Screen"</strong></li>
+                                                    </ol>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>
