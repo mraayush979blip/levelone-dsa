@@ -11,8 +11,6 @@ import InstallPWA from '@/components/InstallPWA';
 import NavigationMenu from '@/components/NavigationMenu';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import HoliEffect from '@/components/HoliEffect';
-import { CornerSplashNav, CornerSplashFooter } from '@/components/PichkariEffect';
 
 export default function StudentLayout({
     children,
@@ -77,10 +75,8 @@ export default function StudentLayout({
                     !isFullscreen ? 'pb-20 md:pb-0' : ''
                 )}
             >
-                {currentTheme === 'theme-holi' && <HoliEffect />}
                 {!isFullscreen && (
                     <nav className="sticky top-0 border-b border-card-border transition-all duration-300 z-50 backdrop-blur-xl bg-card/80 relative">
-                        {currentTheme === 'theme-holi' && <CornerSplashNav />}
                         <div className="max-w-7xl mx-auto px-6 relative z-10">
                             <div className="flex justify-between h-20">
                                 <div className="flex items-center space-x-10">
@@ -155,7 +151,6 @@ export default function StudentLayout({
                 {!isFullscreen && (
                     <>
                         <footer className="hidden md:block py-16 border-t border-card-border transition-colors mt-auto bg-card text-foreground relative overflow-hidden">
-                            {currentTheme === 'theme-holi' && <CornerSplashFooter />}
                             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-3">

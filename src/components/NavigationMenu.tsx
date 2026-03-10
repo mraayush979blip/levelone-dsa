@@ -9,9 +9,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 const themes = [
-    { id: 'theme-light', name: 'Ivory', icon: Sun, color: '#0891b2' },
-    { id: 'theme-dark', name: 'Midnight', icon: Zap, color: '#f59e0b' },
-    { id: 'theme-holi', name: 'Holi 🎨', icon: Sparkles, color: '#FF6D00' }
+    { id: 'theme-light', name: 'Premium Ivory', icon: Sun, color: '#0f172a' },
+    { id: 'theme-dark', name: 'Midnight Pro', icon: Zap, color: '#f59e0b' }
 ];
 
 export default function NavigationMenu() {
