@@ -56,22 +56,22 @@ export default function AssignmentPhasesPage() {
         <Link
             href={`/admin/assignment/${phase.id}`}
             key={phase.id}
-            className="group block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200"
+            className="group block bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200"
         >
             <div className="p-5">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-3">
-                        <div className="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
+                        <div className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
                             Phase {phase.phase_number}
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                             {phase.title}
                         </h3>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
                         <span>Ends {new Date(phase.end_date).toLocaleDateString()}</span>
@@ -101,8 +101,8 @@ export default function AssignmentPhasesPage() {
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Assignment Management</h1>
-                    <p className="mt-1 text-gray-500 font-medium">
+                    <h1 className="text-3xl font-black text-foreground tracking-tight">Assignment Management</h1>
+                    <p className="mt-1 text-muted-foreground font-medium">
                         Track student submissions and analyze phase performance.
                     </p>
                 </div>
@@ -125,14 +125,14 @@ export default function AssignmentPhasesPage() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-40 bg-white rounded-xl border border-gray-100 animate-pulse" />
+                        <div key={i} className="h-40 bg-card rounded-xl border border-border animate-pulse" />
                     ))}
                 </div>
             ) : filteredPhases.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                    <AlertCircle className="mx-auto h-12 w-12 text-gray-300" />
-                    <h3 className="mt-4 text-lg font-bold text-gray-900">No phases matching your search</h3>
-                    <p className="mt-2 text-gray-500">Try adjusting your search terms.</p>
+                <div className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-border">
+                    <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-bold text-foreground">No phases matching your search</h3>
+                    <p className="mt-2 text-muted-foreground">Try adjusting your search terms.</p>
                 </div>
             ) : (
                 <div className="space-y-12">
@@ -140,8 +140,8 @@ export default function AssignmentPhasesPage() {
                     {livePhases.length > 0 && (
                         <section>
                             <div className="flex items-center space-x-2 mb-6">
-                                <Clock className="h-5 w-5 text-green-600" />
-                                <h2 className="text-xl font-bold text-gray-900">Live Phases</h2>
+                                <Clock className="h-5 w-5 text-emerald-500" />
+                                <h2 className="text-xl font-bold text-foreground">Live Phases</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {livePhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}
@@ -153,8 +153,8 @@ export default function AssignmentPhasesPage() {
                     {pastPhases.length > 0 && (
                         <section>
                             <div className="flex items-center space-x-2 mb-6">
-                                <CheckCircle2 className="h-5 w-5 text-gray-600" />
-                                <h2 className="text-xl font-bold text-gray-900">Past Phases</h2>
+                                <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+                                <h2 className="text-xl font-bold text-foreground">Past Phases</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-85">
                                 {pastPhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}

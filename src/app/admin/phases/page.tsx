@@ -83,8 +83,8 @@ export default function PhaseListPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Learning Phases</h1>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h1 className="text-2xl font-bold text-foreground">Learning Phases</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Manage your curriculum phases and student deadlines.
                     </p>
                 </div>
@@ -98,14 +98,14 @@ export default function PhaseListPage() {
             </div>
 
             {/* Search and Filter */}
-            <div className="flex items-center px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center px-4 py-3 bg-card rounded-lg shadow-sm border border-border">
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <Search className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-border rounded-md leading-5 bg-background placeholder-muted-foreground focus:outline-none focus:placeholder-muted-foreground focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                         placeholder="Search phases by title or number..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,10 +119,10 @@ export default function PhaseListPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
             ) : filteredPhases.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
-                    <Layers className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No phases found</h3>
-                    <p className="mt-1 text-sm text-gray-500">Get started by creating a new learning phase.</p>
+                <div className="text-center py-12 bg-card rounded-lg border border-border shadow-sm">
+                    <Layers className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-2 text-sm font-medium text-foreground">No phases found</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Get started by creating a new learning phase.</p>
                     <div className="mt-6">
                         <Link
                             href="/admin/phases/new"
@@ -134,21 +134,21 @@ export default function PhaseListPage() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
-                    <ul className="divide-y divide-gray-200">
+                <div className="bg-card shadow overflow-hidden sm:rounded-md border border-border">
+                    <ul className="divide-y divide-border">
                         {filteredPhases.map((phase) => (
                             <li key={phase.id}>
-                                <div className="px-4 py-4 flex items-center sm:px-6 hover:bg-gray-50 transition-colors">
+                                <div className="px-4 py-4 flex items-center sm:px-6 hover:bg-muted/50 transition-colors">
                                     <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                                         <div className="truncate">
-                                            <div className="flex items-center text-sm font-medium text-blue-600 truncate">
-                                                <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold mr-3">
+                                            <div className="flex items-center text-sm font-medium text-primary truncate">
+                                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold mr-3">
                                                     Phase {phase.phase_number}
                                                 </span>
-                                                <span className="text-lg font-bold text-gray-900">{phase.title}</span>
+                                                <span className="text-lg font-bold text-foreground">{phase.title}</span>
                                             </div>
                                             <div className="mt-2 flex">
-                                                <div className="flex items-center text-sm text-gray-500 mr-6">
+                                                <div className="flex items-center text-sm text-muted-foreground mr-6">
                                                     <span>
                                                         {new Date(phase.start_date).toLocaleDateString()} - {new Date(phase.end_date).toLocaleDateString()}
                                                     </span>

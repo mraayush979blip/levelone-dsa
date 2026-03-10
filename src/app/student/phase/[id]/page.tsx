@@ -51,7 +51,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
     const [submittingIndex, setSubmittingIndex] = useState<number | null>(null);
     const [submissions, setSubmissions] = useState<Record<number, any>>({});
     const [formData, setFormData] = useState<Record<number, {
-        submissionType: 'github' | 'file';
+        submissionType: 'github' | 'file' | 'leetcode';
         githubUrl: string;
         notes: string;
         selectedFile: File | null;
@@ -560,15 +560,14 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                 return;
             }
 
-            // Insert into task_submissions
-            const { error: insertError } = await supabase.from('task_submissions').insert({
-                student_id: user.id,
-                task_id: task.id,
-                phase_id: id
+            // Call the secure RPC to insert submission AND award points
+            const { error: insertError } = await supabase.rpc('verify_and_award_task', {
+                p_task_id: task.id,
+                p_phase_id: id
             });
 
             if (insertError) {
-                if (insertError.code === '23505') {
+                if (insertError.message && insertError.message.includes('unique constraint')) {
                     toast.success('Task already verified!');
                 } else {
                     toast.error('Failed to save completion: ' + insertError.message);
@@ -694,7 +693,7 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 Engineering Resources
                             </h2>
                         </div>
-                        {phase.assignment_file_url || phase.assignment_resource_url || phase.assignment_leetcode_url ? (
+                        {phase.assignment_file_url || phase.assignment_resource_url ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {(phase.assignment_file_url || phase.assignment_resource_url) && (
                                     <button
@@ -712,25 +711,6 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                         </div>
                                         <ChevronDown className="h-4 w-4 text-slate-400 group-hover:translate-y-0.5 transition-transform" />
                                     </button>
-                                )}
-                                {phase.assignment_leetcode_url && (
-                                    <a
-                                        href={phase.assignment_leetcode_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-between p-5 bg-orange-50 dark:bg-orange-950/20 hover:bg-white dark:hover:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-500/10 transition-all group"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                                                <Zap className="h-5 w-5 text-orange-500" />
-                                            </div>
-                                            <div className="text-left">
-                                                <p className="text-sm font-extrabold text-orange-900 dark:text-orange-100">Let&apos;s Code</p>
-                                                <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Solve on LeetCode</p>
-                                            </div>
-                                        </div>
-                                        <Zap className="h-4 w-4 text-orange-400 group-hover:rotate-12 transition-transform" />
-                                    </a>
                                 )}
                             </div>
                         ) : (
