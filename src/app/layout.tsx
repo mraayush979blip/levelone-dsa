@@ -45,6 +45,13 @@ export default function RootLayout({
                 const CURRENT_DEPLOY = "2.4.0-pwa";
                 const lastSync = localStorage.getItem("levelone_last_sync_v4");
                 
+                // Early capture of the install prompt for high reliability
+                window.addEventListener('beforeinstallprompt', (e) => {
+                  e.preventDefault();
+                  window.deferredPrompt = e;
+                  window.dispatchEvent(new CustomEvent('pwa-prompt-captured'));
+                });
+
                 function registerSW() {
                   if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('/sw.js')

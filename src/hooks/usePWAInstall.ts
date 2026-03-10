@@ -11,38 +11,54 @@ export function usePWAInstall() {
     const [isInstallable, setIsInstallable] = useState(false);
 
     useEffect(() => {
+        // Hydrate from global prompt if already captured by head script
+        if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+            setInstallPrompt((window as any).deferredPrompt);
+            setIsInstallable(true);
+        }
+
         const handler = (e: any) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();
-            // Stash the event so it can be triggered later.
             setInstallPrompt(e);
             setIsInstallable(true);
-            console.log('PWA: Install prompt captured');
+            (window as any).deferredPrompt = e;
+            console.log('PWA: Install prompt captured via listener');
+        };
+
+        const customHandler = () => {
+            if ((window as any).deferredPrompt) {
+                setInstallPrompt((window as any).deferredPrompt);
+                setIsInstallable(true);
+                console.log('PWA: Install prompt captured via custom event');
+            }
         };
 
         window.addEventListener('beforeinstallprompt', handler);
+        window.addEventListener('pwa-prompt-captured', customHandler);
 
-        // Check if app is already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
             setIsInstallable(false);
         }
 
-        return () => window.removeEventListener('beforeinstallprompt', handler);
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handler);
+            window.removeEventListener('pwa-prompt-captured', customHandler);
+        };
     }, []);
 
     const handleInstallClick = async () => {
-        if (!installPrompt) return;
+        const prompt = installPrompt || (window as any).deferredPrompt;
+        if (!prompt) return;
 
-        // Show the prompt
-        installPrompt.prompt();
-
-        // Wait for the user to respond to the prompt
-        const { outcome } = await installPrompt.userChoice;
+        prompt.prompt();
+        const { outcome } = await prompt.userChoice;
         console.log(`PWA: User response to install prompt: ${outcome}`);
 
-        // We've used the prompt, and can't use it again, throw it away
-        setInstallPrompt(null);
-        setIsInstallable(false);
+        if (outcome === 'accepted') {
+            setInstallPrompt(null);
+            (window as any).deferredPrompt = null;
+            setIsInstallable(false);
+        }
     };
 
     return { isInstallable, handleInstallClick };

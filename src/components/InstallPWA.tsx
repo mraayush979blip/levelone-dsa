@@ -18,6 +18,19 @@ export default function InstallPWA() {
 
     useEffect(() => {
         setMounted(true);
+
+        // Automatic Popup Logic: Show once per session after 5 seconds if not installed
+        const timer = setTimeout(() => {
+            const hasPopupShown = sessionStorage.getItem('pwa_popup_shown');
+            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+
+            if (!hasPopupShown && !isInstalled) {
+                setShowInstallModal(true);
+                sessionStorage.setItem('pwa_popup_shown', 'true');
+            }
+        }, 5000);
+
+        return () => clearTimeout(timer);
     }, []);
 
     if (!mounted) return null;
