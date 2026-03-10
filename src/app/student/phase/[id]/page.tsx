@@ -1016,29 +1016,39 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                             className="bg-card w-full max-w-md rounded-[2.5rem] border border-card-border shadow-2xl overflow-hidden"
                         >
                             <div className="p-10 space-y-6">
-                                <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500">
+                                <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 mx-auto">
                                     <Zap className="h-8 w-8" />
                                 </div>
-                                <h2 className="text-2xl font-black tracking-tight">LeetCode Identity Required</h2>
-                                <p className="text-muted text-sm leading-relaxed">
-                                    We need your LeetCode username to verify your solution. Please ensure your profile &quot;Solved Problems&quot; section is set to public.
+                                <h2 className="text-2xl font-black tracking-tight text-center">LeetCode Profile Required</h2>
+                                <p className="text-muted text-sm leading-relaxed text-center mb-6">
+                                    We need your LeetCode username to automatically verify your solutions. Please follow these steps to link your account:
                                 </p>
-                                <div className="space-y-4">
-                                    <input
-                                        type="text"
-                                        placeholder="LeetCode Handle"
-                                        className="w-full h-14"
-                                        value={leetcodeUsername}
-                                        onChange={(e) => setLeetcodeUsername(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <button
-                                        onClick={() => setShowUsernameModal(false)}
-                                        className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl shadow-lg shadow-indigo-600/20"
-                                    >
-                                        Save & Continue
-                                    </button>
+
+                                <div className="space-y-4 bg-background p-5 rounded-2xl border border-card-border mb-6">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                                        <p className="text-sm font-medium">Create a <a href="https://leetcode.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-600 underline decoration-orange-500/30 underline-offset-2">LeetCode Account</a> if you don't have one.</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                                        <p className="text-sm font-medium">Copy your exact LeetCode username from your profile.</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                                        <p className="text-sm font-medium">Click your Avatar at the top right of this screen, enter your username under "LeetCode Profile", and click Save.</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</div>
+                                        <p className="text-sm font-medium text-muted">Make sure your LeetCode "Solved Problems" are set to public in your LeetCode settings.</p>
+                                    </div>
                                 </div>
+
+                                <button
+                                    onClick={() => setShowUsernameModal(false)}
+                                    className="w-full h-14 bg-card border border-card-border text-foreground hover:bg-background font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl transition-colors shadow-sm"
+                                >
+                                    I Understand
+                                </button>
                             </div>
                         </motion.div>
                     </motion.div>
