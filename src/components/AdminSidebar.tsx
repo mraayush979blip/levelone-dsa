@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-    LayoutDashboard,
+    Layout,
     Layers,
     Users,
     Upload,
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import InstallPWA from './InstallPWA';
 
 const navItems = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/admin', icon: Layout },
     { name: 'Phases', href: '/admin/phases', icon: Layers },
     { name: 'Assignment', href: '/admin/assignment', icon: FileText },
     { name: 'Students', href: '/admin/students', icon: Users },
@@ -63,28 +63,28 @@ export default function AdminSidebar() {
                 isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
             )}>
                 <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
-                    <div className="flex items-center flex-shrink-0 px-4 mb-8">
-                        <span className="text-xl font-black text-white tracking-tighter">Levelone</span>
-                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold text-zinc-300 bg-zinc-800 rounded uppercase tracking-wider">Admin</span>
+                    <div className="flex items-center flex-shrink-0 px-6 mb-10">
+                        <span className="text-xl font-black text-white tracking-tighter uppercase">Levelone</span>
+                        <span className="ml-3 px-2 py-1 text-[9px] font-black text-black bg-white rounded-md uppercase tracking-[0.2em]">Core</span>
                     </div>
-                    <nav className="flex-1 px-2 space-y-1 bg-zinc-950">
+                    <div className="flex-1 px-4 space-y-2 bg-zinc-950">
                         {navItems.map((item) => {
-                            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href + '/'));
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
+                                        'group flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all relative overflow-hidden',
                                         isActive
-                                            ? 'bg-zinc-800 text-white'
-                                            : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
+                                            ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95'
+                                            : 'text-zinc-500 hover:text-white hover:bg-zinc-900 active:scale-95'
                                     )}
                                 >
                                     <item.icon
                                         className={cn(
-                                            'mr-3 flex-shrink-0 h-5 w-5',
-                                            isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'
+                                            'mr-3 flex-shrink-0 h-4 w-4 transition-colors',
+                                            isActive ? 'text-black' : 'text-zinc-600 group-hover:text-white'
                                         )}
                                         aria-hidden="true"
                                     />
@@ -92,23 +92,21 @@ export default function AdminSidebar() {
                                 </Link>
                             );
                         })}
-                    </nav>
+                    </div>
                 </div>
-                <div className="flex-shrink-0 flex flex-col border-t border-zinc-800 p-4 space-y-4">
+                <div className="p-6 border-t border-zinc-900 space-y-6">
                     <InstallPWA />
-                    <div className="flex-shrink-0 w-full group block">
-                        <div className="flex items-center">
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-white">{user?.name}</p>
-                                <button
-                                    onClick={() => signOut()}
-                                    className="flex items-center text-xs font-medium text-zinc-400 group-hover:text-zinc-200 mt-1"
-                                >
-                                    <LogOut className="mr-1 h-3 w-3" />
-                                    Sign Out
-                                </button>
-                            </div>
+                    <div className="flex items-center justify-between group">
+                        <div className="flex flex-col">
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{user?.name || 'ADMIN_NODE'}</p>
+                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mt-1">Status: Online</span>
                         </div>
+                        <button
+                            onClick={() => signOut()}
+                            className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 hover:text-red-500 hover:border-red-500/20 hover:bg-red-500/5 transition-all active:scale-95"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </button>
                     </div>
                 </div>
             </div>

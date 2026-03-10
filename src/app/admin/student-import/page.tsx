@@ -197,31 +197,31 @@ export default function StudentImportPage() {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Import Students</h1>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h1 className="text-2xl font-black text-white tracking-tight">Import Students</h1>
+                    <p className="mt-1 text-sm text-zinc-400 font-medium">
                         Bulk register students and create Auth accounts automatically.
                     </p>
                 </div>
                 <Link
                     href="/admin/students"
-                    className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                    className="flex items-center text-sm text-zinc-400 hover:text-white transition-colors"
                 >
                     <ArrowLeft className="mr-1 h-4 w-4" />
                     Back to Students
                 </Link>
             </div>
 
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 text-black">
-                <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
+            <div className="bg-zinc-950 p-6 sm:p-8 rounded-3xl border border-zinc-800 text-white shadow-2xl relative overflow-hidden">
+                <div className="flex border-b border-zinc-800 mb-8 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('csv')}
-                        className={`flex items-center py-3 px-6 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'csv' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        className={`flex items-center py-3 px-6 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'csv' ? 'border-white text-white bg-zinc-900/50' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
                     >
                         <Upload className="w-4 h-4 mr-2" /> Bulk CSV Import
                     </button>
                     <button
                         onClick={() => setActiveTab('single')}
-                        className={`flex items-center py-3 px-6 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'single' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        className={`flex items-center py-3 px-6 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'single' ? 'border-white text-white bg-zinc-900/50' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
                     >
                         <UserPlus className="w-4 h-4 mr-2" /> Add Single Student
                     </button>
@@ -229,45 +229,45 @@ export default function StudentImportPage() {
 
                 {activeTab === 'csv' ? (
                     <div className="space-y-8">
-                        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
                             <div className="flex">
                                 <div className="flex-shrink-0">
-                                    <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                    <Info className="h-5 w-5 text-white opacity-40" aria-hidden="true" />
                                 </div>
                                 <div className="ml-3">
-                                    <p className="text-sm text-blue-700 font-bold">
+                                    <p className="text-sm text-white font-black uppercase tracking-widest opacity-40">
                                         CSV Requirement:
                                     </p>
-                                    <p className="text-sm text-blue-600 mt-1">
+                                    <p className="text-sm text-zinc-300 mt-2 font-medium">
                                         Your file must include headers:
-                                        <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">name</code>,
-                                        <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">email</code>,
-                                        <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">roll_no</code>,
-                                        <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">phone</code>,
-                                        and <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">password</code>.
+                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">name</code>,
+                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">email</code>,
+                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">roll_no</code>,
+                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">phone</code>,
+                                        and <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">password</code>.
                                     </p>
                                     <button
                                         onClick={downloadSample}
-                                        className="mt-3 inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-600 font-bold"
+                                        className="mt-4 inline-flex items-center text-xs font-black uppercase tracking-widest text-white hover:opacity-70 transition-opacity"
                                     >
-                                        <Download className="mr-1 h-4 w-4" /> Download Sample CSV
+                                        <Download className="mr-2 h-4 w-4" /> Download Sample CSV
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 transition-colors hover:border-blue-400">
-                            <Upload className="h-12 w-12 text-gray-400 mb-4" />
-                            <p className="text-sm text-gray-600 mb-4">Click to select or drag and drop your CSV file</p>
+                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-[2rem] p-12 transition-all hover:border-zinc-500 group bg-zinc-950">
+                            <Upload className="h-12 w-12 text-zinc-700 mb-4 group-hover:text-white transition-colors" />
+                            <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6 group-hover:text-zinc-300 transition-colors">Select or drag CSV file</p>
                             <input
                                 type="file"
                                 accept=".csv"
                                 onChange={handleFileChange}
-                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                                className="block w-full text-sm text-zinc-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-white file:text-black hover:file:bg-zinc-200 cursor-pointer"
                             />
                             {file && (
-                                <div className="mt-4 flex items-center text-sm font-medium text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">
-                                    <FileText className="mr-2 h-4 w-4 text-blue-500" />
+                                <div className="mt-6 flex items-center text-xs font-bold text-white bg-zinc-900 border border-zinc-800 px-5 py-3 rounded-2xl">
+                                    <FileText className="mr-2 h-4 w-4 text-emerald-500" />
                                     {file.name} ({(file.size / 1024).toFixed(2)} KB)
                                 </div>
                             )}
@@ -321,12 +321,12 @@ export default function StudentImportPage() {
                             <button
                                 onClick={processCSV}
                                 disabled={!file || loading}
-                                className="w-full flex justify-center items-center py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-600/20"
+                                className="w-full flex justify-center items-center py-4 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                             >
                                 {loading ? (
                                     <>
-                                        <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                                        Processing CSV...
+                                        <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                                        Processing CSV Engine...
                                     </>
                                 ) : (
                                     'Start Secure Import'
@@ -338,53 +338,53 @@ export default function StudentImportPage() {
                     <form onSubmit={processSingleStudent} className="space-y-6 max-w-2xl mx-auto py-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Full Name *</label>
+                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Full Name *</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5"
+                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
                                     placeholder="John Doe"
                                     value={singleStudent.name}
                                     onChange={e => setSingleStudent(p => ({ ...p, name: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Email Address *</label>
+                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Email Address *</label>
                                 <input
                                     type="email"
                                     required
-                                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5"
+                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
                                     placeholder="john@example.com"
                                     value={singleStudent.email}
                                     onChange={e => setSingleStudent(p => ({ ...p, email: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Password *</label>
+                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Password *</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 font-mono"
+                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-mono"
                                     placeholder="Student@123"
                                     value={singleStudent.password}
                                     onChange={e => setSingleStudent(p => ({ ...p, password: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Roll / ID Number</label>
+                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Roll / ID Number</label>
                                 <input
                                     type="text"
-                                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 uppercase"
+                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium uppercase"
                                     placeholder="Optional"
                                     value={singleStudent.roll_number}
                                     onChange={e => setSingleStudent(p => ({ ...p, roll_number: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Phone Number</label>
                                 <input
                                     type="tel"
-                                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5"
+                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
                                     placeholder="Optional"
                                     value={singleStudent.phone}
                                     onChange={e => setSingleStudent(p => ({ ...p, phone: e.target.value }))}
@@ -393,8 +393,8 @@ export default function StudentImportPage() {
                         </div>
 
                         {singleResult && (
-                            <div className={`p-4 rounded-lg flex items-center font-bold ${singleResult.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                                {singleResult.success ? <CheckCircle2 className="w-5 h-5 mr-2 shrink-0" /> : <AlertCircle className="w-5 h-5 mr-2 shrink-0" />}
+                            <div className={`p-4 rounded-xl flex items-center font-bold text-xs uppercase tracking-widest ${singleResult.success ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                {singleResult.success ? <CheckCircle2 className="w-5 h-5 mr-3 shrink-0" /> : <AlertCircle className="w-5 h-5 mr-3 shrink-0" />}
                                 {singleResult.message}
                             </div>
                         )}
@@ -402,12 +402,12 @@ export default function StudentImportPage() {
                         <button
                             type="submit"
                             disabled={singleLoading}
-                            className="w-full flex justify-center items-center py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm shadow-blue-600/20"
+                            className="w-full h-14 bg-white text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center"
                         >
                             {singleLoading ? (
                                 <>
-                                    <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                                    Creating Account...
+                                    <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                                    Creating Node...
                                 </>
                             ) : (
                                 'Register Student'

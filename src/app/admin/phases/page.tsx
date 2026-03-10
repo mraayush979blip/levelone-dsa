@@ -116,7 +116,7 @@ export default function PhaseListPage() {
             {/* Phase Grid */}
             {loading ? (
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                 </div>
             ) : filteredPhases.length === 0 ? (
                 <div className="text-center py-12 bg-zinc-900/50 rounded-2xl border border-zinc-800 shadow-sm backdrop-blur-sm">
@@ -162,7 +162,7 @@ export default function PhaseListPage() {
                                                         <span className={cn(
                                                             "px-2.5 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-full border",
                                                             getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'upcoming' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'upcoming' ? "bg-white/10 text-white border-white/20" :
                                                                     getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-500/10 text-red-400 border-red-500/20" :
                                                                         "bg-zinc-800 text-zinc-400 border-zinc-700"
                                                         )}>

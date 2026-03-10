@@ -291,7 +291,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
     if (fetching) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
             </div>
         );
     }
@@ -301,20 +301,20 @@ export default function PhaseForm({ id }: PhaseFormProps) {
             <div className="flex items-center space-x-4">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-2xl transition-all active:scale-95"
                 >
-                    <ArrowLeft className="h-6 w-6 text-gray-500" />
+                    <ArrowLeft className="h-5 w-5 text-white" />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">
-                    {id ? 'Edit Phase' : 'Create New Phase'}
+                <h1 className="text-2xl font-black text-white tracking-tight">
+                    {id ? 'Modify Node Phase' : 'Initialize New Phase'}
                 </h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <div className="sm:col-span-2 text-blue-600">
-                        <label htmlFor="phase_number" className="block text-sm font-bold">
-                            Phase Number
+            <form onSubmit={handleSubmit} className="space-y-8 bg-zinc-950 p-8 rounded-3xl border border-zinc-800 shadow-2xl">
+                <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-6 text-zinc-400">
+                    <div className="sm:col-span-2">
+                        <label htmlFor="phase_number" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Sequence ID
                         </label>
                         <div className="mt-1">
                             <input
@@ -324,7 +324,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 required
                                 min="1"
                                 step="any"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={isNaN(formData.phase_number as number) ? '' : formData.phase_number}
                                 onChange={(e) => {
                                     const val = e.target.value === '' ? NaN : parseFloat(e.target.value);
@@ -335,7 +335,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-4">
-                        <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+                        <label htmlFor="title" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
                             Phase Title
                         </label>
                         <div className="mt-1">
@@ -344,8 +344,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 name="title"
                                 id="title"
                                 required
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
-                                placeholder="e.g. Fundamental Concepts"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
+                                placeholder="Identifier name"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             />
@@ -353,31 +353,31 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="description" className="block text-sm font-bold text-gray-700">
-                            Description
+                        <label htmlFor="description" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Node Narrative / Objectives
                         </label>
                         <div className="mt-1">
                             <textarea
                                 id="description"
                                 name="description"
-                                rows={3}
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
-                                placeholder="What will students learn in this phase?"
+                                rows={4}
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
+                                placeholder="Specify transmission goals..."
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             />
                         </div>
                     </div>
 
-                    <div className="sm:col-span-6 border-t border-gray-100 pt-6">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4">
-                            <Video className="mr-2 h-5 w-5 text-red-500" /> Resources
+                    <div className="sm:col-span-6 border-t border-zinc-900 pt-8">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center mb-6">
+                            <Video className="mr-3 h-4 w-4 text-red-500 opacity-60" /> Core Transmission Links
                         </h3>
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="youtube_url" className="block text-sm font-bold text-gray-700">
-                            YouTube Video URL
+                        <label htmlFor="youtube_url" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Satellite Transmission (YouTube URL)
                         </label>
                         <div className="mt-1">
                             <input
@@ -385,7 +385,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 name="youtube_url"
                                 id="youtube_url"
                                 placeholder="https://www.youtube.com/watch?v=..."
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={formData.youtube_url || ''}
                                 onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
                             />
@@ -393,76 +393,79 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="allowed_submission_type" className="block text-sm font-bold text-gray-700">
-                            Allowed Submission Type
+                        <label htmlFor="allowed_submission_type" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Node Verification Protocol
                         </label>
                         <div className="mt-1">
                             <select
                                 id="allowed_submission_type"
                                 name="allowed_submission_type"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold appearance-none"
                                 value={formData.allowed_submission_type || 'both'}
-                                onChange={(e) => setFormData({ ...formData, allowed_submission_type: e.target.value as 'github' | 'file' | 'both' })}
+                                onChange={(e) => setFormData({ ...formData, allowed_submission_type: e.target.value as 'github' | 'file' | 'both' | 'leetcode' })}
                             >
-                                <option value="both">Both (GitHub Link & File Upload)</option>
-                                <option value="github">GitHub Link Only</option>
-                                <option value="file">File Upload Only</option>
-                                <option value="leetcode">LeetCode Verification</option>
+                                <option value="both" className="bg-zinc-950">Dual Mode (GitHub & File)</option>
+                                <option value="github" className="bg-zinc-950">Repository Only</option>
+                                <option value="file" className="bg-zinc-950">Binary Only</option>
+                                <option value="leetcode" className="bg-zinc-950">Matrix Verification (LeetCode)</option>
                             </select>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">Choose how students are allowed to submit their work for this phase.</p>
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label className="block text-sm font-bold text-gray-700">
-                            Assignment Document (PDF or Image)
+                        <label className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Blueprint Upload (PDF/IMG)
                         </label>
-                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors bg-gray-50">
-                            <div className="space-y-1 text-center">
+                        <div className="mt-1 flex justify-center px-8 py-10 border-2 border-zinc-900 border-dashed rounded-3xl hover:border-zinc-700 transition-all bg-zinc-900/30 group">
+                            <div className="space-y-4 text-center">
                                 {formData.assignment_file_url || selectedFile ? (
                                     <div className="flex flex-col items-center">
-                                        <FileText className="mx-auto h-12 w-12 text-blue-500" />
-                                        <div className="mt-4 flex text-sm text-gray-600">
-                                            <p className="font-medium text-blue-600 truncate max-w-xs">
+                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-2">
+                                            <FileText className="h-10 w-10 text-white" />
+                                        </div>
+                                        <div className="mt-4 flex text-sm text-zinc-300">
+                                            <p className="font-black uppercase tracking-widest text-[10px] truncate max-w-xs">
                                                 {selectedFile ? selectedFile.name : formData.assignment_file_url?.split('/').pop()}
                                             </p>
                                         </div>
                                         {selectedFile && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {formatFileSize(selectedFile.size)} (Pending Upload)
+                                            <p className="text-[10px] text-zinc-600 font-bold mt-1 uppercase">
+                                                {formatFileSize(selectedFile.size)} <span className="text-white ml-2">PENDING_SYNC</span>
                                             </p>
                                         )}
-                                        <div className="mt-4 flex space-x-4">
+                                        <div className="mt-6 flex space-x-3">
                                             {formData.assignment_file_url && !selectedFile && (
                                                 <a
                                                     href={formData.assignment_file_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                    className="inline-flex items-center px-4 py-2 bg-zinc-800 border border-zinc-700 text-[10px] font-black uppercase tracking-widest rounded-xl text-white hover:bg-zinc-700 transition-all"
                                                 >
-                                                    <Download className="mr-1.5 h-4 w-4 text-gray-400" />
-                                                    View Current
+                                                    <Download className="mr-2 h-4 w-4" />
+                                                    Preview
                                                 </a>
                                             )}
                                             <button
                                                 type="button"
                                                 onClick={handleRemoveFile}
-                                                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                className="inline-flex items-center px-4 py-2 bg-red-500/10 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl text-red-500 hover:bg-red-500/20 transition-all"
                                             >
-                                                <X className="mr-1.5 h-4 w-4" />
-                                                Remove/Replace
+                                                <X className="mr-2 h-4 w-4" />
+                                                Remove Node
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                                        <div className="flex text-sm text-gray-600 justify-center">
+                                        <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-800 inline-block mb-2 group-hover:border-zinc-700 transition-colors">
+                                            <Upload className="h-10 w-10 text-zinc-700 group-hover:text-white transition-colors" />
+                                        </div>
+                                        <div className="flex text-sm text-zinc-500 justify-center">
                                             <label
                                                 htmlFor="file-upload"
-                                                className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                                                className="relative cursor-pointer font-black text-white uppercase tracking-widest text-[10px] hover:text-zinc-300 transition-colors"
                                             >
-                                                <span>Upload a file</span>
+                                                <span>Transmit File</span>
                                                 <input
                                                     id="file-upload"
                                                     name="file-upload"
@@ -472,10 +475,10 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                                     onChange={handleFileSelect}
                                                 />
                                             </label>
-                                            <p className="pl-1">or drag and drop</p>
+                                            <p className="pl-2 font-bold uppercase tracking-widest text-[10px]">or Drop binary</p>
                                         </div>
-                                        <p className="text-xs text-gray-500">
-                                            PDF, PNG, JPG up to 2MB
+                                        <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em]">
+                                            LIMIT: 2.0MB
                                         </p>
                                     </>
                                 )}
@@ -483,63 +486,63 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                         </div>
                     </div>
 
-                    <div className="sm:col-span-6 border-t border-gray-100 pt-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-medium text-gray-900 flex items-center text-orange-600">
-                                <Target className="mr-2 h-5 w-5" /> Detailed Tasks / LeetCode Problems
+                    <div className="sm:col-span-6 border-t border-zinc-900 pt-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center">
+                                <Target className="mr-3 h-4 w-4 text-white opacity-40" /> Task Verification Nodes
                             </h3>
                             <button
                                 type="button"
                                 onClick={handleAddTask}
-                                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                className="inline-flex items-center px-4 py-2 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all border group"
                             >
-                                <Plus className="mr-1.5 h-4 w-4" />
-                                Add Problem
+                                <Plus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform" />
+                                Node Entry
                             </button>
                         </div>
-                        <p className="text-sm text-gray-500 mb-6">Assign specific problems for students to solve. They will be verified individually.</p>
+                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-8">Specify individual problem identifiers for Matrix verification.</p>
 
                         <div className="space-y-4">
                             {tasks.map((task, idx) => (
-                                <div key={idx} className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex gap-4 items-start relative pb-6">
+                                <div key={idx} className="bg-zinc-900/50 p-5 rounded-2xl border border-zinc-800 flex gap-4 items-start relative pb-8 group hover:border-zinc-700 transition-colors">
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveTask(idx)}
-                                        className="absolute top-2 right-2 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        className="absolute top-4 right-4 p-2 text-zinc-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 flex-1 mt-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 flex-1 mt-2">
                                         <div className="sm:col-span-5">
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Problem Title</label>
+                                            <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Identifier</label>
                                             <input
                                                 type="text"
                                                 required
-                                                placeholder="e.g. Two Sum"
-                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border"
+                                                placeholder="e.g. Binary Search"
+                                                className="block w-full bg-zinc-950 border border-zinc-900 rounded-xl py-2.5 px-4 text-white placeholder-zinc-800 focus:outline-none focus:border-zinc-600 transition-all text-xs font-bold"
                                                 value={task.title || ''}
                                                 onChange={(e) => handleTaskChange(idx, 'title', e.target.value)}
                                             />
                                         </div>
                                         <div className="sm:col-span-5">
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">LeetCode URL</label>
+                                            <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Matrix Endpoint (URL)</label>
                                             <input
                                                 type="url"
                                                 required
-                                                placeholder="https://leetcode.com/problems/..."
-                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border"
+                                                placeholder="https://matrix.node/..."
+                                                className="block w-full bg-zinc-950 border border-zinc-900 rounded-xl py-2.5 px-4 text-white placeholder-zinc-800 focus:outline-none focus:border-zinc-600 transition-all text-xs font-bold"
                                                 value={task.url || ''}
                                                 onChange={(e) => handleTaskChange(idx, 'url', e.target.value)}
                                             />
                                         </div>
                                         <div className="sm:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Points</label>
+                                            <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">XP</label>
                                             <input
                                                 type="number"
                                                 required
                                                 min="1"
-                                                className="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2.5 border text-center"
+                                                className="block w-full bg-zinc-950 border border-zinc-900 rounded-xl py-2.5 px-2 text-white placeholder-zinc-800 focus:outline-none focus:border-zinc-600 transition-all text-xs font-black text-center"
                                                 value={task.points || 10}
                                                 onChange={(e) => handleTaskChange(idx, 'points', parseInt(e.target.value) || 0)}
                                             />
@@ -548,24 +551,24 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 </div>
                             ))}
                             {tasks.length === 0 && (
-                                <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-xl text-gray-500">
-                                    No problems added yet.
+                                <div className="text-center py-10 border border-dashed border-zinc-800 rounded-3xl text-zinc-700 font-bold uppercase tracking-widest text-[10px]">
+                                    No node descriptors initialized.
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="assignment_resource_url" className="block text-sm font-bold text-gray-700">
-                            Additional Resource URL (Optional)
+                        <label htmlFor="assignment_resource_url" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Remote Source URL (Optional)
                         </label>
                         <div className="mt-1">
                             <input
                                 type="url"
                                 name="assignment_resource_url"
                                 id="assignment_resource_url"
-                                placeholder="Link to project boilerplate or instructions"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                placeholder="External resource link"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={formData.assignment_resource_url || ''}
                                 onChange={(e) => setFormData({ ...formData, assignment_resource_url: e.target.value })}
                             />
@@ -573,8 +576,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="min_seconds_required" className="block text-sm font-bold text-gray-700">
-                            Minimum Time Spent (Minutes) to Unlock Assignment
+                        <label htmlFor="min_seconds_required" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Incubation Time (Minutes)
                         </label>
                         <div className="mt-1 flex items-center">
                             <input
@@ -583,41 +586,41 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 id="min_seconds_required"
                                 min="0"
                                 step="0.1"
-                                placeholder="e.g. 0.5 for 30 seconds"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                placeholder="Threshold"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={isNaN(formData.min_seconds_required as number) ? '' : (formData.min_seconds_required ? formData.min_seconds_required / 60 : 0)}
                                 onChange={(e) => {
                                     const val = e.target.value === '' ? NaN : parseFloat(e.target.value) * 60;
                                     setFormData({ ...formData, min_seconds_required: val });
                                 }}
                             />
-                            <span className="ml-3 text-sm text-gray-500">minutes</span>
+                            <span className="ml-4 text-[10px] font-black text-zinc-700 uppercase tracking-widest">MINS</span>
                         </div>
-                        <p className="mt-1 text-xs text-gray-400 italic">Students must spend at least this much time on the phase page before they can submit (0 = Requires Video Completion).</p>
+                        <p className="mt-2 text-[9px] text-zinc-600 font-bold uppercase tracking-widest italic">Time threshold required before transmission is accepted.</p>
                     </div>
 
                     <div className="sm:col-span-6">
                         <div className="flex items-start">
-                            <div className="flex items-center h-5">
+                            <div className="flex items-center h- relative">
                                 <input
                                     id="bypass_time_requirement"
                                     name="bypass_time_requirement"
                                     type="checkbox"
-                                    className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                    className="h-5 w-5 bg-zinc-900 border-zinc-800 rounded-lg text-white focus:ring-offset-zinc-950 focus:ring-white/20"
                                     checked={formData.bypass_time_requirement || false}
                                     onChange={(e) => setFormData({ ...formData, bypass_time_requirement: e.target.checked })}
                                 />
                             </div>
-                            <div className="ml-3 text-sm">
-                                <label htmlFor="bypass_time_requirement" className="font-medium text-gray-700">Allow Immediate Submission (Bypass Time Requirement)</label>
-                                <p className="text-gray-500">If checked, students can submit assignments immediately without waiting for the minimum time or watching the video.</p>
+                            <div className="ml-4 text-xs">
+                                <label htmlFor="bypass_time_requirement" className="font-black text-white uppercase tracking-widest">Instant Transmission</label>
+                                <p className="text-zinc-600 font-bold uppercase text-[9px] mt-1 tracking-wider">Override incubation and allow immediate data push.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="sm:col-span-6">
-                        <label htmlFor="total_assignments" className="block text-sm font-bold text-gray-700">
-                            Total Assignments Required
+                        <label htmlFor="total_assignments" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Required Node Count
                         </label>
                         <div className="mt-1">
                             <input
@@ -626,7 +629,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 id="total_assignments"
                                 min="1"
                                 max="10"
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={isNaN(formData.total_assignments as number) ? '' : (formData.total_assignments || 1)}
                                 onChange={(e) => {
                                     const val = e.target.value === '' ? NaN : parseInt(e.target.value);
@@ -634,34 +637,34 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 }}
                             />
                         </div>
-                        <p className="mt-1 text-xs text-gray-400 italic">How many separate assignments must the student submit for this phase?</p>
+                        <p className="mt-2 text-[9px] text-zinc-600 font-bold uppercase tracking-widest italic">Quantity of separate segments required for completion.</p>
                     </div>
 
-                    <div className="sm:col-span-6 border-t border-gray-100 pt-6">
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="sm:col-span-6 border-t border-zinc-900 pt-8">
+                        <div className="flex items-center justify-between p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800">
                             <div>
-                                <h3 className="text-sm font-bold text-gray-900">Mandatory Phase</h3>
-                                <p className="text-xs text-gray-500">If disabled, students won't be revoked for missing this deadline.</p>
+                                <h3 className="text-xs font-black text-white uppercase tracking-widest">Mandatory Node</h3>
+                                <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-1">If active, missed deadlines will trigger revocation protocols.</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, is_mandatory: !formData.is_mandatory })}
-                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ring-2 ring-transparent ring-offset-2 ${formData.is_mandatory ? 'bg-blue-600' : 'bg-gray-200'}`}
+                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ring-2 ring-transparent ring-offset-2 ${formData.is_mandatory ? 'bg-white' : 'bg-zinc-800'}`}
                             >
-                                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.is_mandatory ? 'translate-x-5' : 'translate-x-0'}`} />
+                                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-zinc-950 shadow ring-0 transition duration-200 ease-in-out ${formData.is_mandatory ? 'translate-x-5' : 'translate-x-0'}`} />
                             </button>
                         </div>
                     </div>
 
-                    <div className="sm:col-span-6 border-t border-gray-100 pt-6">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4">
-                            <Calendar className="mr-2 h-5 w-5 text-green-500" /> Timeline
+                    <div className="sm:col-span-6 border-t border-zinc-900 pt-8">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center mb-6">
+                            <Calendar className="mr-3 h-4 w-4 text-emerald-500 opacity-60" /> Phase Timeline
                         </h3>
                     </div>
 
                     <div className="sm:col-span-3">
-                        <label htmlFor="start_date" className="block text-sm font-bold text-gray-700">
-                            Start Date
+                        <label htmlFor="start_date" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Commencement Date
                         </label>
                         <div className="mt-1">
                             <input
@@ -669,7 +672,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 name="start_date"
                                 id="start_date"
                                 required
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={formData.start_date}
                                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                             />
@@ -677,8 +680,8 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                     </div>
 
                     <div className="sm:col-span-3">
-                        <label htmlFor="end_date" className="block text-sm font-bold text-gray-700">
-                            End Date (Deadline)
+                        <label htmlFor="end_date" className="block text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-500">
+                            Deadline Threshold
                         </label>
                         <div className="mt-1">
                             <input
@@ -686,7 +689,7 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                                 name="end_date"
                                 id="end_date"
                                 required
-                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border text-gray-900"
+                                className="block w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all sm:text-sm font-bold"
                                 value={formData.end_date}
                                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                             />
@@ -695,40 +698,40 @@ export default function PhaseForm({ id }: PhaseFormProps) {
                 </div>
 
                 {error && (
-                    <div className="rounded-md bg-red-50 p-4 border border-red-200">
+                    <div className="rounded-2xl bg-red-500/10 p-4 border border-red-500/20">
                         <div className="flex">
-                            <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+                            <AlertCircle className="h-5 w-5 text-red-500" aria-hidden="true" />
                             <div className="ml-3">
-                                <p className="text-sm font-medium text-red-800">{error}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-red-500">{error}</p>
                             </div>
                         </div>
                     </div>
                 )}
 
-                <div className="flex justify-end pt-6 border-t border-gray-100">
+                <div className="flex justify-end pt-10 border-t border-zinc-900">
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="bg-transparent py-2.5 px-6 border border-zinc-800 rounded-xl shadow-sm text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-zinc-900 transition-all active:scale-95"
                     >
-                        Cancel
+                        Abort
                     </button>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="ml-4 inline-flex justify-center py-2.5 px-8 border border-transparent shadow-[0_0_20px_rgba(255,255,255,0.15)] text-[10px] font-black uppercase tracking-widest rounded-xl text-black bg-white hover:bg-zinc-200 focus:outline-none transition-all disabled:opacity-50 active:scale-95"
                     >
                         {loading ? (
                             <span className="flex items-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Saving...
+                                Syncing...
                             </span>
                         ) : (
-                            <span className="flex items-center text-bold font-bold">
-                                <Save className="-ml-1 mr-2 h-4 w-4" /> Save Phase
+                            <span className="flex items-center">
+                                <Save className="-ml-1 mr-2 h-4 w-4" /> Save Configuration
                             </span>
                         )}
                     </button>

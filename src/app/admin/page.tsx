@@ -111,8 +111,8 @@ export default function AdminDashboard() {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-96 space-y-4">
-                <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
-                <p className="text-gray-400 font-mono text-xs uppercase tracking-widest animate-pulse">Loading Analytics...</p>
+                <Loader2 className="h-12 w-12 text-white animate-spin" />
+                <p className="text-zinc-500 font-mono text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">Syncing Core Analytics...</p>
             </div>
         );
     }

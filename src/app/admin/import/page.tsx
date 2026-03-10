@@ -146,63 +146,62 @@ export default function CSVImportPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Import Students</h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Bulk register students and create Auth accounts automatically.
+                    <h1 className="text-2xl font-black text-white tracking-tight uppercase">Bulk Registration</h1>
+                    <p className="mt-1 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+                        Initialize multiple student nodes via CSV synchronization.
                     </p>
                 </div>
                 <Link
                     href="/admin/students"
-                    className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                    className="p-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-2xl transition-all active:scale-95 text-white"
                 >
-                    <ArrowLeft className="mr-1 h-4 w-4" />
-                    Back to Students
+                    <ArrowLeft className="h-5 w-5" />
                 </Link>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8 text-black">
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div className="bg-zinc-950 p-8 rounded-[2.5rem] border border-zinc-800 shadow-2xl space-y-8">
+                <div className="bg-zinc-900/50 border-l-4 border-white p-6 rounded-2xl">
                     <div className="flex">
                         <div className="flex-shrink-0">
-                            <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                            <Info className="h-5 w-5 text-white opacity-40" aria-hidden="true" />
                         </div>
-                        <div className="ml-3">
-                            <p className="text-sm text-blue-700 font-bold">
-                                CSV Requirement:
+                        <div className="ml-4">
+                            <p className="text-[10px] text-white font-black uppercase tracking-widest">
+                                Transmission Requirements:
                             </p>
-                            <p className="text-sm text-blue-600 mt-1">
-                                Your file must include headers:
-                                <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">name</code>,
-                                <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">email</code>,
-                                <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">roll_no</code>,
-                                <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">phone</code>,
-                                and <code className="mx-1 font-mono bg-blue-100 px-1 rounded font-bold">password</code>.
+                            <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-2 leading-relaxed">
+                                Headers Required:
+                                <code className="mx-2 text-white bg-white/5 border border-white/10 px-2 py-0.5 rounded font-black tracking-widest">name</code>,
+                                <code className="mx-2 text-white bg-white/5 border border-white/10 px-2 py-0.5 rounded font-black tracking-widest">email</code>,
+                                <code className="mx-2 text-white bg-white/5 border border-white/10 px-2 py-0.5 rounded font-black tracking-widest">roll_no</code>,
+                                <code className="mx-2 text-white bg-white/5 border border-white/10 px-2 py-0.5 rounded font-black tracking-widest">phone</code>,
+                                and <code className="mx-2 text-white bg-white/5 border border-white/10 px-2 py-0.5 rounded font-black tracking-widest">password</code>.
                             </p>
                             <button
                                 onClick={downloadSample}
-                                className="mt-3 inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-600 font-bold"
+                                className="mt-4 inline-flex items-center text-[10px] font-black text-white hover:text-zinc-300 uppercase tracking-[0.2em] transition-colors"
                             >
-                                <Download className="mr-1 h-4 w-4" /> Download Sample CSV
+                                <Download className="mr-2 h-4 w-4" /> Get Blueprint (.CSV)
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 transition-colors hover:border-blue-400">
-                    <Upload className="h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-sm text-gray-600 mb-4">Click to select or drag and drop your CSV file</p>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-900 rounded-[2rem] p-12 transition-all hover:border-zinc-700 bg-zinc-900/30 group">
+                    <Upload className="h-12 w-12 text-zinc-800 mb-6 group-hover:text-white transition-colors" />
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-6">Select or Drag Transmission Manifest</p>
                     <input
                         type="file"
                         accept=".csv"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        className="block w-full text-[10px] text-zinc-500 font-black uppercase tracking-widest file:mr-6 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-white file:text-black hover:file:bg-zinc-200 transition-all cursor-pointer"
                     />
                     {file && (
-                        <div className="mt-4 flex items-center text-sm text-gray-900">
-                            <FileText className="mr-2 h-4 w-4 text-blue-500" />
+                        <div className="mt-6 flex items-center text-[10px] font-black text-white uppercase tracking-widest bg-zinc-900 px-6 py-3 rounded-2xl border border-zinc-800">
+                            <FileText className="mr-3 h-4 w-4 text-white opacity-40" />
                             {file.name} ({(file.size / 1024).toFixed(2)} KB)
                         </div>
                     )}
@@ -216,38 +215,38 @@ export default function CSVImportPage() {
                 )}
 
                 {result && (
-                    <div className="bg-green-50 border border-green-200 p-6 rounded-lg space-y-4">
-                        <div className="flex items-center text-green-800 font-bold">
-                            <CheckCircle2 className="mr-2 h-6 w-6 text-green-500" />
-                            Import Complete
+                    <div className="bg-transparent p-8 rounded-3xl border border-zinc-900 space-y-8">
+                        <div className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                            <CheckCircle2 className="mr-3 h-5 w-5 text-emerald-500" />
+                            Synchronization Complete
                         </div>
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            <div className="bg-white p-3 rounded shadow-sm">
-                                <p className="text-xs text-gray-500 uppercase font-bold">Total</p>
-                                <p className="text-xl font-bold">{result.total}</p>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                                <p className="text-[8px] text-zinc-600 uppercase font-black tracking-widest mb-1">Total</p>
+                                <p className="text-2xl font-black text-white">{result.total}</p>
                             </div>
-                            <div className="bg-white p-3 rounded shadow-sm">
-                                <p className="text-xs text-green-500 uppercase font-bold">Success</p>
-                                <p className="text-xl font-bold text-green-600">{result.success}</p>
+                            <div className="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20">
+                                <p className="text-[8px] text-emerald-500/60 uppercase font-black tracking-widest mb-1">Success</p>
+                                <p className="text-2xl font-black text-emerald-500">{result.success}</p>
                             </div>
-                            <div className="bg-white p-3 rounded shadow-sm">
-                                <p className="text-xs text-red-500 uppercase font-bold">Failed</p>
-                                <p className="text-xl font-bold text-red-600">{result.failed}</p>
+                            <div className="bg-red-500/10 p-5 rounded-2xl border border-red-500/20">
+                                <p className="text-[8px] text-red-500/60 uppercase font-black tracking-widest mb-1">Failed</p>
+                                <p className="text-2xl font-black text-red-500">{result.failed}</p>
                             </div>
                         </div>
                         {result.errors.length > 0 && (
                             <div className="mt-4">
-                                <p className="text-sm font-medium text-red-800 mb-2 font-bold underline">Error Details:</p>
-                                <ul className="text-xs text-red-600 bg-red-100 p-3 rounded list-disc list-inside space-y-1 max-h-40 overflow-y-auto font-bold">
-                                    {result.errors.map((err, i) => <li key={i}>{err}</li>)}
+                                <p className="text-[10px] font-black text-red-500 mb-4 uppercase tracking-widest">Error Log:</p>
+                                <ul className="text-[9px] text-red-400 bg-red-500/5 border border-red-500/10 p-4 rounded-xl list-none space-y-2 max-h-40 overflow-y-auto font-bold uppercase tracking-wider">
+                                    {result.errors.map((err, i) => <li key={i} className="flex items-start"><span className="mr-2 opacity-40">→</span>{err}</li>)}
                                 </ul>
                             </div>
                         )}
                         <button
                             onClick={() => router.push('/admin/students')}
-                            className="w-full py-2 bg-green-600 text-white rounded-md font-bold hover:bg-green-700"
+                            className="w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-200 shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all active:scale-95"
                         >
-                            View Students
+                            Explore Student Nodes
                         </button>
                     </div>
                 )}
@@ -256,15 +255,15 @@ export default function CSVImportPage() {
                     <button
                         onClick={processCSV}
                         disabled={!file || loading}
-                        className="w-full flex justify-center items-center py-3 bg-blue-600 text-white rounded-md font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full flex justify-center items-center py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95"
                     >
                         {loading ? (
-                            <>
-                                <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                                Processing CSV & Registering Students...
-                            </>
+                            <div className="flex items-center">
+                                <Loader2 className="animate-spin mr-3 h-4 w-4" />
+                                Processing Node Transmission...
+                            </div>
                         ) : (
-                            'Start Import'
+                            'Initialize Node Sync'
                         )}
                     </button>
                 )}

@@ -98,7 +98,7 @@ export default function StudentDetailPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
             </div>
         );
     }
@@ -106,8 +106,8 @@ export default function StudentDetailPage() {
     if (!student) {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500 font-bold">Student not found.</p>
-                <button onClick={() => router.back()} className="mt-4 text-blue-600 hover:underline">Go Back</button>
+                <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Student not found in Node.</p>
+                <button onClick={() => router.back()} className="mt-4 text-white hover:underline transition-all">Go Back</button>
             </div>
         );
     }
@@ -117,26 +117,26 @@ export default function StudentDetailPage() {
             <div className="flex items-center space-x-4">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-2xl transition-all active:scale-95"
                 >
-                    <ArrowLeft className="h-6 w-6 text-gray-500" />
+                    <ArrowLeft className="h-5 w-5 text-white" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{student.name}</h1>
-                    <p className="text-sm text-gray-500 font-bold underline">ID: {student.roll_number || 'N/A'}</p>
+                    <h1 className="text-2xl font-black text-white tracking-tight">{student.name}</h1>
+                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">Node ID: {student.roll_number || 'STU-NULL'}</p>
                 </div>
                 <div className="ml-auto flex items-center space-x-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold border-2 ${student.status === 'active'
-                        ? 'bg-green-50 text-green-700 border-green-200'
-                        : 'bg-red-50 text-red-700 border-red-200'
+                    <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${student.status === 'active'
+                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        : 'bg-red-500/10 text-red-500 border-red-500/20'
                         }`}>
                         {student.status.toUpperCase()}
                     </span>
                     <button
                         onClick={toggleStatus}
-                        className={`p-2 rounded-lg border-2 transition-colors ${student.status === 'active'
-                            ? 'bg-white border-red-200 text-red-600 hover:bg-red-50'
-                            : 'bg-white border-green-200 text-green-600 hover:bg-green-50'
+                        className={`p-3 rounded-2xl border transition-all active:scale-95 ${student.status === 'active'
+                            ? 'bg-zinc-900 border-zinc-800 text-red-500 hover:bg-red-500/10'
+                            : 'bg-zinc-900 border-zinc-800 text-emerald-500 hover:bg-emerald-500/10'
                             }`}
                     >
                         {student.status === 'active' ? <ShieldOff className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
@@ -147,42 +147,42 @@ export default function StudentDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Profile Card */}
                 <div className="md:col-span-1 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 font-bold">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <User className="mr-2 h-5 w-5 text-blue-500" />
+                    <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 flex items-center">
+                            <User className="mr-3 h-4 w-4 text-white opacity-40" />
                             General Information
                         </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center text-sm">
-                                <Mail className="mr-3 h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">{student.email}</span>
+                        <div className="space-y-5">
+                            <div className="flex items-center text-sm group">
+                                <Mail className="mr-3 h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" />
+                                <span className="text-zinc-300 font-medium">{student.email}</span>
                             </div>
-                            <div className="flex items-center text-sm">
-                                <Phone className="mr-3 h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">{student.phone || 'No phone number'}</span>
+                            <div className="flex items-center text-sm group">
+                                <Phone className="mr-3 h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" />
+                                <span className="text-zinc-300 font-medium">{student.phone || 'No phone number'}</span>
                             </div>
-                            <div className="flex items-center text-sm">
-                                <Calendar className="mr-3 h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">Joined on {new Date(student.created_at).toLocaleDateString()}</span>
+                            <div className="flex items-center text-sm group">
+                                <Calendar className="mr-3 h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" />
+                                <span className="text-zinc-300 font-medium">Joined Node on {new Date(student.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 font-bold">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <Activity className="mr-2 h-5 w-5 text-emerald-500" />
-                            Progress Stats
+                    <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 flex items-center">
+                            <Activity className="mr-3 h-4 w-4 text-white opacity-40" />
+                            Progress Metrics
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-emerald-50 p-4 rounded-xl">
-                                <p className="text-xs text-emerald-600 font-bold uppercase">Phases Completed</p>
-                                <p className="text-2xl font-black text-emerald-700">
+                            <div className="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1.5">Phases</p>
+                                <p className="text-3xl font-black text-white">
                                     {submissions.filter(s => s.status === 'valid').length}
                                 </p>
                             </div>
-                            <div className="bg-blue-50 p-4 rounded-xl font-bold">
-                                <p className="text-xs text-blue-600 font-bold uppercase">Total Watchtime</p>
-                                <p className="text-2xl font-black text-blue-700">
+                            <div className="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1.5">Watchtime</p>
+                                <p className="text-3xl font-black text-white">
                                     {Math.round((student.total_time_spent_seconds || 0) / 3600)}h
                                 </p>
                             </div>
@@ -190,38 +190,39 @@ export default function StudentDetailPage() {
                     </div>
                 </div>
 
-                {/* Submissions History */}
-                <div className="md:col-span-2 space-y-6 font-bold">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                            <Layers className="mr-2 h-5 w-5 text-indigo-500" />
-                            Submission History
+                <div className="md:col-span-2 space-y-6">
+                    <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl relative overflow-hidden">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-8 flex items-center">
+                            <Layers className="mr-3 h-4 w-4 text-white opacity-40" />
+                            Node Submission History
                         </h3>
 
                         {submissions.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                                <Clock className="mx-auto h-12 w-12 text-gray-300" />
-                                <p className="mt-2 text-sm text-gray-500">No assignments submitted yet.</p>
+                            <div className="text-center py-20 bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800">
+                                <Clock className="mx-auto h-12 w-12 text-zinc-800 mb-4" />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">No data transmitted yet.</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 {submissions.map((sub) => (
-                                    <div key={sub.id} className="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
-                                        <div className="flex items-start justify-between">
+                                    <div key={sub.id} className="p-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:bg-zinc-800 transition-all group">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                             <div>
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-sm font-bold text-indigo-600">Phase {sub.phase.phase_number}:</span>
-                                                    <span className="text-sm font-bold text-gray-900">{sub.phase.title}</span>
+                                                <div className="flex items-center space-x-3 mb-2">
+                                                    <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-white/20">
+                                                        Phase {sub.phase.phase_number}
+                                                    </span>
+                                                    <span className="text-base font-black text-white">{sub.phase.title}</span>
                                                 </div>
-                                                <div className="mt-2 flex items-center space-x-4">
+                                                <div className="mt-3 flex flex-wrap gap-4">
                                                     {sub.github_url && (
                                                         <a
                                                             href={sub.github_url}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="inline-flex items-center text-xs text-gray-500 hover:text-blue-600"
+                                                            className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
                                                         >
-                                                            <Github className="mr-1 h-3 w-3" /> GitHub Repo
+                                                            <Github className="mr-2 h-3.5 w-3.5" /> Repository
                                                         </a>
                                                     )}
                                                     {sub.file_url && (
@@ -229,26 +230,28 @@ export default function StudentDetailPage() {
                                                             href={sub.file_url}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="inline-flex items-center text-xs text-gray-500 hover:text-blue-600"
+                                                            className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
                                                         >
-                                                            <LinkIcon className="mr-1 h-3 w-3" /> Project Files
+                                                            <LinkIcon className="mr-2 h-3.5 w-3.5" /> Build Files
                                                         </a>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="text-xs text-gray-400 block mb-1">
+                                            <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 order-2 sm:order-1">
                                                     {new Date(sub.updated_at).toLocaleDateString()}
                                                 </span>
-                                                {sub.status === 'valid' ? (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 text-black">
-                                                        <CheckCircle2 className="mr-1 h-3 w-3" /> Valid
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
-                                                        Pending Review
-                                                    </span>
-                                                )}
+                                                <div className="order-1 sm:order-2">
+                                                    {sub.status === 'valid' ? (
+                                                        <span className="inline-flex items-center px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                                            <CheckCircle2 className="mr-2 h-3 w-3" /> Valid Node
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                                            Pending Verification
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
