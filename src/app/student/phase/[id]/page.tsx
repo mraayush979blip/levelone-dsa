@@ -1022,12 +1022,21 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
 
                                                 <button
                                                     type="submit"
-                                                    disabled={submittingIndex === idx || !isUnlocked || isPastDeadline || (data.submissionType === 'leetcode' && !user?.leetcode_username)}
-                                                    className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden group"
+                                                    disabled={submittingIndex === idx || (isSubmitted && data.submissionType === 'leetcode') || !isUnlocked || isPastDeadline || (data.submissionType === 'leetcode' && !user?.leetcode_username)}
+                                                    className={cn(
+                                                        "w-full h-14 font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center relative overflow-hidden group",
+                                                        isSubmitted && data.submissionType === 'leetcode'
+                                                            ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                                                            : "bg-indigo-600 text-white shadow-indigo-600/20 hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600"
+                                                    )}
                                                 >
                                                     <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                                                     {submittingIndex === idx || isVerifying ? (
                                                         <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : isSubmitted && data.submissionType === 'leetcode' ? (
+                                                        <span className="flex items-center gap-2">
+                                                            <CheckCircle2 className="h-4 w-4" /> Solved & Locked
+                                                        </span>
                                                     ) : (
                                                         <span>
                                                             {data.submissionType === 'leetcode'

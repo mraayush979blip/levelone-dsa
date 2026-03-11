@@ -179,7 +179,7 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
     if (loading) {
         return (
             <div className="flex justify-center items-center h-full min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
             </div>
         );
     }
@@ -187,8 +187,8 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
     if (!phase) {
         return (
             <div className="text-center py-12">
-                <h2 className="text-2xl font-black text-white uppercase tracking-widest">Phase not found in Node</h2>
-                <Link href="/admin/assignment" className="text-white hover:underline mt-4 inline-block font-black uppercase tracking-[0.2em] text-xs">
+                <h2 className="text-2xl font-black text-black uppercase tracking-widest">Phase not found in Node</h2>
+                <Link href="/admin/assignment" className="text-black hover:underline mt-4 inline-block font-black uppercase tracking-[0.2em] text-xs">
                     Back to assignments
                 </Link>
             </div>
@@ -196,58 +196,58 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8 font-sans">
             <div className="flex items-center space-x-4">
                 <Link
                     href="/admin/assignment"
-                    className="p-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-2xl transition-all active:scale-95"
+                    className="p-3 bg-white border border-zinc-200 hover:bg-zinc-50 rounded-2xl transition-all active:scale-95 shadow-sm"
                 >
-                    <ArrowLeft className="h-5 w-5 text-white" />
+                    <ArrowLeft className="h-5 w-5 text-black" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-black text-white tracking-tight">Phase {phase.phase_number}: {phase.title}</h1>
-                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">Transmission Status & Analytics</p>
+                    <h1 className="text-2xl font-black text-black tracking-tight tracking-widest uppercase">{phase.title}</h1>
+                    <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">Transmission Status & Analytics</p>
                 </div>
             </div>
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl relative overflow-hidden group">
+                <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm relative overflow-hidden group">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                            <Users className="h-6 w-6 text-white" />
+                        <div className="p-3 bg-zinc-50 rounded-2xl border border-zinc-100">
+                            <Users className="h-6 w-6 text-black" />
                         </div>
-                        <span className="text-3xl font-black text-white">{totalStudents}</span>
+                        <span className="text-3xl font-black text-black">{totalStudents}</span>
                     </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Total Students</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Total Students</p>
                 </div>
-                <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl relative overflow-hidden group">
+                <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm relative overflow-hidden group">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                            <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                        <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                         </div>
-                        <span className="text-3xl font-black text-white">{submittedCount}</span>
+                        <span className="text-3xl font-black text-black">{submittedCount}</span>
                     </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Successful Nodes</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Successful Nodes</p>
                 </div>
-                <div className="bg-zinc-950 p-6 rounded-3xl border border-zinc-800 shadow-2xl relative overflow-hidden group">
+                <div className="bg-black p-6 rounded-3xl border border-black shadow-xl shadow-black/10 relative overflow-hidden group">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
-                            <XCircle className="h-6 w-6 text-red-500" />
+                        <div className="p-3 bg-white/10 rounded-2xl border border-white/10">
+                            <XCircle className="h-6 w-6 text-white" />
                         </div>
                         <span className="text-3xl font-black text-white">{pendingCount}</span>
                     </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Pending Sync</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pending Sync</p>
                 </div>
             </div>
 
             {/* Graph and Details */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Submission Graph */}
-                <div className="lg:col-span-1 bg-zinc-950 p-8 rounded-[2.5rem] border border-zinc-800 shadow-2xl flex flex-col items-center">
+                <div className="lg:col-span-1 bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col items-center">
                     <div className="w-full flex items-center justify-between mb-8">
-                        <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center">
-                            <BarChart3 className="mr-3 h-4 w-4 text-white opacity-40" />
+                        <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center">
+                            <BarChart3 className="mr-3 h-4 w-4 text-black opacity-40" />
                             Efficiency Ratio
                         </h3>
                     </div>
@@ -255,7 +255,10 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
-                                    data={chartData}
+                                    data={[
+                                        { name: 'Submitted', value: submittedCount, color: '#000000' },
+                                        { name: 'Pending', value: pendingCount, color: '#f4f4f5' },
+                                    ]}
                                     cx="50%"
                                     cy="50%"
                                     innerRadius={70}
@@ -264,36 +267,39 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                     dataKey="value"
                                     stroke="none"
                                 >
-                                    {chartData.map((entry, index) => (
+                                    {[
+                                        { color: '#000000' },
+                                        { color: '#f4f4f5' }
+                                    ].map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ background: '#0a0a0a', borderRadius: '16px', border: '1px solid #27272a', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}
-                                    itemStyle={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                                    contentStyle={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e4e4e7', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}
+                                    itemStyle={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000000' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="mt-8 text-center bg-zinc-900 border border-zinc-800 px-8 py-5 rounded-[2.5rem]">
-                        <span className="text-4xl font-black text-white">{submissionRate.toFixed(1)}%</span>
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Global Completion</p>
+                    <div className="mt-8 text-center bg-zinc-50 border border-zinc-100 px-8 py-5 rounded-[2.5rem]">
+                        <span className="text-4xl font-black text-black">{submissionRate.toFixed(1)}%</span>
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">Global Completion</p>
                     </div>
                 </div>
 
                 {/* Submissions Table */}
-                <div className="lg:col-span-2 bg-zinc-950 rounded-[2.5rem] border border-zinc-800 shadow-2xl overflow-hidden flex flex-col">
-                    <div className="p-8 border-b border-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                        <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center">
-                            <Users className="mr-3 h-4 w-4 text-white opacity-40" />
+                <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden flex flex-col">
+                    <div className="p-8 border-b border-zinc-50 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center">
+                            <Users className="mr-3 h-4 w-4 text-black opacity-40" />
                             Transmission Logs
                         </h3>
                         <div className="relative flex-1 max-w-xs">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
                             <input
                                 type="text"
                                 placeholder="Search nodes..."
-                                className="w-full pl-11 h-11 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all"
+                                className="w-full pl-11 h-11 bg-zinc-50 border border-zinc-100 rounded-2xl text-xs text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -302,33 +308,33 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-zinc-900/50 border-b border-zinc-900">
+                            <thead className="bg-zinc-50 border-b border-zinc-100">
                                 <tr>
-                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Student</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Metadata</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Student</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Metadata</th>
                                     {totalPhaseTasks > 0 && (
-                                        <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Task Progress</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Task Progress</th>
                                     )}
-                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Transmission</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-right">Action</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Transmission</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-zinc-900">
+                            <tbody className="divide-y divide-zinc-50">
                                 {filteredSubmissions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-8 py-20 text-center text-zinc-600 font-black uppercase tracking-widest text-[10px]">
+                                        <td colSpan={5} className="px-8 py-20 text-center text-zinc-300 font-black uppercase tracking-widest text-[10px]">
                                             No data detected
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredSubmissions.map((sub) => (
-                                        <tr key={sub.id} className="hover:bg-zinc-900/50 transition-colors group">
+                                        <tr key={sub.id} className="hover:bg-zinc-50 transition-colors group">
                                             <td className="px-8 py-6">
-                                                <div className="font-black text-white group-hover:text-white transition-colors">{sub.student.name}</div>
+                                                <div className="font-black text-black group-hover:text-black transition-colors">{sub.student.name}</div>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{sub.student.roll_number || 'STU-NULL'}</div>
-                                                <div className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">{sub.student.batch || 'DEFAULT_BATCH'}</div>
+                                                <div className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5">{sub.student.batch || 'DEFAULT_BATCH'}</div>
                                             </td>
                                             {totalPhaseTasks > 0 && (
                                                 <td className="px-8 py-6">
@@ -342,22 +348,22 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                                     {Math.round((sub.task_progress.completed / sub.task_progress.total) * 100)}%
                                                                 </span>
                                                             </div>
-                                                            <div className="h-1.5 w-full bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden p-0.5">
+                                                            <div className="h-1.5 w-full bg-zinc-100 rounded-full border border-zinc-200 overflow-hidden p-0.5">
                                                                 <div
                                                                     className={cn(
                                                                         "h-full rounded-full transition-all duration-1000",
-                                                                        sub.task_progress.completed === sub.task_progress.total ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" : "bg-white"
+                                                                        sub.task_progress.completed === sub.task_progress.total ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]" : "bg-black"
                                                                     )}
                                                                     style={{ width: `${(sub.task_progress.completed / sub.task_progress.total) * 100}%` }}
                                                                 />
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest italic">Incomplete Matrix</span>
+                                                        <span className="text-[10px] font-black text-zinc-100 uppercase tracking-widest italic">Incomplete Matrix</span>
                                                     )}
                                                 </td>
                                             )}
-                                            <td className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                            <td className="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                                                 {new Date(sub.submitted_at).toLocaleString()}
                                             </td>
                                             <td className="px-8 py-6 text-right">
@@ -366,7 +372,7 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                         href={sub.github_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center px-4 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] active:scale-95"
+                                                        className="inline-flex items-center px-4 py-2 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all shadow-[0_10px_15px_rgba(0,0,0,0.1)] active:scale-95"
                                                     >
                                                         <Github className="h-3.5 w-3.5 mr-2" />
                                                         Explore Repo
@@ -376,14 +382,14 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                         href={sub.file_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center px-4 py-2 bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-700 transition-all active:scale-95"
+                                                        className="inline-flex items-center px-4 py-2 bg-zinc-50 text-black border border-zinc-100 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white hover:border-zinc-200 transition-all active:scale-95"
                                                     >
                                                         <Download className="h-3.5 w-3.5 mr-2" />
                                                         Download Node
                                                     </a>
                                                 ) : (
                                                     <div className="flex items-center justify-end">
-                                                        <div className="px-4 py-2 bg-zinc-900/50 border border-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-xl">
+                                                        <div className="px-4 py-2 bg-zinc-50 border border-zinc-100 text-zinc-400 text-[10px] font-black uppercase tracking-widest rounded-xl">
                                                             Progress Sync
                                                         </div>
                                                     </div>

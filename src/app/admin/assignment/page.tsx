@@ -56,19 +56,19 @@ export default function AssignmentPhasesPage() {
         <Link
             href={`/admin/assignment/${phase.id}`}
             key={phase.id}
-            className="group block bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 shadow-sm hover:shadow-md hover:border-zinc-700 transition-all duration-200"
+            className="group block bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-xl hover:shadow-black/5 hover:border-zinc-300 transition-all duration-300 active:scale-[0.98]"
         >
             <div className="p-5">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-3">
-                        <div className="bg-white/10 text-white border border-white/20 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest mr-3">
+                        <div className="bg-zinc-900 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest mr-3">
                             Phase {phase.phase_number}
                         </div>
-                        <h3 className="text-lg font-black text-white group-hover:text-zinc-200 transition-colors line-clamp-1">
+                        <h3 className="text-lg font-black text-black group-hover:text-zinc-600 transition-colors line-clamp-1">
                             {phase.title}
                         </h3>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-zinc-500 group-hover:text-white transform group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="h-5 w-5 text-zinc-300 group-hover:text-black transform group-hover:translate-x-1 transition-all" />
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm text-zinc-400">
@@ -79,9 +79,9 @@ export default function AssignmentPhasesPage() {
                     <div className="flex items-center">
                         <div className={cn(
                             "flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                                    "bg-zinc-800 text-zinc-400 border-zinc-700"
+                            getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'live' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                                getPhaseStatus(phase.start_date, phase.end_date, phase.is_paused) === 'ended' ? "bg-red-50 text-red-700 border-red-100" :
+                                    "bg-zinc-100 text-zinc-500 border-zinc-200"
                         )}>
                             <div className={cn(
                                 "w-1.5 h-1.5 rounded-full mr-1.5",
@@ -101,8 +101,8 @@ export default function AssignmentPhasesPage() {
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">Assignment Management</h1>
-                    <p className="mt-1 text-zinc-400 font-medium tracking-wide">
+                    <h1 className="text-3xl font-black text-black tracking-tight">Assignment Management</h1>
+                    <p className="mt-1 text-zinc-500 font-medium tracking-wide">
                         Track student submissions and analyze phase performance.
                     </p>
                 </div>
@@ -110,12 +110,12 @@ export default function AssignmentPhasesPage() {
 
             {/* Search */}
             <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-zinc-500" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-zinc-400" />
                 </div>
                 <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-3 border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm rounded-xl leading-5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all shadow-sm"
+                    className="block w-full pl-11 pr-4 py-4 border border-zinc-200 bg-white rounded-2xl leading-5 text-black placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all shadow-sm"
                     placeholder="Search phases by title or number..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -125,7 +125,7 @@ export default function AssignmentPhasesPage() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-40 bg-zinc-900/50 rounded-xl border border-zinc-800 animate-pulse" />
+                        <div key={i} className="h-40 bg-white rounded-2xl border border-zinc-100 animate-pulse" />
                     ))}
                 </div>
             ) : filteredPhases.length === 0 ? (
@@ -140,8 +140,8 @@ export default function AssignmentPhasesPage() {
                     {livePhases.length > 0 && (
                         <section>
                             <div className="flex items-center space-x-2 mb-6">
-                                <Clock className="h-5 w-5 text-emerald-400" />
-                                <h2 className="text-xl font-black text-white uppercase tracking-widest">Live Phases</h2>
+                                <Clock className="h-5 w-5 text-emerald-500" />
+                                <h2 className="text-xl font-black text-black uppercase tracking-widest">Live Phases</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {livePhases.map((phase) => <PhaseCard key={phase.id} phase={phase} />)}
