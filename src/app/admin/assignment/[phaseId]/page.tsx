@@ -23,18 +23,30 @@ import {
     Pie
 } from 'recharts';
 
-interface ExtendedSubmission extends Submission {
+interface CombinedSubmission {
+    id: string;
+    student_id: string;
     student: {
         name: string;
         roll_number: string;
         batch: string;
     };
+    submitted_at: string;
+    submission_type: string;
+    github_url?: string;
+    file_url?: string;
+    task_progress?: {
+        completed: number;
+        total: number;
+    };
+    is_only_tasks?: boolean;
 }
 
 export default function PhaseAssignmentDetailsPage({ params }: { params: Promise<{ phaseId: string }> }) {
     const { phaseId } = use(params);
     const [phase, setPhase] = useState<Phase | null>(null);
-    const [submissions, setSubmissions] = useState<ExtendedSubmission[]>([]);
+    const [combinedSubmissions, setCombinedSubmissions] = useState<CombinedSubmission[]>([]);
+    const [totalPhaseTasks, setTotalPhaseTasks] = useState(0);
     const [totalStudents, setTotalStudents] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -63,7 +75,17 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                 if (studentsError) throw studentsError;
                 setTotalStudents(count || 0);
 
-                // Fetch submissions with student info
+                // Fetch phase tasks count
+                const { count: tasksCount, error: tasksError } = await supabase
+                    .from('phase_tasks')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('phase_id', phaseId);
+
+                if (tasksError) throw tasksError;
+                const totalTasks = tasksCount || 0;
+                setTotalPhaseTasks(totalTasks);
+
+                // Fetch submissions
                 const { data: subsData, error: subsError } = await supabase
                     .from('submissions')
                     .select('*, student:users(name, roll_number, batch)')
@@ -71,7 +93,60 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                     .is('is_deleted', false);
 
                 if (subsError) throw subsError;
-                setSubmissions((subsData as any) || []);
+
+                // Fetch task submissions
+                const { data: taskSubsData, error: taskSubsError } = await supabase
+                    .from('task_submissions')
+                    .select('*, student:users(name, roll_number, batch)')
+                    .eq('phase_id', phaseId);
+
+                if (taskSubsError) throw taskSubsError;
+
+                // Build task counts map
+                const taskCounts: Record<string, number> = {};
+                const taskStudents: Record<string, any> = {};
+
+                (taskSubsData as any[])?.forEach(ts => {
+                    taskCounts[ts.student_id] = (taskCounts[ts.student_id] || 0) + 1;
+                    if (!taskStudents[ts.student_id]) {
+                        taskStudents[ts.student_id] = ts.student;
+                    }
+                });
+
+                // Prepare combined data
+                const combined: CombinedSubmission[] = (subsData as any[] || []).map(sub => ({
+                    id: sub.id,
+                    student_id: sub.student_id,
+                    student: sub.student,
+                    submitted_at: sub.submitted_at,
+                    submission_type: sub.submission_type,
+                    github_url: sub.github_url,
+                    file_url: sub.file_url,
+                    task_progress: totalTasks > 0 ? {
+                        completed: taskCounts[sub.student_id] || 0,
+                        total: totalTasks
+                    } : undefined
+                }));
+
+                // Add students who only have task submissions
+                Object.keys(taskCounts).forEach(sid => {
+                    if (!combined.some(c => c.student_id === sid)) {
+                        combined.push({
+                            id: `ts-${sid}`,
+                            student_id: sid,
+                            student: taskStudents[sid],
+                            submitted_at: taskSubsData?.find(ts => ts.student_id === sid)?.verified_at || new Date().toISOString(),
+                            submission_type: 'leetcode_tasks',
+                            task_progress: {
+                                completed: taskCounts[sid],
+                                total: totalTasks
+                            },
+                            is_only_tasks: true
+                        });
+                    }
+                });
+
+                setCombinedSubmissions(combined);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -85,13 +160,13 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
         }
     }, [phaseId]);
 
-    const filteredSubmissions = submissions.filter(sub =>
+    const filteredSubmissions = combinedSubmissions.filter(sub =>
         sub.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         sub.student.roll_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         sub.student.batch?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const submittedCount = submissions.length;
+    const submittedCount = combinedSubmissions.length;
     const pendingCount = Math.max(0, totalStudents - submittedCount);
     const submissionRate = totalStudents > 0 ? (submittedCount / totalStudents) * 100 : 0;
 
@@ -230,6 +305,9 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                 <tr>
                                     <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Student</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Metadata</th>
+                                    {totalPhaseTasks > 0 && (
+                                        <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Task Progress</th>
+                                    )}
                                     <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Transmission</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-right">Action</th>
                                 </tr>
@@ -251,6 +329,33 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                 <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{sub.student.roll_number || 'STU-NULL'}</div>
                                                 <div className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">{sub.student.batch || 'DEFAULT_BATCH'}</div>
                                             </td>
+                                            {totalPhaseTasks > 0 && (
+                                                <td className="px-8 py-6">
+                                                    {sub.task_progress ? (
+                                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                                                                    {sub.task_progress.completed}/{sub.task_progress.total}
+                                                                </span>
+                                                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                    {Math.round((sub.task_progress.completed / sub.task_progress.total) * 100)}%
+                                                                </span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden p-0.5">
+                                                                <div
+                                                                    className={cn(
+                                                                        "h-full rounded-full transition-all duration-1000",
+                                                                        sub.task_progress.completed === sub.task_progress.total ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" : "bg-white"
+                                                                    )}
+                                                                    style={{ width: `${(sub.task_progress.completed / sub.task_progress.total) * 100}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest italic">Incomplete Matrix</span>
+                                                    )}
+                                                </td>
+                                            )}
                                             <td className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                                                 {new Date(sub.submitted_at).toLocaleString()}
                                             </td>
@@ -265,7 +370,7 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                         <Github className="h-3.5 w-3.5 mr-2" />
                                                         Explore Repo
                                                     </a>
-                                                ) : (
+                                                ) : sub.submission_type === 'file' ? (
                                                     <a
                                                         href={sub.file_url}
                                                         target="_blank"
@@ -275,6 +380,12 @@ export default function PhaseAssignmentDetailsPage({ params }: { params: Promise
                                                         <Download className="h-3.5 w-3.5 mr-2" />
                                                         Download Node
                                                     </a>
+                                                ) : (
+                                                    <div className="flex items-center justify-end">
+                                                        <div className="px-4 py-2 bg-zinc-900/50 border border-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-xl">
+                                                            Progress Sync
+                                                        </div>
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>
