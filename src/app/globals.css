@@ -211,12 +211,14 @@ textarea:not(.raw-input):focus {
 .text-gradient {
   background: linear-gradient(to right, #ffffff, var(--text-muted));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 [data-theme='theme-dark'] .text-gradient {
   background: linear-gradient(to right, #ffffff, #a1a1aa);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Linkedin, Globe, Users, ArrowLeft, Sparkles, Code2, Palette, ShieldCheck } from 'lucide-react';
+import { Linkedin, Instagram, Globe, Users, ArrowLeft, Sparkles, Code2, Palette, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SlideUp, FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/motion-wrapper';
@@ -14,6 +14,7 @@ const team = [
         role: "Developer & Architect",
         description: "Visionary behind Levelone's core architecture and Whole System.",
         linkedin: "https://www.linkedin.com/in/aayush-sharma-2013d",
+        instagram: "https://www.instagram.com/aayush_sharma_2007?igsh=MW9lemo5cG54MThwaQ==",
         portfolio: "https://aayush-sharma-beige.vercel.app/",
         avatar: "⚡",
         color: "from-zinc-500 to-slate-400",
@@ -148,6 +149,16 @@ export default function TeamPage() {
                                         >
                                             <Linkedin className="w-5 h-5" />
                                         </a>
+                                        {member.instagram && (
+                                            <a
+                                                href={member.instagram}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-3 bg-background border border-card-border rounded-2xl text-muted hover:text-white hover:bg-white/5 transition-all shadow-sm"
+                                            >
+                                                <Instagram className="w-5 h-5" />
+                                            </a>
+                                        )}
                                         {member.portfolio && (
                                             <a
                                                 href={member.portfolio}
