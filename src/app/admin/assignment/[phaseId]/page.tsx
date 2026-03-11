@@ -14,6 +14,7 @@ import {
     Download
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import { Phase, Submission } from '@/types/database';
 import {
     Tooltip,
