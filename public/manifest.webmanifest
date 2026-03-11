@@ -2,41 +2,36 @@
     "name": "Levelone Learning Portal DSA",
     "short_name": "Levelone DSA",
     "description": "Premium Phase-Based Learning Management System",
-    "start_url": "https://levelone-dsa.vercel.app/",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#3b82f6",
-    "icons": [
-        {
-            "src": "/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
     ],
+    "background_color": "#000000",
+    "theme_color": "#000000",
     "orientation": "any",
     "id": "L_1",
     "lang": "en",
     "categories": [
-        "education"
+        "education",
+        "productivity"
+    ],
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
     ],
     "screenshots": [
         {
@@ -52,6 +47,36 @@
             "type": "image/png",
             "form_factor": "wide",
             "label": "Live Rankings and Global Leaderboard"
+        },
+        {
+            "src": "/screenshots/dashboard.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Mobile Student Experience"
+        }
+    ],
+    "prefer_related_applications": false,
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "1024x1024"
+                }
+            ]
+        },
+        {
+            "name": "Rankings",
+            "url": "/student/compete",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "1024x1024"
+                }
+            ]
         }
     ]
 }
