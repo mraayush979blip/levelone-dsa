@@ -59,15 +59,15 @@ export default function AdminSidebar() {
 
             {/* Sidebar content */}
             <div className={cn(
-                "fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col w-64 bg-white border-r border-zinc-200 shrink-0",
-                isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+                "fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col w-64 glass border-r border-white/5 shrink-0",
+                isOpen ? "translate-x-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.5)]" : "-translate-x-full"
             )}>
-                <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
-                    <div className="flex items-center flex-shrink-0 px-6 mb-10">
-                        <span className="text-xl font-black text-black tracking-tighter uppercase">Levelone</span>
-                        <span className="ml-3 px-2 py-1 text-[9px] font-black text-white bg-black rounded-md uppercase tracking-[0.2em]">Core</span>
+                <div className="flex flex-col flex-grow pt-8 pb-4 overflow-y-auto overflow-x-hidden">
+                    <div className="flex items-center flex-shrink-0 px-8 mb-12">
+                        <span className="text-2xl font-black text-white tracking-tighter uppercase text-glow">Levelone</span>
+                        <span className="ml-3 px-2 py-0.5 text-[8px] font-black text-black bg-primary rounded-sm uppercase tracking-[0.3em] animate-premium-float">Core</span>
                     </div>
-                    <div className="flex-1 px-4 space-y-2 bg-white">
+                    <div className="flex-1 px-4 space-y-1.5 ">
                         {navItems.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href + '/'));
                             return (
@@ -75,16 +75,19 @@ export default function AdminSidebar() {
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        'group flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all relative overflow-hidden',
+                                        'group flex items-center px-5 py-3.5 text-[9px] font-black uppercase tracking-[0.25em] rounded-2xl transition-all relative overflow-hidden active:scale-95',
                                         isActive
-                                            ? 'bg-black text-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] active:scale-95'
-                                            : 'text-zinc-500 hover:text-black hover:bg-zinc-50 active:scale-95'
+                                            ? 'bg-white/5 text-primary border border-primary/10 shadow-[0_0_20px_rgba(var(--theme-primary-rgb),0.1)]'
+                                            : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     )}
                                 >
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--theme-primary-rgb),0.8)]" />
+                                    )}
                                     <item.icon
                                         className={cn(
-                                            'mr-3 flex-shrink-0 h-4 w-4 transition-colors',
-                                            isActive ? 'text-white' : 'text-zinc-400 group-hover:text-black'
+                                            'mr-4 flex-shrink-0 h-4 w-4 transition-all duration-300',
+                                            isActive ? 'text-primary scale-110' : 'text-zinc-600 group-hover:text-zinc-300'
                                         )}
                                         aria-hidden="true"
                                     />
@@ -94,22 +97,26 @@ export default function AdminSidebar() {
                         })}
                     </div>
                 </div>
-                <div className="p-6 border-t border-zinc-100 space-y-6">
+                <div className="p-6 border-t border-white/5 space-y-8 bg-black/20">
                     <InstallPWA />
-                    <div className="flex items-center justify-between group">
+                    <div className="flex items-center justify-between group px-2">
                         <div className="flex flex-col">
-                            <p className="text-[10px] font-black text-black uppercase tracking-widest leading-none">{user?.name || 'ADMIN_NODE'}</p>
-                            <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mt-1">Status: Online</span>
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none group-hover:text-primary transition-colors">{user?.name || 'ADMIN_NODE'}</p>
+                            <div className="flex items-center mt-2">
+                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                <span className="text-[7.5px] font-black text-zinc-500 uppercase tracking-widest ml-2">Secure Link Active</span>
+                            </div>
                         </div>
                         <button
                             onClick={() => signOut()}
-                            className="p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-400 hover:text-red-500 hover:border-red-500/10 hover:bg-red-500/5 transition-all active:scale-95"
+                            className="p-3 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-red-500 hover:border-red-500/20 hover:bg-red-500/10 transition-all active:scale-90"
                         >
                             <LogOut className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
             </div>
+
         </>
     );
 }

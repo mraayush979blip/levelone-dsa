@@ -120,121 +120,133 @@ export default function AdminDashboard() {
     const { stats, retentionData } = dashboardData!;
 
     return (
-        <div className="space-y-4 md:space-y-8 font-sans">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">Dashboard Overview</h2>
-                <div className="text-[10px] font-black text-zinc-400 bg-white px-4 py-2 rounded-full border border-zinc-200 shadow-sm uppercase tracking-widest">
-                    Last sync: {new Date().toLocaleTimeString()}
+        <div className="space-y-12 animate-fade-in max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div>
+                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.4em] mb-2 drop-shadow-[0_0_8px_rgba(var(--theme-primary-rgb),0.5)]">System Core</p>
+                    <h1 className="text-4xl font-black text-white tracking-tighter text-glow uppercase">Command Center</h1>
+                    <p className="mt-2 text-sm text-zinc-500 font-medium">
+                        Real-time analytics and student protocol management.
+                    </p>
+                </div>
+                <div className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-white/5 px-6 py-3 rounded-2xl border border-white/10">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <span>Synchronized: {new Date().toLocaleTimeString()}</span>
                 </div>
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="glass-card p-8 group hover:glow-card transition-all">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Total Students</p>
-                            <p className="text-3xl md:text-4xl font-black text-black mt-2">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Total Fleet</p>
+                            <p className="text-4xl font-black text-white group-hover:text-primary transition-colors">
                                 {stats.totalStudents}
                             </p>
                         </div>
-                        <div className="bg-zinc-50 rounded-2xl p-4 shrink-0 transition-colors">
-                            <Users className="w-6 h-6 text-black" />
+                        <div className="bg-white/5 rounded-2xl p-4 group-hover:bg-white/10 transition-colors">
+                            <Users className="w-6 h-6 text-zinc-400 group-hover:text-white" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
-                    <div className="flex items-center justify-between">
+                <div className="glass-card p-8 group hover:glow-card transition-all relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all" />
+                    <div className="flex items-center justify-between relative z-10">
                         <div>
-                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Active Students</p>
-                            <p className="text-3xl md:text-4xl font-black text-emerald-600 mt-2">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Active Nodes</p>
+                            <p className="text-4xl font-black text-emerald-400">
                                 {stats.activeStudents}
                             </p>
                         </div>
-                        <div className="bg-emerald-50 rounded-2xl p-4 shrink-0 border border-emerald-100">
-                            <Shield className="w-6 h-6 text-emerald-600" />
+                        <div className="bg-emerald-500/10 rounded-2xl p-4 border border-emerald-500/20">
+                            <Shield className="w-6 h-6 text-emerald-400" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-black rounded-[2rem] shadow-xl shadow-black/10 p-6 md:p-8 hover:scale-[1.02] transition-all active:scale-[0.98]">
+                <div className="glass-card bg-zinc-950/50 p-8 group hover:glow-card transition-all border-red-500/10 active:scale-95">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Revoked Students</p>
-                            <p className="text-3xl md:text-4xl font-black text-white mt-2">
+                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">Severed Links</p>
+                            <p className="text-4xl font-black text-red-500">
                                 {stats.revokedStudents}
                             </p>
                         </div>
-                        <div className="bg-white/10 rounded-2xl p-4 shrink-0 border border-white/10">
-                            <ShieldAlert className="w-6 h-6 text-white" />
+                        <div className="bg-red-500/10 rounded-2xl p-4 border border-red-500/20">
+                            <ShieldAlert className="w-6 h-6 text-red-500" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
+                <div className="glass-card p-8 group hover:glow-card transition-all">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Live Phases</p>
-                            <p className="text-3xl md:text-4xl font-black text-black mt-2">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Live Protocols</p>
+                            <p className="text-4xl font-black text-white group-hover:text-primary transition-colors">
                                 {stats.livePhases}
                             </p>
                         </div>
-                        <div className="bg-zinc-50 rounded-2xl p-4 shrink-0">
-                            <Layers className="w-6 h-6 text-black" />
+                        <div className="bg-white/5 rounded-2xl p-4 group-hover:bg-white/10 transition-colors">
+                            <Layers className="w-6 h-6 text-zinc-400 group-hover:text-white" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Retention Stats */}
-                <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-zinc-100 p-8 md:p-10">
-                    <div className="flex items-center justify-between mb-8 md:mb-10">
-                        <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-widest flex items-center">
-                            <BarChart3 className="mr-3 h-5 w-5 text-zinc-400" />
-                            Retention Analysis
+                <div className="lg:col-span-2 glass-card p-10">
+                    <div className="flex items-center justify-between mb-12">
+                        <h3 className="text-xl font-black text-white uppercase tracking-[0.2em] flex items-center">
+                            <BarChart3 className="mr-4 h-6 w-6 text-primary" />
+                            Fleet Retention Matrix
                         </h3>
                     </div>
 
                     {retentionData && (
-                        <div className="space-y-10">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-                                <div className="space-y-8 flex-1">
-                                    <div className="relative pt-1 max-w-sm">
-                                        <div className="flex mb-3 items-center justify-between">
+                        <div className="space-y-12">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-12">
+                                <div className="space-y-10 flex-1">
+                                    <div className="relative pt-1">
+                                        <div className="flex mb-4 items-center justify-between">
                                             <div>
-                                                <span className="text-[10px] font-black inline-block py-1.5 px-3 uppercase rounded-full text-black bg-zinc-50 tracking-widest border border-zinc-100">
-                                                    Retention Rate
+                                                <span className="text-[10px] font-black inline-block py-2 px-4 uppercase rounded-full text-primary bg-primary/10 tracking-[0.2em] border border-primary/20 shadow-[0_0_15px_rgba(var(--theme-primary-rgb),0.1)]">
+                                                    Stability Index
                                                 </span>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-xs font-black text-black tracking-widest">
+                                                <span className="text-4xl font-black text-white tracking-tighter">
                                                     {retentionData.retention_percent}%
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-zinc-50 border border-zinc-100 p-1">
-                                            <div style={{ width: `${retentionData.retention_percent}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-black rounded-full transition-all duration-1000"></div>
+                                        <div className="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-white/5 border border-white/10 p-1">
+                                            <div 
+                                                style={{ width: `${retentionData.retention_percent}%` }} 
+                                                className="shadow-[0_0_20px_rgba(var(--theme-primary-rgb),0.4)] flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary rounded-full transition-all duration-1000 animate-pulse"
+                                            ></div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-6 transition-all hover:border-black/5">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Retained Nodes</p>
-                                            <p className="text-2xl font-black text-black">{retentionData.retained_count}</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-white/5 border border-white/5 rounded-3xl p-8 hover:bg-white/10 hover:border-white/10 transition-all group/stat">
+                                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 group-hover/stat:text-emerald-400 transition-colors">Stable Nodes</p>
+                                            <p className="text-4xl font-black text-white">{retentionData.retained_count}</p>
                                         </div>
-                                        <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-6 transition-all hover:border-black/5">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Dropped/Revoked</p>
-                                            <p className="text-2xl font-black text-black">{retentionData.revoked_count}</p>
+                                        <div className="bg-white/5 border border-white/5 rounded-3xl p-8 hover:bg-white/10 hover:border-white/10 transition-all group/stat">
+                                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 group-hover/stat:text-red-400 transition-colors">Anomaly Count</p>
+                                            <p className="text-4xl font-black text-white">{retentionData.revoked_count}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="hidden md:flex flex-col items-center justify-center p-10 bg-zinc-50 border border-zinc-100 rounded-[2rem] min-w-[180px] shadow-inner">
-                                    <TrendingUp className="h-10 w-10 text-zinc-300 mb-3" />
-                                    <span className="text-4xl font-black text-black tracking-tighter">{retentionData.retention_percent}%</span>
-                                    <span className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mt-1">Efficiency</span>
+                                <div className="hidden md:flex flex-col items-center justify-center p-12 bg-white/5 border border-white/5 rounded-[3rem] min-w-[220px] shadow-2xl relative overflow-hidden group/efficiency">
+                                    <div className="absolute inset-0 bg-primary/5 blur-3xl group-hover/efficiency:bg-primary/10 transition-all" />
+                                    <TrendingUp className="h-12 w-12 text-primary mb-4 relative z-10" />
+                                    <span className="text-5xl font-black text-white tracking-tighter relative z-10">{retentionData.retention_percent}%</span>
+                                    <span className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] mt-2 relative z-10">Efficiency</span>
                                 </div>
                             </div>
                         </div>
@@ -242,53 +254,54 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-[2.5rem] shadow-sm border border-zinc-200 p-8 md:p-10 font-sans">
-                    <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-widest mb-8 md:mb-10">Quick Actions</h3>
-                    <div className="space-y-4">
-                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
+                <div className="glass-card p-10 flex flex-col">
+                    <h3 className="text-xl font-black text-white uppercase tracking-[0.2em] mb-12">Core Tasks</h3>
+                    <div className="space-y-4 flex-1">
+                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-primary rounded-[2rem] transition-all group border border-white/5 hover:border-primary active:scale-95 shadow-lg group">
                             <div className="flex items-center">
-                                <Plus className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">Create New Phase</span>
+                                <Plus className="h-5 w-5 text-zinc-400 group-hover:text-white mr-5 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 group-hover:text-white transition-colors">Initialize Phase</span>
                             </div>
-                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-600 group-hover:text-white transition-colors text-xl">→</span>
                         </Link>
 
-                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
+                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-primary rounded-[2rem] transition-all group border border-white/5 hover:border-primary active:scale-95 shadow-lg group">
                             <div className="flex items-center">
-                                <Upload className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">Import Students</span>
+                                <Upload className="h-5 w-5 text-zinc-400 group-hover:text-white mr-5 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 group-hover:text-white transition-colors">Import Fleet</span>
                             </div>
-                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-600 group-hover:text-white transition-colors text-xl">→</span>
                         </Link>
 
-                        <Link href="/admin/students" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
+                        <Link href="/admin/students" className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-primary rounded-[2rem] transition-all group border border-white/5 hover:border-primary active:scale-95 shadow-lg group">
                             <div className="flex items-center">
-                                <Users className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">View All Students</span>
+                                <Users className="h-5 w-5 text-zinc-400 group-hover:text-white mr-5 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 group-hover:text-white transition-colors">Scan Network</span>
                             </div>
-                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-600 group-hover:text-white transition-colors text-xl">→</span>
                         </Link>
 
                         <button
                             onClick={handleSyncRevocation}
                             disabled={isSyncing}
-                            className="w-full flex items-center justify-between p-5 bg-red-50 hover:bg-red-600 rounded-2xl transition-all group mt-6 border border-red-100 hover:border-red-600 active:scale-95 shadow-lg shadow-red-500/5 disabled:opacity-50"
+                            className="w-full flex items-center justify-between p-6 bg-red-500/10 hover:bg-red-600 rounded-[2rem] transition-all group mt-8 border border-red-500/20 hover:border-red-600 active:scale-95 shadow-[0_0_20px_rgba(239,68,68,0.1)] group disabled:opacity-50"
                         >
                             <div className="flex items-center">
                                 {isSyncing ? (
-                                    <RefreshCw className="h-5 w-5 text-red-600 group-hover:text-white mr-4 animate-spin shrink-0 transition-colors" />
+                                    <RefreshCw className="h-5 w-5 text-red-500 group-hover:text-white mr-5 animate-spin shrink-0 transition-colors" />
                                 ) : (
-                                    <ShieldAlert className="h-5 w-5 text-red-600 group-hover:text-white mr-4 shrink-0 transition-colors" />
+                                    <ShieldAlert className="h-5 w-5 text-red-500 group-hover:text-white mr-5 shrink-0 transition-colors" />
                                 )}
-                                <span className="text-[10px] font-black uppercase tracking-widest text-red-600 group-hover:text-white transition-colors">
-                                    {isSyncing ? 'Syncing...' : 'Sync Revocations'}
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 group-hover:text-white transition-colors">
+                                    {isSyncing ? 'Syncing...' : 'Sync Protocol'}
                                 </span>
                             </div>
-                            {!isSyncing && <span className="text-red-300 group-hover:text-white transition-colors">↻</span>}
+                            {!isSyncing && <span className="text-red-500/50 group-hover:text-white transition-colors text-xl">↻</span>}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     );
+
 }

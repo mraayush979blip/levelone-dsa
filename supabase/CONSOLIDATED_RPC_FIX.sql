@@ -83,3 +83,74 @@ BEGIN
     RETURN jsonb_build_object('success', true, 'message', 'Equipped successfully');
 END;
 $$;
+
+-- 3. award_points
+CREATE OR REPLACE FUNCTION award_points(target_user_id UUID, amount INTEGER, reason TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    UPDATE users SET points = points + amount WHERE id = target_user_id;
+END;
+$$;
+
+-- 4. purchase_item
+CREATE OR REPLACE FUNCTION purchase_item(item_id_param UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    user_points INTEGER;
+    item_cost INTEGER;
+    item_req_badge UUID;
+    item_req_streak INTEGER;
+    user_streak INTEGER;
+    has_badge BOOLEAN;
+    already_owned BOOLEAN;
+BEGIN
+    -- Check ownership
+    SELECT EXISTS(SELECT 1 FROM user_inventory WHERE user_id = auth.uid() AND item_id = item_id_param)
+    INTO already_owned;
+    
+    IF already_owned THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Item already owned');
+    END IF;
+
+    -- Get user stats
+    SELECT points, current_streak INTO user_points, user_streak FROM users WHERE id = auth.uid();
+    
+    -- Get item details
+    SELECT cost, required_badge_id, required_streak 
+    INTO item_cost, item_req_badge, item_req_streak 
+    FROM store_items WHERE id = item_id_param;
+
+    -- Check cost
+    IF user_points < item_cost THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Insufficient points');
+    END IF;
+
+    -- Check streak requirement
+    IF item_req_streak IS NOT NULL AND user_streak < item_req_streak THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Streak requirement not met (' || item_req_streak || ' day streak needed)');
+    END IF;
+
+    -- Check badge requirement
+    IF item_req_badge IS NOT NULL THEN
+        SELECT EXISTS(SELECT 1 FROM user_badges WHERE user_id = auth.uid() AND badge_id = item_req_badge)
+        INTO has_badge;
+        
+        IF NOT has_badge THEN
+             RETURN jsonb_build_object('success', false, 'message', 'Badge requirement not met');
+        END IF;
+    END IF;
+
+    -- Execute Purchase
+    UPDATE users SET points = points - item_cost WHERE id = auth.uid();
+    
+    INSERT INTO user_inventory (user_id, item_id) VALUES (auth.uid(), item_id_param);
+
+    RETURN jsonb_build_object('success', true, 'message', 'Purchase successful', 'new_balance', user_points - item_cost);
+END;
+$$;
