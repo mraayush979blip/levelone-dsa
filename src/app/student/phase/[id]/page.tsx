@@ -597,6 +597,16 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
         return (match && match[2].length === 11) ? match[2] : null;
     };
 
+    // --- Completion Stats ---
+    const totalTasksCount = tasksData?.length || 0;
+    const completedTasksCount = taskSubmissionsData?.length || 0;
+    const totalAssignmentsCount = phase?.total_assignments || 1;
+    const completedAssignmentsCount = Object.keys(submissions).length;
+
+    const totalItems = totalTasksCount + totalAssignmentsCount;
+    const completedItems = completedTasksCount + completedAssignmentsCount;
+    const overallCompletionPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
     // --- Render Helpers ---
 
     if (phaseLoading) {
@@ -754,6 +764,40 @@ export default function PhaseDetailPage({ params }: PhasePageProps) {
                                 </p>
                             </div>
                         )}
+
+                        {/* Overall Completion UI */}
+                        <div className="mb-10 p-6 bg-orange-500 rounded-[2rem] shadow-lg shadow-orange-500/20 relative overflow-hidden group">
+                            {/* Background pattern */}
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                                <Trophy className="w-24 h-24 text-white" />
+                            </div>
+
+                            <div className="relative z-10">
+                                <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em] mb-4 block">Overall Completion</span>
+                                <div className="flex items-end gap-2 mb-6">
+                                    <span className="text-4xl font-black text-white leading-none">{overallCompletionPercent}%</span>
+                                </div>
+
+                                <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden mb-6">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${overallCompletionPercent}%` }}
+                                        transition={{ duration: 1, ease: "easeOut" }}
+                                        className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-1 h-1 rounded-full bg-white" />
+                                            <span className="text-[10px] font-black text-white uppercase tracking-widest">{completedItems} RESOLVED</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{totalItems} TOTAL</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <div className="space-y-12">
                             {tasksData && tasksData.length > 0 ? (
