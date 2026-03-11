@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils';
 const team = [
     {
         name: "Aayush Sharma",
-        role: "Team Member",
-        description: "Visionary behind Levelone's core architecture and AI systems.",
+        role: "Developer & Architect",
+        description: "Visionary behind Levelone's core architecture and Whole System.",
         linkedin: "https://www.linkedin.com/in/aayush-sharma-2013d",
         portfolio: "https://aayush-sharma-beige.vercel.app/",
         avatar: "⚡",
@@ -23,7 +23,7 @@ const team = [
     {
         name: "Palak Chaurasia",
         role: "Team Member",
-        description: "Crafting the visual identity and premium aesthetic of Levelone.",
+        description: "Student management and data handling.",
         linkedin: "https://www.linkedin.com/in/palak-chaurasia-6a1388388/",
         avatar: "🎨",
         color: "from-gray-500 to-slate-300",
@@ -33,7 +33,7 @@ const team = [
     {
         name: "Kritagya Jain",
         role: "Team Member",
-        description: "Ensuring the scalability and precision of our educational infrastructure.",
+        description: "Student management and data handling.",
         linkedin: "https://www.linkedin.com/in/kritagyajain21/",
         avatar: "🛡️",
         color: "from-zinc-600 to-slate-500",
