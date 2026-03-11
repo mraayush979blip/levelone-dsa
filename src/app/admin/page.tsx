@@ -111,8 +111,8 @@ export default function AdminDashboard() {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-96 space-y-4">
-                <Loader2 className="h-12 w-12 text-white animate-spin" />
-                <p className="text-zinc-500 font-mono text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">Syncing Core Analytics...</p>
+                <Loader2 className="h-12 w-12 text-black animate-spin" />
+                <p className="text-zinc-400 font-black text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">Syncing Core Analytics...</p>
             </div>
         );
     }
@@ -120,121 +120,121 @@ export default function AdminDashboard() {
     const { stats, retentionData } = dashboardData!;
 
     return (
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-4 md:space-y-8 font-sans">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl md:text-2xl font-bold text-white">Dashboard Overview</h2>
-                <div className="text-xs md:text-sm font-medium text-zinc-400 bg-zinc-900 px-2 py-1 md:px-3 rounded-full border border-zinc-800">
+                <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">Dashboard Overview</h2>
+                <div className="text-[10px] font-black text-zinc-400 bg-white px-4 py-2 rounded-full border border-zinc-200 shadow-sm uppercase tracking-widest">
                     Last sync: {new Date().toLocaleTimeString()}
                 </div>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Total Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-white mt-1 md:mt-2">
+                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Total Students</p>
+                            <p className="text-3xl md:text-4xl font-black text-black mt-2">
                                 {stats.totalStudents}
                             </p>
                         </div>
-                        <div className="bg-zinc-800 rounded-lg p-2 md:p-3 shrink-0">
-                            <Users className="w-5 h-5 md:w-6 md:h-6 text-zinc-300" />
+                        <div className="bg-zinc-50 rounded-2xl p-4 shrink-0 transition-colors">
+                            <Users className="w-6 h-6 text-black" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Active Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-emerald-400 mt-1 md:mt-2">
+                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Active Students</p>
+                            <p className="text-3xl md:text-4xl font-black text-emerald-600 mt-2">
                                 {stats.activeStudents}
                             </p>
                         </div>
-                        <div className="bg-emerald-500/10 rounded-lg p-2 md:p-3 shrink-0">
-                            <Shield className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
+                        <div className="bg-emerald-50 rounded-2xl p-4 shrink-0 border border-emerald-100">
+                            <Shield className="w-6 h-6 text-emerald-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-black rounded-[2rem] shadow-xl shadow-black/10 p-6 md:p-8 hover:scale-[1.02] transition-all active:scale-[0.98]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Revoked Students</p>
-                            <p className="text-2xl md:text-3xl font-bold text-rose-400 mt-1 md:mt-2">
+                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Revoked Students</p>
+                            <p className="text-3xl md:text-4xl font-black text-white mt-2">
                                 {stats.revokedStudents}
                             </p>
                         </div>
-                        <div className="bg-rose-500/10 rounded-lg p-2 md:p-3 shrink-0">
-                            <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
+                        <div className="bg-white/10 rounded-2xl p-4 shrink-0 border border-white/10">
+                            <ShieldAlert className="w-6 h-6 text-white" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-[2rem] shadow-sm border border-zinc-100 p-6 md:p-8 hover:shadow-xl hover:shadow-black/5 transition-all active:scale-[0.98]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs md:text-sm font-semibold text-zinc-400 uppercase">Live Phases</p>
-                            <p className="text-2xl md:text-3xl font-bold text-zinc-100 mt-1 md:mt-2">
+                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Live Phases</p>
+                            <p className="text-3xl md:text-4xl font-black text-black mt-2">
                                 {stats.livePhases}
                             </p>
                         </div>
-                        <div className="bg-zinc-800 rounded-lg p-2 md:p-3 shrink-0">
-                            <Layers className="w-5 h-5 md:w-6 md:h-6 text-zinc-300" />
+                        <div className="bg-zinc-50 rounded-2xl p-4 shrink-0">
+                            <Layers className="w-6 h-6 text-black" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Retention Stats */}
-                <div className="lg:col-span-2 bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6">
-                    <div className="flex items-center justify-between mb-4 md:mb-6">
-                        <h3 className="text-base md:text-lg font-bold text-white flex items-center">
-                            <BarChart3 className="mr-2 h-4 w-4 md:h-5 md:w-5 text-zinc-400" />
-                            Student Retention Analysis
+                <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-zinc-100 p-8 md:p-10">
+                    <div className="flex items-center justify-between mb-8 md:mb-10">
+                        <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-widest flex items-center">
+                            <BarChart3 className="mr-3 h-5 w-5 text-zinc-400" />
+                            Retention Analysis
                         </h3>
                     </div>
 
                     {retentionData && (
-                        <div className="space-y-6">
-                            <div className="flex items-end justify-between">
-                                <div className="space-y-4 flex-1">
+                        <div className="space-y-10">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+                                <div className="space-y-8 flex-1">
                                     <div className="relative pt-1 max-w-sm">
-                                        <div className="flex mb-2 items-center justify-between">
+                                        <div className="flex mb-3 items-center justify-between">
                                             <div>
-                                                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-zinc-300 bg-zinc-800">
+                                                <span className="text-[10px] font-black inline-block py-1.5 px-3 uppercase rounded-full text-black bg-zinc-50 tracking-widest border border-zinc-100">
                                                     Retention Rate
                                                 </span>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-xs font-semibold inline-block text-zinc-300 font-bold">
+                                                <span className="text-xs font-black text-black tracking-widest">
                                                     {retentionData.retention_percent}%
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-zinc-800">
-                                            <div style={{ width: `${retentionData.retention_percent}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-zinc-900 justify-center bg-zinc-400"></div>
+                                        <div className="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-zinc-50 border border-zinc-100 p-1">
+                                            <div style={{ width: `${retentionData.retention_percent}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-black rounded-full transition-all duration-1000"></div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-zinc-800/50 rounded-lg p-4 font-bold">
-                                            <p className="text-xs text-zinc-500 uppercase">Retained</p>
-                                            <p className="text-xl font-bold text-white">{retentionData.retained_count}</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-6 transition-all hover:border-black/5">
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Retained Nodes</p>
+                                            <p className="text-2xl font-black text-black">{retentionData.retained_count}</p>
                                         </div>
-                                        <div className="bg-zinc-800/50 rounded-lg p-4 font-bold">
-                                            <p className="text-xs text-zinc-500 uppercase">Dropped/Revoked</p>
-                                            <p className="text-xl font-bold text-white">{retentionData.revoked_count}</p>
+                                        <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-6 transition-all hover:border-black/5">
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Dropped/Revoked</p>
+                                            <p className="text-2xl font-black text-black">{retentionData.revoked_count}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="hidden sm:flex flex-col items-center justify-center p-8 bg-zinc-800/50 border border-zinc-700 rounded-2xl">
-                                    <TrendingUp className="h-12 w-12 text-zinc-400 mb-2" />
-                                    <span className="text-2xl font-black text-white">{retentionData.retention_percent}%</span>
-                                    <span className="text-xs text-zinc-500 font-medium">Efficiency</span>
+                                <div className="hidden md:flex flex-col items-center justify-center p-10 bg-zinc-50 border border-zinc-100 rounded-[2rem] min-w-[180px] shadow-inner">
+                                    <TrendingUp className="h-10 w-10 text-zinc-300 mb-3" />
+                                    <span className="text-4xl font-black text-black tracking-tighter">{retentionData.retention_percent}%</span>
+                                    <span className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mt-1">Efficiency</span>
                                 </div>
                             </div>
                         </div>
@@ -242,49 +242,49 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl shadow-sm border border-zinc-800 p-4 md:p-6 font-bold">
-                    <h3 className="text-base md:text-lg font-bold text-white mb-4 md:mb-6">Quick Actions</h3>
-                    <div className="space-y-3">
-                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
+                <div className="bg-white rounded-[2.5rem] shadow-sm border border-zinc-200 p-8 md:p-10 font-sans">
+                    <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-widest mb-8 md:mb-10">Quick Actions</h3>
+                    <div className="space-y-4">
+                        <Link href="/admin/phases/new" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
                             <div className="flex items-center">
-                                <Plus className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-zinc-200">Create New Phase</span>
+                                <Plus className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">Create New Phase</span>
                             </div>
-                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
                         </Link>
 
-                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
+                        <Link href="/admin/student-import" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
                             <div className="flex items-center">
-                                <Upload className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-zinc-200">Import Students</span>
+                                <Upload className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">Import Students</span>
                             </div>
-                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
                         </Link>
 
-                        <Link href="/admin/students" className="w-full flex items-center justify-between p-3 md:p-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors group border border-zinc-700/50 hover:border-zinc-600">
+                        <Link href="/admin/students" className="w-full flex items-center justify-between p-5 bg-zinc-50 hover:bg-black rounded-2xl transition-all group border border-zinc-100 hover:border-black active:scale-95 shadow-sm">
                             <div className="flex items-center">
-                                <Users className="h-4 w-4 md:h-5 md:w-5 text-white mr-2 md:mr-3 shrink-0" />
-                                <span className="text-xs md:text-sm font-bold text-zinc-200">View All Students</span>
+                                <Users className="h-5 w-5 text-black group-hover:text-white mr-4 shrink-0 transition-colors" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-black group-hover:text-white transition-colors">View All Students</span>
                             </div>
-                            <span className="text-zinc-500 group-hover:text-white transition-colors">→</span>
+                            <span className="text-zinc-300 group-hover:text-white transition-colors">→</span>
                         </Link>
 
                         <button
                             onClick={handleSyncRevocation}
                             disabled={isSyncing}
-                            className="w-full flex items-center justify-between p-3 md:p-4 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-all group mt-2 md:mt-4 border border-rose-500/20 disabled:opacity-50"
+                            className="w-full flex items-center justify-between p-5 bg-red-50 hover:bg-red-600 rounded-2xl transition-all group mt-6 border border-red-100 hover:border-red-600 active:scale-95 shadow-lg shadow-red-500/5 disabled:opacity-50"
                         >
                             <div className="flex items-center">
                                 {isSyncing ? (
-                                    <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-rose-400 mr-2 md:mr-3 animate-spin shrink-0" />
+                                    <RefreshCw className="h-5 w-5 text-red-600 group-hover:text-white mr-4 animate-spin shrink-0 transition-colors" />
                                 ) : (
-                                    <ShieldAlert className="h-4 w-4 md:h-5 md:w-5 text-rose-400 mr-2 md:mr-3 shrink-0" />
+                                    <ShieldAlert className="h-5 w-5 text-red-600 group-hover:text-white mr-4 shrink-0 transition-colors" />
                                 )}
-                                <span className="text-xs md:text-sm font-bold text-rose-400">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-red-600 group-hover:text-white transition-colors">
                                     {isSyncing ? 'Syncing...' : 'Sync Revocations'}
                                 </span>
                             </div>
-                            {!isSyncing && <span className="text-rose-500/50 group-hover:text-rose-400 transition-colors">↻</span>}
+                            {!isSyncing && <span className="text-red-300 group-hover:text-white transition-colors">↻</span>}
                         </button>
                     </div>
                 </div>

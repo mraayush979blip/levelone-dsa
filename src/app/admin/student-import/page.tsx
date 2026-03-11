@@ -197,58 +197,58 @@ export default function StudentImportPage() {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-white tracking-tight">Import Students</h1>
-                    <p className="mt-1 text-sm text-zinc-400 font-medium">
+                    <h1 className="text-2xl font-black text-black tracking-tight uppercase">Import Students</h1>
+                    <p className="mt-1 text-sm text-zinc-500 font-medium">
                         Bulk register students and create Auth accounts automatically.
                     </p>
                 </div>
                 <Link
                     href="/admin/students"
-                    className="flex items-center text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="flex items-center text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors"
                 >
-                    <ArrowLeft className="mr-1 h-4 w-4" />
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Students
                 </Link>
             </div>
 
-            <div className="bg-zinc-950 p-6 sm:p-8 rounded-3xl border border-zinc-800 text-white shadow-2xl relative overflow-hidden">
-                <div className="flex border-b border-zinc-800 mb-8 overflow-x-auto">
+            <div className="bg-white p-6 sm:p-10 rounded-[2.5rem] border border-zinc-200 text-black shadow-sm relative overflow-hidden">
+                <div className="flex border-b border-zinc-100 mb-10 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('csv')}
-                        className={`flex items-center py-3 px-6 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'csv' ? 'border-white text-white bg-zinc-900/50' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`flex items-center py-4 px-8 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap ${activeTab === 'csv' ? 'border-black text-black bg-zinc-50/50' : 'border-transparent text-zinc-400 hover:text-black'}`}
                     >
-                        <Upload className="w-4 h-4 mr-2" /> Bulk CSV Import
+                        <Upload className="w-4 h-4 mr-3" /> Bulk CSV Import
                     </button>
                     <button
                         onClick={() => setActiveTab('single')}
-                        className={`flex items-center py-3 px-6 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'single' ? 'border-white text-white bg-zinc-900/50' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`flex items-center py-4 px-8 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap ${activeTab === 'single' ? 'border-black text-black bg-zinc-50/50' : 'border-transparent text-zinc-400 hover:text-black'}`}
                     >
-                        <UserPlus className="w-4 h-4 mr-2" /> Add Single Student
+                        <UserPlus className="w-4 h-4 mr-3" /> Add Single Student
                     </button>
                 </div>
 
                 {activeTab === 'csv' ? (
                     <div className="space-y-8">
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+                        <div className="bg-zinc-50 border border-zinc-100 rounded-3xl p-6">
                             <div className="flex">
                                 <div className="flex-shrink-0">
-                                    <Info className="h-5 w-5 text-white opacity-40" aria-hidden="true" />
+                                    <Info className="h-5 w-5 text-black opacity-20" aria-hidden="true" />
                                 </div>
-                                <div className="ml-3">
-                                    <p className="text-sm text-white font-black uppercase tracking-widest opacity-40">
+                                <div className="ml-4">
+                                    <p className="text-[10px] text-black font-black uppercase tracking-widest opacity-40">
                                         CSV Requirement:
                                     </p>
-                                    <p className="text-sm text-zinc-300 mt-2 font-medium">
+                                    <p className="text-sm text-zinc-500 mt-2 font-medium">
                                         Your file must include headers:
-                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">name</code>,
-                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">email</code>,
-                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">roll_no</code>,
-                                        <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">phone</code>,
-                                        and <code className="mx-1 font-mono bg-white/10 text-white px-2 py-0.5 rounded-lg font-bold">password</code>.
+                                        <code className="mx-1 font-mono bg-white text-black border border-zinc-200 px-2 py-0.5 rounded-lg font-bold">name</code>,
+                                        <code className="mx-1 font-mono bg-white text-black border border-zinc-200 px-2 py-0.5 rounded-lg font-bold">email</code>,
+                                        <code className="mx-1 font-mono bg-white text-black border border-zinc-200 px-2 py-0.5 rounded-lg font-bold">roll_no</code>,
+                                        <code className="mx-1 font-mono bg-white text-black border border-zinc-200 px-2 py-0.5 rounded-lg font-bold">phone</code>,
+                                        and <code className="mx-1 font-mono bg-white text-black border border-zinc-200 px-2 py-0.5 rounded-lg font-bold">password</code>.
                                     </p>
                                     <button
                                         onClick={downloadSample}
-                                        className="mt-4 inline-flex items-center text-xs font-black uppercase tracking-widest text-white hover:opacity-70 transition-opacity"
+                                        className="mt-6 inline-flex items-center text-[10px] font-black uppercase tracking-widest text-black hover:opacity-100 opacity-60 transition-opacity"
                                     >
                                         <Download className="mr-2 h-4 w-4" /> Download Sample CSV
                                     </button>
@@ -256,18 +256,18 @@ export default function StudentImportPage() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-[2rem] p-12 transition-all hover:border-zinc-500 group bg-zinc-950">
-                            <Upload className="h-12 w-12 text-zinc-700 mb-4 group-hover:text-white transition-colors" />
-                            <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6 group-hover:text-zinc-300 transition-colors">Select or drag CSV file</p>
+                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 rounded-[2.5rem] p-16 transition-all hover:border-zinc-300 group bg-zinc-50/30">
+                            <Upload className="h-12 w-12 text-zinc-200 mb-6 group-hover:text-black transition-colors" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-8 group-hover:text-black transition-colors">Select or drag CSV transmission</p>
                             <input
                                 type="file"
                                 accept=".csv"
                                 onChange={handleFileChange}
-                                className="block w-full text-sm text-zinc-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-white file:text-black hover:file:bg-zinc-200 cursor-pointer"
+                                className="block w-full text-xs text-zinc-400 file:mr-6 file:py-3 file:px-8 file:rounded-2xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-black file:text-white hover:file:bg-zinc-800 cursor-pointer"
                             />
                             {file && (
-                                <div className="mt-6 flex items-center text-xs font-bold text-white bg-zinc-900 border border-zinc-800 px-5 py-3 rounded-2xl">
-                                    <FileText className="mr-2 h-4 w-4 text-emerald-500" />
+                                <div className="mt-8 flex items-center text-[10px] font-black uppercase tracking-widest text-black bg-white border border-zinc-100 px-6 py-4 rounded-2xl shadow-sm">
+                                    <FileText className="mr-3 h-4 w-4 text-emerald-500" />
                                     {file.name} ({(file.size / 1024).toFixed(2)} KB)
                                 </div>
                             )}
@@ -286,18 +286,18 @@ export default function StudentImportPage() {
                                     <CheckCircle2 className="mr-2 h-6 w-6 text-green-500" />
                                     Import Complete
                                 </div>
-                                <div className="grid grid-cols-3 gap-4 text-center">
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Total</p>
-                                        <p className="text-2xl font-black text-gray-800">{result.total}</p>
+                                <div className="grid grid-cols-3 gap-6 text-center">
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-zinc-100">
+                                        <p className="text-[10px] text-zinc-400 uppercase font-black tracking-widest">Total</p>
+                                        <p className="text-3xl font-black text-black mt-2">{result.total}</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                        <p className="text-xs text-green-500 uppercase font-bold tracking-wider">Success</p>
-                                        <p className="text-2xl font-black text-green-600">{result.success}</p>
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-zinc-100">
+                                        <p className="text-[10px] text-emerald-500 uppercase font-black tracking-widest">Success</p>
+                                        <p className="text-3xl font-black text-emerald-600 mt-2">{result.success}</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                        <p className="text-xs text-red-500 uppercase font-bold tracking-wider">Failed</p>
-                                        <p className="text-2xl font-black text-red-600">{result.failed}</p>
+                                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-zinc-100">
+                                        <p className="text-[10px] text-red-500 uppercase font-black tracking-widest">Failed</p>
+                                        <p className="text-3xl font-black text-red-600 mt-2">{result.failed}</p>
                                     </div>
                                 </div>
                                 {result.errors.length > 0 && (
@@ -310,9 +310,9 @@ export default function StudentImportPage() {
                                 )}
                                 <button
                                     onClick={() => router.push('/admin/students')}
-                                    className="w-full py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition"
+                                    className="w-full py-4 bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-zinc-800 transition shadow-lg shadow-black/10"
                                 >
-                                    View Database
+                                    Access Database
                                 </button>
                             </div>
                         )}
@@ -321,70 +321,70 @@ export default function StudentImportPage() {
                             <button
                                 onClick={processCSV}
                                 disabled={!file || loading}
-                                className="w-full flex justify-center items-center py-4 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                                className="w-full flex justify-center items-center py-5 bg-black text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl shadow-black/10 active:scale-95"
                             >
                                 {loading ? (
                                     <>
-                                        <Loader2 className="animate-spin mr-3 h-5 w-5" />
-                                        Processing CSV Engine...
+                                        <Loader2 className="animate-spin mr-4 h-5 w-5" />
+                                        Processing Protocol...
                                     </>
                                 ) : (
-                                    'Start Secure Import'
+                                    'Initialize Secure Import'
                                 )}
                             </button>
                         )}
                     </div>
                 ) : (
                     <form onSubmit={processSingleStudent} className="space-y-6 max-w-2xl mx-auto py-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                             <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Full Name *</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">Full Name *</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
+                                    className="w-full h-14 px-6 bg-zinc-50 border border-zinc-100 rounded-2xl text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all text-sm font-bold"
                                     placeholder="John Doe"
                                     value={singleStudent.name}
                                     onChange={e => setSingleStudent(p => ({ ...p, name: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Email Address *</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">Email Address *</label>
                                 <input
                                     type="email"
                                     required
-                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
+                                    className="w-full h-14 px-6 bg-zinc-50 border border-zinc-100 rounded-2xl text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all text-sm font-bold"
                                     placeholder="john@example.com"
                                     value={singleStudent.email}
                                     onChange={e => setSingleStudent(p => ({ ...p, email: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Password *</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">Password *</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-mono"
+                                    className="w-full h-14 px-6 bg-zinc-50 border border-zinc-100 rounded-2xl text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all text-sm font-black tracking-widest font-mono"
                                     placeholder="Student@123"
                                     value={singleStudent.password}
                                     onChange={e => setSingleStudent(p => ({ ...p, password: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Roll / ID Number</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">Roll / ID Number</label>
                                 <input
                                     type="text"
-                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium uppercase"
+                                    className="w-full h-14 px-6 bg-zinc-50 border border-zinc-100 rounded-2xl text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all text-sm font-bold uppercase"
                                     placeholder="Optional"
                                     value={singleStudent.roll_number}
                                     onChange={e => setSingleStudent(p => ({ ...p, roll_number: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Phone Number</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 ml-1">Phone Number</label>
                                 <input
                                     type="tel"
-                                    className="w-full h-12 px-5 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:border-white transition-all text-sm font-medium"
+                                    className="w-full h-14 px-6 bg-zinc-50 border border-zinc-100 rounded-2xl text-black placeholder-zinc-300 focus:outline-none focus:border-black transition-all text-sm font-bold"
                                     placeholder="Optional"
                                     value={singleStudent.phone}
                                     onChange={e => setSingleStudent(p => ({ ...p, phone: e.target.value }))}
@@ -402,15 +402,15 @@ export default function StudentImportPage() {
                         <button
                             type="submit"
                             disabled={singleLoading}
-                            className="w-full h-14 bg-white text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center"
+                            className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center active:scale-95"
                         >
                             {singleLoading ? (
                                 <>
-                                    <Loader2 className="animate-spin mr-3 h-5 w-5" />
-                                    Creating Node...
+                                    <Loader2 className="animate-spin mr-4 h-5 w-5" />
+                                    SYNCING_NODE...
                                 </>
                             ) : (
-                                'Register Student'
+                                'Register Student Node'
                             )}
                         </button>
                     </form>

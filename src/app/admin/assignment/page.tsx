@@ -129,10 +129,10 @@ export default function AssignmentPhasesPage() {
                     ))}
                 </div>
             ) : filteredPhases.length === 0 ? (
-                <div className="text-center py-20 bg-zinc-900/50 rounded-2xl border border-zinc-800 backdrop-blur-sm">
-                    <AlertCircle className="mx-auto h-12 w-12 text-zinc-600" />
-                    <h3 className="mt-4 text-lg font-bold text-white uppercase tracking-wider">No phases matching your search</h3>
-                    <p className="mt-2 text-zinc-400">Try adjusting your search terms.</p>
+                <div className="text-center py-20 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 shadow-sm">
+                    <AlertCircle className="mx-auto h-12 w-12 text-zinc-200" />
+                    <h3 className="mt-6 text-lg font-black text-black uppercase tracking-[0.2em]">No Phases Detected</h3>
+                    <p className="mt-2 text-[10px] text-zinc-400 font-black uppercase tracking-widest">Adjust search filters to reveal nodes.</p>
                 </div>
             ) : (
                 <div className="space-y-12">
